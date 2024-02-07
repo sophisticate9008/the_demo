@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author wlj
- * @since 2024-02-06
+ * @since 2024-02-07
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -37,6 +37,8 @@ public class Goods implements Serializable {
     private String label;
 
     private String introduction;
+
+    private String goodName;
 
 
 }

@@ -45,8 +45,8 @@ public class CommentsController {
     public DataGridView loadAllComment(CommentsVo commentsVo) {
         IPage<Comments> page = new Page<>(commentsVo.getPage(),commentsVo.getLimit());
         QueryWrapper<Comments> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("gid", commentsVo.getGid());
-        queryWrapper.eq("star", commentsVo.getStar());
+        queryWrapper.eq(commentsVo.getGid() != null,"gid", commentsVo.getGid());
+        queryWrapper.eq(commentsVo.getStar() != null,"star", commentsVo.getStar());
         queryWrapper.orderByDesc("create_time");
         commentsService.page(page, queryWrapper);
         return new DataGridView(page.getTotal(), page.getRecords());
@@ -70,7 +70,7 @@ public class CommentsController {
         queryWrapper.eq("gid", commentsVo.getGid());
         int count = commentsMapper.selectCount(queryWrapper);
         if(count > 0) {
-            commentsMapper.deleteById(commentsVo.getId());
+            commentsService.removeById(commentsVo.getId());
             return ResponseEntity.ok("Comment deleted successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete the comment.");
