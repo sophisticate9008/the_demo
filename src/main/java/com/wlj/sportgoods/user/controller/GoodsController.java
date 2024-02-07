@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wlj.sportgoods.sys.common.AppFileUtils;
 import com.wlj.sportgoods.sys.common.DataGridView;
+import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.user.entity.Goods;
 import com.wlj.sportgoods.user.service.GoodsService;
 import com.wlj.sportgoods.user.vo.GoodsVo;
@@ -45,21 +46,21 @@ public class GoodsController {
     }
 
     @RequestMapping("addGoods")
-    public ResponseEntity<String> addGoods(GoodsVo goodsVo) {
+    public ResultObj addGoods(GoodsVo goodsVo) {
         try {
             if (goodsVo.getImagePath()!=null&&goodsVo.getImagePath().endsWith("_temp")){
                 String newName = AppFileUtils.renameFile(goodsVo.getImagePath());
                 goodsVo.setImagePath(newName);
             }
             goodsService.save(goodsVo);
-            return ResponseEntity.ok("goods added successfully.");
+            return ResultObj.ADD_SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to add goods. Please check your request and try again.");
+            return ResultObj.ADD_ERROR;
         }        
     }
     @RequestMapping("updateGoods")
-    public ResponseEntity<String> updateGoods(GoodsVo goodsVo){
+    public ResultObj updateGoods(GoodsVo goodsVo){
         try {
             //商品图片不是默认图片
             if (!(goodsVo.getImagePath()!=null&&goodsVo.getImagePath().equals("/images/noDefaultImage.jpg"))){
@@ -72,22 +73,22 @@ public class GoodsController {
                 }
             }
             goodsService.updateById(goodsVo);
-            return ResponseEntity.ok("goods update successfully.");
+            return ResultObj.UPDATE_SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("goods update failed");
+            return ResultObj.UPDATE_ERROR;
         }
     }
     @RequestMapping("deleteGoods")
-    public ResponseEntity<String> deleteGoods(Integer id,String goodsimg){
+    public ResultObj deleteGoods(Integer id,String goodsimg){
         try {
             //删除商品的图片
             AppFileUtils.removeFileByPath(goodsimg);
             goodsService.removeById(id);
-            return ResponseEntity.ok("goods delete successfully.");
+            return ResultObj.DELETE_SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("goods delete failed");
+            return ResultObj.DELETE_ERROR;
         }
     }    
 

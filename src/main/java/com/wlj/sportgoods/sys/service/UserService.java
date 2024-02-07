@@ -1,5 +1,6 @@
 package com.wlj.sportgoods.sys.service;
 
+import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2024-02-05
  */
 public interface UserService extends IService<User> {
-
+    public ResultObj register(User user);
 }

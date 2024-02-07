@@ -1,9 +1,15 @@
 package com.wlj.sportgoods.sys.controller;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.wlj.sportgoods.sys.common.ResultObj;
+import com.wlj.sportgoods.sys.entity.User;
+import com.wlj.sportgoods.sys.service.UserService;
+import com.wlj.sportgoods.sys.vo.UserVo;
 
 /**
  * <p>
@@ -17,5 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user")
 public class UserController {
 
+    @Autowired
+    private UserService userService;
+
+    @RequestMapping("register")
+    public ResultObj register(User user) {
+        return userService.register(user);
+    }
 }
 
