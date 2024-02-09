@@ -10,4 +10,8 @@ public class SystemController {
     public String toLogin(){
         return "system/index/login";
     }
+    @RequestMapping("toRegister")
+    public String toRegister(){
+        return "system/index/register";
+    }
 }

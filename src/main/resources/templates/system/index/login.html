@@ -14,6 +14,7 @@
             align-items: center;
             height: 100vh;
         }
+        
         /* 登录框样式 */
         .login-container {
             background-color: #f0f0f0; /* 设置背景色 */
@@ -39,6 +40,9 @@
             width: 100%; /* 输入框宽度100% */
             padding-right: 30px; /* 预留验证码图片的空间 */
         }
+        .btn-block {
+          width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -46,15 +50,14 @@
         <div class="login-container">
             <div class="login_face"><img src="/resources/images/face.jpg" class="userAvatar"></div>
             <div class="input-item">
-                <label for="loginname">用户名</label>
-                <input type="text" placeholder="请输入用户名" autocomplete="off" id="loginname" v-model="loginname" class="form-control" required>
+
+                <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control" required>
             </div>
             <div class="input-item">
-                <label for="pwd">密码</label>
-                <input type="password" placeholder="请输入密码" autocomplete="off" id="pwd" v-model="pwd" class="form-control" required>
+
+                <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password" class="form-control" required>
             </div>
             <div class="input-item">
-                <label for="code">验证码</label>
                 <div class="captcha-input">
                     <input type="text" placeholder="请输入验证码" autocomplete="off" id="code" v-model="code" class="form-control" required>
                     <!-- 这里展示后端生成的验证码 -->
@@ -65,7 +68,7 @@
                 <button class="btn btn-primary btn-block" @click="login" :disabled="isLoginDisabled">登录</button>
             </div>
             <div class="input-item">
-                <p>没有账户？<a href="#">立刻注册</a></p>
+                <p>没有账户？<a href="/sys/toRegister">立刻注册</a></p>
             </div>
         </div>
     </div>
@@ -78,8 +81,8 @@
         new Vue({
             el: '#app',
             data: {
-                loginname: '',
-                pwd: '',
+                account: '',
+                password: '',
                 code: '',
                 captchaImage: '/login/getCode', // 默认验证码图片地址
                 isLoginDisabled: false // 登录按钮是否禁用
@@ -90,8 +93,8 @@
                     this.isLoginDisabled = true;
                     // 发起登录请求
                     axios.post("/login/login", {
-                        loginname: this.loginname,
-                        pwd: this.pwd,
+                        account: this.account,
+                        password: this.password,
                         code: this.code
                     })
                     .then(response => {
