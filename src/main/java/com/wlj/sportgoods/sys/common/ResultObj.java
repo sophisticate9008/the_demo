@@ -1,6 +1,5 @@
 package com.wlj.sportgoods.sys.common;
 
-import org.springframework.http.ResponseEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

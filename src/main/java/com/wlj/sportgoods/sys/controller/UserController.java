@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.UserService;
-import com.wlj.sportgoods.sys.vo.UserVo;
 
 /**
  * <p>

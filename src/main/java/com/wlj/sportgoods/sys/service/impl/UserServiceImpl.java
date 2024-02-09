@@ -6,7 +6,6 @@ import com.wlj.sportgoods.sys.mapper.UserMapper;
 import com.wlj.sportgoods.sys.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,15 +19,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
-    private UserMapper userMapper;
+
     @Override
     public ResultObj register(User user) {
-        User existingUser = userMapper.selectById(user.getAccount()); 
+        User existingUser = this.getById(user.getAccount()); 
         if(existingUser != null) {
             return ResultObj.REGISTER_ERROR;
         }else {
-            userMapper.insert(user);
+            this.save(user);
             return ResultObj.REGISTER_SUCCESS;
         }
         

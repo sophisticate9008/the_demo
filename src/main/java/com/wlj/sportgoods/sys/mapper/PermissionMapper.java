@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author wlj
  * @since 2024-02-04
  */
+
 public interface PermissionMapper extends BaseMapper<Permission> {
 
 }

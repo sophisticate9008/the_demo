@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author wlj
  * @since 2024-02-06
  */
+
 public interface NoticeMapper extends BaseMapper<Notice> {
 
 }

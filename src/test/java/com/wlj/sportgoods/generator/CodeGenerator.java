@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 
 public class CodeGenerator {
     public static void main(String[] args) {
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         System.out.println("请输入要生成代码的数据库表名：");
         String tableName = scanner.nextLine();
