@@ -2,6 +2,7 @@ package com.wlj.sportgoods.sys.service;
 
 import com.wlj.sportgoods.sys.entity.Role;
 
+import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -16,4 +17,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface RoleService extends IService<Role> {
     public Map<String, Integer> getAllRolesAsMap();
+    public List<Integer> queryRolePermissionIdsByRid(Integer rid);
 }

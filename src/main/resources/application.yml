@@ -17,7 +17,14 @@ spring:
       #   login-password: 135223
       #   url-pattern: /druid/*
 
-
+#配置mybatisplus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  global-config:
+    db-config:
+      id-type: auto
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 server:
   port: 8888

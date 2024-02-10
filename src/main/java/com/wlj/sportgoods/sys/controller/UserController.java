@@ -2,8 +2,8 @@ package com.wlj.sportgoods.sys.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wlj.sportgoods.sys.common.ResultObj;
@@ -26,7 +26,8 @@ public class UserController {
     private UserService userService;
 
     @RequestMapping("register")
-    public ResultObj register(User user) {
+    public ResultObj register(@RequestBody User user) {
+        System.err.println(user.toString());
         return userService.register(user);
     }
 }

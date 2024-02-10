@@ -11,6 +11,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,10 +30,11 @@ public class LoginController {
 
 
     @RequestMapping("login")
-    public ResultObj login(UserVo userVo,String code,HttpSession session){
+    public ResultObj login(@RequestBody UserVo userVo,HttpSession session){
 
         //获得存储在session中的验证码
         String sessionCode = (String) session.getAttribute("code");
+        String code = userVo.getCode();
         if (code!=null&&sessionCode.equals(code)){
             Subject subject = SecurityUtils.getSubject();
             AuthenticationToken token = new UsernamePasswordToken(userVo.getAccount(),userVo.getPassword());

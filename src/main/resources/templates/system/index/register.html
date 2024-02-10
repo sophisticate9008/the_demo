@@ -85,25 +85,26 @@
                 register() {
                     // 禁用注册按钮
                     this.isregisterDisabled = true;
-                    // 发起注册请求
                     axios.post("/user/register", {
                         account: this.account,
                         password: this.password,
-                        userType: this.selectedUserTypeValue // 发送用户选择的类型
+                        type: this.selectedUserTypeValue, // 发送用户选择的类型
+                        available: 1
                     })
                     .then(response => {
                         // 处理注册结果
                         alert(response.data.msg);
                         if(response.data.code === 200){
                             // 注册成功后的操作，比如页面跳转等
-                            location.href = "/sys/index";
+                            location.href = "/sys/toLogin";
                         }
                     })
                     .catch(error => {
                         // 处理注册失败的逻辑
+                        this.isregisterDisabled = false;
                         console.error('注册失败:', error);
                         // 允许重新注册
-                        this.isregisterDisabled = false;
+                        
                     });
                 },
             }

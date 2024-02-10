@@ -1,11 +1,11 @@
 package com.wlj.sportgoods.sys.service.impl;
 
+import com.wlj.sportgoods.sys.common.PasswordUtils;
 import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.mapper.UserMapper;
 import com.wlj.sportgoods.sys.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,13 +19,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-
     @Override
     public ResultObj register(User user) {
-        User existingUser = this.getById(user.getAccount()); 
+        User existingUser = this.getById(user.getAccount());
         if(existingUser != null) {
             return ResultObj.REGISTER_ERROR;
         }else {
+            String salt = PasswordUtils.generateRandomSalt();
+            user.setAccount(user.getAccount());
+            user.setSalt(salt);
+            user.setPassword(PasswordUtils.hashPassword(user.getPassword(), salt));
             this.save(user);
             return ResultObj.REGISTER_SUCCESS;
         }
