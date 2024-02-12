@@ -14,4 +14,8 @@ public class SystemController {
     public String toRegister(){
         return "system/index/register";
     }
+    @RequestMapping("createCustomerService")
+    public String toCreateCustomerService() {
+        return "merchant/createCustomerService";
+    }
 }

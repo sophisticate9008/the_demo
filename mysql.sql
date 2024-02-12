@@ -18,6 +18,8 @@ CREATE TABLE Role (
     remark VARCHAR(255) DEFAULT NULL,
     available BOOLEAN DEFAULT TRUE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
 CREATE TABLE Permission (
     id INT PRIMARY KEY AUTO_INCREMENT,
     pid INT DEFAULT NULL,
@@ -81,3 +83,6 @@ CREATE TABLE comments(
 INSERT INTO Role VALUES(1, "普通用户", "普通用户,拥有查看,购买,评论等权限", 1);
 INSERT INTO Role VALUES(2, "商家", "商家,拥有发布,修改,创建客服账号等权限", 1);
 INSERT INTO Role VALUES(3, "客服", "仅仅可以由商家在系统创建", 1);
+
+INSERT INTO Permission VALUES(1,"创建客服权限","merchant:createCustomerService");
+INSERT INTO role_permission VALUES(2, 1);

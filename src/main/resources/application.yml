@@ -19,12 +19,30 @@ spring:
 
 #配置mybatisplus
 mybatis-plus:
-  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  mapper-locations: classpath*:com/wlj/sportgoods/*/mapper/xml/*Mapper.xml
   global-config:
     db-config:
       id-type: auto
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+shiro:
+  hash-algorithm-name: md5
+  hash-iterations: 2
+  anon-urls:
+  - /index.html*
+  - /sys/toLogin*
+  - /sys/toRegister*
+  - /role/getAllRoles*
+  - /user/register*
+  - /login/login*
+  - /login/getCode
+  - /resources/**
+  login-url: /index.html
+  log-out-url: /login/logout*
+  authc-ulrs:
+  - /**
 
 server:
   port: 8888

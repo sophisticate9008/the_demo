@@ -25,8 +25,6 @@ public class Permission implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private Integer pid;
-
     private String title;
 
     private String percode;

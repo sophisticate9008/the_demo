@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册--仓库管理系统</title>
+    <!-- 引入 Bootstrap CSS 文件 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 居中对齐 */
+        #app {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        /* 注册框样式 */
+        .register-container {
+            background-color: #f0f0f0; /* 设置背景色 */
+            padding: 20px; /* 添加内边距 */
+            border-radius: 10px; /* 设置圆角 */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+            width: 300px; /* 设置宽度 */
+        }
+        .input-item {
+            margin-bottom: 15px;
+        }
+        .btn-block {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="register-container">
+            <div class="input-item">
+                <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control" required>
+            </div>
+            <div class="input-item">
+                <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password" class="form-control" required>
+            </div>
+            <div class="input-item">
+                <button class="btn btn-primary btn-block" @click="register" :disabled="isregisterDisabled">注册</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- 引入 Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                account: '',
+                password: '',
+                isregisterDisabled: false // 注册按钮是否禁用
+            },
+            mounted() {
+                // 在页面加载后立即请求后端获取用户类型列表
+                this.fetchUserTypes();
+            },
+            methods: {
+                register() {
+                    // 禁用注册按钮
+                    this.isregisterDisabled = true;
+                    axios.post("/user/createCustomerService", {
+                        account: this.account,
+                        password: this.password,
+                        type: 3, // 发送用户选择的类型
+                        available: 1
+                    })
+                    .then(response => {
+                        // 处理注册结果
+                        alert(response.data.msg);
+                        if(response.data.code === 200){
+                            // 注册成功后的操作，比如页面跳转等
+                            location.href = "/sys/toLogin";
+                        }
+                    })
+                    .catch(error => {
+                        // 处理注册失败的逻辑
+                        this.isregisterDisabled = false;
+                        console.error('注册失败:', error);
+                        // 允许重新注册
+                        
+                    });
+                },
+            }
+        });
+    </script>
+</body>
+</html>

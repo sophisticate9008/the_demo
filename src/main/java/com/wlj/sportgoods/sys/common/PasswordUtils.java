@@ -5,7 +5,6 @@ import java.security.SecureRandom;
 import org.apache.shiro.crypto.hash.DefaultHashService;
 import org.apache.shiro.crypto.hash.HashRequest;
 import org.apache.shiro.crypto.hash.HashService;
-import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.util.ByteSource;
 
 public class PasswordUtils {
@@ -42,5 +41,4 @@ public class PasswordUtils {
                 .build();
         return hashService.computeHash(request).toHex();
     }
-    
 }
