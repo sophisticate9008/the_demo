@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录--仓库管理系统</title>
+    <title>登录-体育器材商城系统</title>
     <!-- 引入 Bootstrap CSS 文件 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -22,39 +22,55 @@
             border-radius: 10px; /* 设置圆角 */
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
             width: 300px; /* 设置宽度 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+        
+        .userAvatar {
+            border-radius: 50%; /* 将图片显示为圆形 */
+            margin-bottom: 20px; /* 添加下边距 */
+            width: 80px; /* 设置图片宽度 */
+            height: 80px; /* 设置图片高度 */
+        }
+        
         .input-item {
             margin-bottom: 15px;
+            width: 100%; /* 设置输入框宽度 */
         }
-        /* 修改验证码样式 */
+        
         .captcha-input {
-          position: relative; /* 让验证码输入框相对定位 */
+            position: relative; /* 让验证码输入框相对定位 */
+            width: 100%; /* 设置验证码输入框宽度 */
         }
+        
         .captcha-input img {
             position: absolute; /* 将验证码图片绝对定位 */
             right: 2.5%; /* 图片右对齐 */
             top: 2.5%; /* 图片顶部对齐 */
             max-height: 90%; /* 限制验证码图片的最大高度 */
         }
+        
         .captcha-input input {
             width: 100%; /* 输入框宽度100% */
             padding-right: 30px; /* 预留验证码图片的空间 */
         }
+        
         .btn-block {
-          width: 100%;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="login-container">
-            <div class="login_face"><img src="/resources/images/face.jpg" class="userAvatar"></div>
+            <div class="login_face">
+                <img src="/resources/images/face.jpg" class="userAvatar">
+            </div>
             <div class="input-item">
-
                 <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control" required>
             </div>
             <div class="input-item">
-
                 <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password" class="form-control" required>
             </div>
             <div class="input-item">

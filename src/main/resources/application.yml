@@ -32,6 +32,7 @@ shiro:
   hash-iterations: 2
   anon-urls:
   - /index.html*
+  - /file*
   - /sys/toLogin*
   - /sys/toRegister*
   - /role/getAllRoles*
