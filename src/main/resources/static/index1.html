@@ -18,19 +18,23 @@
       width: 12%;
       height: 100vh;
     }
-
+    #buttonIframeContainer {
+      display: flex;
+      flex-direction: column-reverse;
+      height: 100vh;
+      flex-grow: 1;
+    }
     #toggleButton {
-      width: 60px;
-      height: 60px;
+      width: 40px;
+      height: 40px;
       font-size: 40px;
       text-align: center;
       cursor: pointer;
-
+      flex-grow: 1;
     }
     #myIframe{
       background-color: black;
       height: 90vh;
-      width: 100vh;
       flex-grow: 1;
     }
     #headBar {
@@ -116,8 +120,11 @@
       <div id="userInfo"></div>
       <ul class="list-unstyled"></ul>
     </div>
-    <i id='toggleButton' class="bi bi-menu-button-wide"></i>
-    <iframe id="myIframe"></iframe>
+    <div id="buttonIframeContainer">
+      <iframe id="myIframe"></iframe> 
+      <i id='toggleButton' class="bi bi-menu-button-wide"></i>
+    </div>
+
     </div>
     
   </div>
@@ -144,8 +151,8 @@
         "str6": {}
       },
       itemUrls:{
-        "str4": "https://icons.getbootstrap.com/icons/menu-button-wide/",
-        "str5": "https://icons.getbootstrap.com/"
+        "str4": "https://bing.com/",
+        "str5": "https://google.com/"
       }
     },
     mounted() {
@@ -181,6 +188,7 @@
         $parent.on('click', '.menu', function (event) {
           event.stopPropagation();// 阻止事件冒泡，防止父菜单隐藏
           self.pullDown($(this));
+          self.changeIframe($(this));
         });
       },
       pullDown($element) {
@@ -205,7 +213,7 @@
 
         // 2. 获取 span 内的字符串
         let spanText = $span.text().trim();
-        if (itemUrls.hasOwnProperty(spanText)) {
+        if (this.itemUrls.hasOwnProperty(spanText)) {
           // 如果字符串在 itemUrls 中存在，则切换 iframe 的 src 属性
           let url = this.itemUrls[spanText];
           $('#myIframe').attr('src', url);
