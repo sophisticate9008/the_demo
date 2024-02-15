@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <style>
+      #app{
+        display: flex;
+      }
+      #sideBar{
+        background-color: rgb(152, 236, 236);
+        width: 10%;
+        height: 100vh;
+        flex-direction: column;
+      }
+      #toggleButton{
+        background-color: rgb(0, 0, 0);
+        width: 20px;
+        height: 20px;
+      }
+      #headBar{
+        display: block;
+        position: absolute;
+        background-color: rgb(122, 102, 102);
+        width: 100%;
+        height: 10%;
+        z-index: -1;
+      }
+      .menu span{
+        background-color: rgb(166, 102, 102);
+        display: block;
+        width: 100%;
+      }
+      .menu span:hover {
+        background-color: #f0f0f0;
+      }
+      .menu span{
+        padding: 10px;
+        transition: background-color 0.3s;
+      }        
+      #userInfo{
+        height: 20%;
+      }
+    </style>
+    <!-- CSS 部分 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+    <!-- JavaScript 部分 -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Vue.js -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- jQuery (required for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Axios -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      
+  </head>
+  <body>
+    <div id="app">
+      <div id="headBar">
+        
+      </div>
+      <div id="sideBar">
+        <div id="userInfo">
+
+        </div>
+        <ul class="list-unstyled">
+        </ul>        
+      </div>
+      <button id="toggleButton"></button>
+      
+
+      </div>
+    </div>
+
+  </body>
+  <script>
+      $(document).ready(function() {
+        $("#toggleButton").click(function() {
+            $("#sideBar").animate({
+                width: "toggle" // 切换侧边栏的宽度
+            }, 200); // 动画持续时间为0.5秒
+        });
+      });
+      new Vue({
+          el: '#app',
+          data: {
+            items: {
+                "str1": {},
+                "str2": {},
+                "str3": {
+                    "str4": {},
+                    "str5": {}
+                },
+                "str6": {}
+            }
+          },
+          mounted() {
+            // 调用函数生成嵌套的li元素
+            this.generateList(this.items, $('#app ul'));
+            
+          },
+          methods: {
+            
+            generateList(items, $parent) {
+              let self = this;
+              for (let key in items) {
+                  if (items.hasOwnProperty(key)) {
+                      let $li = $('<li class="menu"> <span>' + key + '</span></li>');
+                      if (typeof items[key] === 'object' && items[key] !== null) {
+                          let $ul = $('<ul class="list-unstyled"></ul>');
+                          $li.append($ul);
+                          this.generateList(items[key], $ul);
+                      }
+                      $parent.append($li);
+                  }
+              }
+              $parent.on('click', '.menu', function(event) {
+                  event.stopPropagation(); // 阻止事件冒泡，防止父菜单隐藏
+                  self.pullDown($(this)); // 传入当前点击的 li 元素
+              });
+          },
+          pullDown($element) {
+              let $ul = $element.children('ul');
+              
+              // 如果 ul 元素是可见的，则隐藏它，否则显示它
+              if ($ul.is(':visible')) {
+                  $ul.hide(); // 隐藏子元素
+              } else {
+                  $ul.show(); // 显示子元素
+              }
+          }
+
+        }
+
+      })
+  </script>
+</html>
