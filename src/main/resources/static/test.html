@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flex Layout</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+    }
+    
+    .sidebar {
+        width: 200px;
+        background-color: #333;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s;
+    }
+    
+    .main-content {
+        flex: 1;
+        padding: 20px;
+    }
+    
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        padding: 20px;
+    }
+    
+    .button {
+        width: 50px;
+        height: 50px;
+        background-color: #007bff;
+        margin-right: 10px;
+    }
+    
+    .iframe-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    /* 修改：隐藏按钮 */
+    .hide-sidebar {
+        display: none;
+    }
+    
+    /* 修改：展开侧边栏后隐藏按钮 */
+    .sidebar-open .hide-sidebar {
+        display: block;
+    }
+</style>
+</head>
+<body>
+    <!-- 修改：添加按钮容器 -->
+    <div class="button-container">
+        <div class="button hide-sidebar"></div> <!-- 修改：隐藏按钮 -->
+    </div>
+    <div class="sidebar">
+        <div class="button-container">
+            <div class="button"></div>
+            <div class="button hide-sidebar"></div> <!-- 修改：隐藏按钮 -->
+        </div>
+        <div class="iframe-container">
+            <iframe src="https://www.example.com"></iframe>
+        </div>
+    </div>
+    <div class="main-content"></div>
+
+    <script>
+        // 修改：添加按钮点击事件，切换侧边栏状态
+        const button = document.querySelector('.button');
+        const sidebar = document.querySelector('.sidebar');
+
+        button.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+    </script>
+</body>
+</html>
