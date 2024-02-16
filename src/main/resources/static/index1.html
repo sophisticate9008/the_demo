@@ -24,13 +24,13 @@
       height: 100vh;
       flex-grow: 1;
     }
-    #buttonWindowsContainer{
+    #buttonLabelContainer{
       display: flex;
       flex-direction: row;
       flex-grow: 1;
       height: 1%;
     }
-    #windowsContainer{
+    #labelContainer{
       width: 80%;
       height: 100%;
       overflow: auto;
@@ -40,7 +40,7 @@
     * ::-webkit-scrollbar {
       display: none;
     }
-    .openWindows {
+    .openLabel {
       background-color: white;
       position: relative;
       width: 8%;
@@ -50,16 +50,23 @@
       margin-right: 10px;
       margin: 2px;
       border: 1px solid black; /* 添加边框样式 */
+      z-index: 2;
+    }
+    .noFocusLabel {
+      background-color: rgb(211,227,253);
+    }
+    .noFocusLabel:hover {
+      background-color: rgb(168,199,250);
     }
     #toggleButton {
       width: 50px;
-      height: 30px;
-      font-size: 28px;
+      height: 25px;
+      font-size: 25px;
       text-align: center;
       cursor: pointer;
 
     }
-    #myIframe{
+    .myIframe{
       background-color: black;
       height: 90vh;
       flex-grow: 1;
@@ -148,35 +155,13 @@
       <ul class="list-unstyled"></ul>
     </div>
     <div id="buttonIframeContainer">
-      <div id="buttonWindowsContainer">
+      <div id="buttonLabelContainer">
         <i id='toggleButton' class="bi bi-menu-button-wide"></i>
-        <div id="windowsContainer">
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
-          <div class="openWindows"></div>
+        <div id="labelContainer">
+          <div class="openLabel" id="defaultLabel"></div>
         </div>
       </div>
-      <iframe id="myIframe"></iframe> 
+      <iframe class="myIframe" id="defaultIframe"></iframe> 
     </div>
     </div>
     
@@ -207,7 +192,7 @@
         "str4": "https://bing.com/",
         "str5": "https://google.com/"
       },
-      
+      focusIframe : 'default',
     },
     mounted() {
       // 调用函数生成嵌套的li元素
@@ -242,7 +227,7 @@
         $parent.on('click', '.menu', function (event) {
           event.stopPropagation();// 阻止事件冒泡，防止父菜单隐藏
           self.pullDown($(this));
-          self.changeIframe($(this));
+          self.addIframe($(this));
         });
       },
       pullDown($element) {
@@ -261,7 +246,7 @@
           $ul.show(); // 显示子元素
         }
       },
-      changeIframe($element) {
+      addIframe($element) {
         // 1. 获取元素内最近的子元素 span
         let $span = $element.find('span');
 
@@ -271,16 +256,41 @@
           // 如果字符串在 itemUrls 中存在，则切换 iframe 的 src 属性
           
           let url = this.itemUrls[spanText];
-          $('#myIframe').attr('src', url);
+          this.generateLabel(spanText, url);
         }
       },
-      generateWindows(winName) {
-        let windowsContainer = $("#windowsContainer");
+      generateLabel(name, url) {
+        let labelContainer = $("#labelContainer");
+        let buttonIframeContainer = $("#buttonIframeContainer");
+        let iframeLabel = $('<div class="openLabel" id="' + name + 'Label"></div>');
+        let iframeSelf = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
+        labelContainer.append(iframeLabel);
+        buttonIframeContainer.append(iframeSelf);
+        this.clickLabel(name);
+        $iframeLabel = $("#" + name + "Label");
+        let self = this;
+        $iframeLabel.on('click', function() {
+          let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
+          let iframeName = clickedLabelId.replace('Label', ''); // 去除ID中的 "Label"
+          self.clickLabel(iframeName);
+        });
+      },
+      
+      clickLabel(name) {
+        let focusIframe = $("#" + this.focusIframe + "Iframe");
+        let focusLabel = $("#" + this.focusIframe + "Label");
+        let iframeLabel = $("#" + name + "Label");
+        let iframeSelf = $("#" + name + "Iframe");
+        focusLabel.addClass("noFocusLabel");
+        focusIframe.hide();
+        iframeSelf.show();
+        iframeLabel.removeClass("noFocusLabel");
+        this.focusIframe = name;
+      },
+      closeLabel(name) {
 
       },
-      close(winName) {
 
-      }
     }
 
   })
