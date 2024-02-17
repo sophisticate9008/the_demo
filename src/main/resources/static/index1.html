@@ -17,6 +17,7 @@
       background-color: rgb(57, 61, 73);
       width: 12%;
       height: 100vh;
+      overflow: scroll;
     }
     #buttonIframeContainer {
       display: flex;
@@ -33,7 +34,7 @@
     #labelContainer{
       width: 80%;
       height: 100%;
-      overflow: auto;
+      overflow: scroll;
       flex-direction: row;
       display: flex;
     }
@@ -41,16 +42,18 @@
       display: none;
     }
     .openLabel {
+      display: flex;
+      flex-direction: row-reverse;
       background-color: white;
       position: relative;
       width: 8%;
       height: 90%;
-      border-radius: 8%;
-      margin-left: 10px;
-      margin-right: 10px;
-      margin: 2px;
+      border-radius: 4%;
+      margin-top: 0.25%;
+      margin-right: 0.25%;
       border: 1px solid black; /* 添加边框样式 */
       z-index: 2;
+      overflow: hidden;
     }
     .noFocusLabel {
       background-color: rgb(211,227,253);
@@ -79,12 +82,14 @@
       height: 8vh;
       z-index: -1;
     }
-
     .menu-child span {
       background-color: rgb(30,32,38);
       display: block;
       width: 94%;
       left: 3%;
+      overflow: hidden;
+      text-wrap: nowrap;
+      color: rgb(210, 210, 210);
 
     }
     .menu-child span:hover {
@@ -96,6 +101,7 @@
       display: block;
       width: 100%;
       z-index: 3;
+      color: white;
     }
 
     .menu-father:hover > span {
@@ -104,7 +110,6 @@
     }
 
     .menu-father span {
-      
       position: relative;
       padding: 10px;
       transition: background-color 0.3s;
@@ -132,7 +137,39 @@
     .menu-icon {
       pointer-events: none;
     }
-
+    .labelTitle {
+      top: 30%;
+      color: black;
+      font-size: 12px;
+      left: 5%;
+      display: block;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      line-height: 100%; 
+      text-align: left; 
+      margin-right: 5px;
+      margin-left: 5px;
+      width: 90%;
+    }
+    .bi-x-lg{
+      top: 25%;
+      color: black;
+      position: relative;
+      font-size: 10px;
+      width: 15px;
+      height: 15px;
+      display: block;
+      margin-right: 5%;
+      text-align: center;
+    }
+    .bi-x-lg:hover {
+      background-color: rgb(147,173,217);
+      border-radius: 50%; /* 将元素的边框样式设置为圆形 */
+    }
+    .bi-x-lg::before{
+      width: 15px;
+    }
   </style>
   <!-- CSS 部分 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -176,31 +213,98 @@
       }, 200); // 动画持续时间为0.5秒
     });
   });
-  new Vue({
+  var vue = new Vue({
     el: '#app',
     data: {
       items: {
-        "str1": {},
-        "str2": {},
-        "str3": {
-          "str4": {},
-          "str5": {}
+        "str1": {
+          "sub1": {},
+          "sub2": {}
         },
-        "str6": {}
+        "str2": {
+          "sub3": {},
+          "sub4": {}
+        },
+        "str3": {
+          "sub5": {},
+          "sub6": {}
+        },
+        "str4": {
+          "sub7": {},
+          "sub8": {}
+        },
+        "str5": {
+          "sub9": {},
+          "sub10": {}
+        },
+        "str6": {
+          "sub11": {},
+          "sub12": {}
+        },
+        "str7": {
+          "sub13": {},
+          "sub14": {}
+        },
+        "str8": {
+          "sub15": {},
+          "sub16": {}
+        },
+        "str9": {
+          "sub17": {},
+          "sub18": {}
+        },
+        "str10": {
+          "sub19": {},
+          "sub20": {}
+        }
       },
-      itemUrls:{
-        "str4": "https://bing.com/",
-        "str5": "https://google.com/"
+      itemUrls: {
+        "sub2": "https://example.com/1",
+        "sub4": "https://example.com/2",
+        "sub6": "https://example.com/3",
+        "sub8": "https://example.com/4",
+        "sub10": "https://example.com/5",
+        "sub12": "https://example.com/6",
+        "sub14": "https://example.com/7",
+        "sub16": "https://example.com/8",
+        "sub18": "https://example.com/9",
+        "sub20": "https://example.com/10",
+        "sub1": "https://example.com/1",
+        "sub3": "https://example.com/2",
+        "sub5": "https://example.com/3",
+        "sub7": "https://example.com/4",
+        "sub9": "https://example.com/5",
+        "sub11": "https://example.com/6",
+        "sub13": "https://example.com/7",
+        "sub15": "https://example.com/8",
+        "sub17": "https://example.com/9",
+        "sub19": "https://example.com/10"
       },
       focusIframe : 'default',
+      openIframes : []
     },
     mounted() {
       // 调用函数生成嵌套的li元素
       this.generateList(this.items, $('#app ul'), "menu-father");
-
+      this.openIframes.push("default");
     },
     methods: {
+      removeLabel(name) {
+        const index = this.openIframes.indexOf(name);
+        if (index > 0) {
+          this.openIframes.splice(index, 1); 
+          let $theLabel = $('#' + name + 'Label');
+          let $theIframe = $('#' + name + 'Iframe');
+          $theLabel.remove();
+          $theIframe.remove();
 
+          if(name == this.focusIframe) {
+            this.focusIframe = this.openIframes[index - 1]; // 更新选择为前一个元素
+            this.clickLabel(this.focusIframe);            
+          }
+        }
+      },
+      
       generateList(items, $parent, className) {
         let self = this;
         for (let key in items) {
@@ -254,21 +358,38 @@
         let spanText = $span.text().trim();
         if (this.itemUrls.hasOwnProperty(spanText)) {
           // 如果字符串在 itemUrls 中存在，则切换 iframe 的 src 属性
-          
-          let url = this.itemUrls[spanText];
-          this.generateLabel(spanText, url);
+          if(!this.openIframes.includes(spanText)) {
+            let url = this.itemUrls[spanText];
+            this.generateLabel(spanText, url);
+            this.openIframes.push(spanText);            
+          }
+
         }
       },
       generateLabel(name, url) {
-        let labelContainer = $("#labelContainer");
-        let buttonIframeContainer = $("#buttonIframeContainer");
-        let iframeLabel = $('<div class="openLabel" id="' + name + 'Label"></div>');
-        let iframeSelf = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
-        labelContainer.append(iframeLabel);
-        buttonIframeContainer.append(iframeSelf);
-        this.clickLabel(name);
-        $iframeLabel = $("#" + name + "Label");
         let self = this;
+        let $labelContainer = $("#labelContainer");
+        let $buttonIframeContainer = $("#buttonIframeContainer");
+        let $iframeLabel = $('<div class="openLabel" id="' + name + 'Label" title=' + name + '></div>');
+        let $iframeSelf = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
+        let $labelTitle = $('<span class="labelTitle">' + name + '</span>');
+        let $xLogo = $('<i class="bi bi-x-lg" id="' + name +  'xLogo"></i>');
+        $iframeLabel.append($xLogo);
+        $xLogo.on('click', function() {
+          let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
+          let iframeName = clickedLabelId.replace('xLogo', ''); // 去除ID中的 "Label"
+          self.removeLabel(iframeName);    
+        });
+        $labelContainer.append($iframeLabel);
+        $buttonIframeContainer.append($iframeSelf);
+        this.clickLabel(name);
+        $iframeLabel.append($labelTitle);
+        
+        
+        $defaultLabel = $("#defaultLabel");
+        $defaultLabel.on('click', function() {
+          self.clickLabel('default'); 
+        });
         $iframeLabel.on('click', function() {
           let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
           let iframeName = clickedLabelId.replace('Label', ''); // 去除ID中的 "Label"
@@ -277,14 +398,14 @@
       },
       
       clickLabel(name) {
-        let focusIframe = $("#" + this.focusIframe + "Iframe");
-        let focusLabel = $("#" + this.focusIframe + "Label");
-        let iframeLabel = $("#" + name + "Label");
-        let iframeSelf = $("#" + name + "Iframe");
-        focusLabel.addClass("noFocusLabel");
-        focusIframe.hide();
-        iframeSelf.show();
-        iframeLabel.removeClass("noFocusLabel");
+        let $focusIframe = $("#" + this.focusIframe + "Iframe");
+        let $focusLabel = $("#" + this.focusIframe + "Label");
+        let $iframeLabel = $("#" + name + "Label");
+        let $iframeSelf = $("#" + name + "Iframe");
+        $focusLabel.addClass("noFocusLabel");
+        $focusIframe.hide();
+        $iframeSelf.show();
+        $iframeLabel.removeClass("noFocusLabel");
         this.focusIframe = name;
       },
       closeLabel(name) {
