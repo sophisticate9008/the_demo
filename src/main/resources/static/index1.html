@@ -139,23 +139,31 @@
     .menu-icon {
       pointer-events: none;
     }
-    .labelTitle {
-      top: 30%;
-      color: black;
-      font-size: 12px;
-      left: 5%;
+    :has(>.labelTitle) {
+    
       display: block;
       position: relative;
-      white-space: nowrap;
-      overflow: hidden;
+      left: 5%;
       line-height: 100%; 
-      text-align: left; 
       margin-right: 5px;
       margin-left: 5px;
       width: 90%;
+      overflow: hidden;
+      font-size: 12px;
+      color: black;
+    }
+    .labelTitle {
+      top: 50%; 
+      transform: translate(0%, -50%);     
+      display: block;
+      position: absolute;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: left; 
     }
     .bi-x-lg{
-      top: 25%;
+      top: 50%; 
+      transform: translate(0%, -50%);     
       color: black;
       position: relative;
       font-size: 10px;
@@ -247,7 +255,10 @@
         <i id='toggleButton' class="bi bi-menu-button-wide"></i>
         <div id="labelContainer">
           <div class="openLabel" id="defaultLabel">
-            <span class="labelTitle">首页</span>
+            <div>
+              <span class="labelTitle">首页</span>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -457,7 +468,7 @@
         let $buttonIframeContainer = $("#buttonIframeContainer");
         let $iframeLabel = $('<div class="openLabel" id="' + name + 'Label" title=' + name + '></div>');
         let $iframeapp = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
-        let $labelTitle = $('<span class="labelTitle">' + name + '</span>');
+        let $labelTitle = $('<div> <span class="labelTitle">' + name + '</span><div>');
         let $xLogo = $('<i class="bi bi-x-lg" id="' + name +  'xLogo"></i>');
         $iframeLabel.append($xLogo);
         $xLogo.on('click', function() {
