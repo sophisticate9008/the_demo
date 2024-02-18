@@ -259,7 +259,15 @@
 
 </body>
 <script>
-  
+  window.addEventListener('message', function(event) {
+    // 校验消息的来源
+    // 解析接收到的JSON数据
+    var jsonData = event.data;
+    var name = jsonData.name;
+    var url = jsonData.url;
+    app.itemUrls[name] = url;
+    app.addIframe({name:name})
+  });
   $(document).ready(function () {
     $("#toggleButton").click(function () {
       $("#sideBar").animate({
@@ -313,7 +321,8 @@
         }
       },
       itemUrls: {
-        "sub2": "https://bing.com",
+        
+        "sub2": "index2.html",
         "sub4": "https://example.com/2",
         "sub6": "https://example.com/3",
         "sub8": "https://example.com/4",
@@ -437,6 +446,8 @@
             let url = this.itemUrls[labelName];
             this.generateLabel(labelName, url);
             this.openIframes.push(labelName);            
+          }else {
+            app.clickLabel(labelName);
           }
 
         }
