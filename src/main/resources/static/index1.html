@@ -24,15 +24,17 @@
       flex-direction: column;
       height: 100vh;
       flex-grow: 1;
+      
     }
     #buttonLabelContainer{
       display: flex;
       flex-direction: row;
       flex-grow: 1;
       height: 1%;
+      width: 80%;
     }
     #labelContainer{
-      width: 80%;
+      width: 100%;
       height: 100%;
       overflow: scroll;
       flex-direction: row;
@@ -70,7 +72,6 @@
 
     }
     .myIframe{
-      background-color: black;
       height: 90vh;
       flex-grow: 1;
     }
@@ -115,7 +116,8 @@
       transition: background-color 0.3s;
     }
     #userInfo {
-      height: 20%;
+      position: relative;
+      height: 25%;
     }
     .menu-father{
       position: relative;
@@ -170,7 +172,45 @@
     .bi-x-lg::before{
       width: 15px;
     }
+    #bigAvatar{
+      display: block;
+      width: 80px;
+      height: 80px;
+      position: relative;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.5);
+    }
+    #welcomeText{
+      position: relative;
+      top: 25%;
+      display: block;
+      font-size: 80%;
+      text-align: center;
+    }
+    #iconsContainer{
+      color: white;
+      position: absolute;
+      right: 0;
+      width: 12%;
+      height: 6%;
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    #iconsContainer i{
+      display: block;
+      font-size: 25px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    #iconsContainer i::after{
+      display: none;
+      
+    }
   </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
   <!-- CSS 部分 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -179,23 +219,36 @@
   <!-- Vue.js -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
   <!-- jQuery (required for Bootstrap) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 </head>
 <body>
   <div id="app">
-    <div id="headBar"></div>
+    <div id="iconsContainer">
+      <i class="bi bi-person-circle dropdown-toggle" data-bs-toggle="dropdown"></i>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a id="changeProfile" class="dropdown-item" @click.prevent="addIframe({name:'修改资料'})">修改资料</a></li>
+        <li><a id="changePassword" class="dropdown-item" @click.prevent="addIframe({name:'修改密码'})">修改密码</a></li>
+      </ul>
+    </div>    
+    <div id="headBar">
+    </div>
     <div id="sideBar">
-      <div id="userInfo"></div>
+      <div id="userInfo">
+        <img id="bigAvatar" src="D:\05.code\02.java_code\project\sportgoods\src\main\resources\static\resources\images\face.jpg">
+        <span id="welcomeText">你好,亲爱的用户</span>
+      </div>
       <ul class="list-unstyled"></ul>
     </div>
     <div id="buttonIframeContainer">
       <div id="buttonLabelContainer">
         <i id='toggleButton' class="bi bi-menu-button-wide"></i>
         <div id="labelContainer">
-          <div class="openLabel" id="defaultLabel"></div>
+          <div class="openLabel" id="defaultLabel">
+            <span class="labelTitle">首页</span>
+          </div>
         </div>
       </div>
       <iframe class="myIframe" id="defaultIframe"></iframe> 
@@ -206,6 +259,7 @@
 
 </body>
 <script>
+  
   $(document).ready(function () {
     $("#toggleButton").click(function () {
       $("#sideBar").animate({
@@ -213,7 +267,7 @@
       }, 200); // 动画持续时间为0.5秒
     });
   });
-  var vue = new Vue({
+  var app = new Vue({
     el: '#app',
     data: {
       items: {
@@ -259,7 +313,7 @@
         }
       },
       itemUrls: {
-        "sub2": "https://example.com/1",
+        "sub2": "https://bing.com",
         "sub4": "https://example.com/2",
         "sub6": "https://example.com/3",
         "sub8": "https://example.com/4",
@@ -278,17 +332,36 @@
         "sub13": "https://example.com/7",
         "sub15": "https://example.com/8",
         "sub17": "https://example.com/9",
-        "sub19": "https://example.com/10"
+        "sub19": "https://example.com/10",
+        "chat": "https://chat",
+        "star": "https//star",
+        "cart": "https//cart",
+        "修改资料": "https://example.com/10",
+        "修改密码": "https://example.com/10"
       },
       focusIframe : 'default',
-      openIframes : []
+      openIframes : [],
+      personMenuVisible: false,
+      headIcons: ['chat', 'star', 'cart'],
     },
     mounted() {
       // 调用函数生成嵌套的li元素
-      this.generateList(this.items, $('#app ul'), "menu-father");
+      this.generateList(this.items, $('#sideBar ul'), "menu-father");
+      this.generateIcons();
       this.openIframes.push("default");
     },
+
     methods: {
+      generateIcons() {
+        let $iconsContainer = $("#iconsContainer");
+        this.headIcons.forEach(item => {
+          let $icon = $('<i class="bi bi-' + item + '"> </i>');
+            $iconsContainer.append($icon);
+          $icon.on('click', function() {
+            app.addIframe({name :item});
+          })
+        });
+      },
       removeLabel(name) {
         const index = this.openIframes.indexOf(name);
         if (index > 0) {
@@ -300,13 +373,11 @@
 
           if(name == this.focusIframe) {
             this.focusIframe = this.openIframes[index - 1]; // 更新选择为前一个元素
-            this.clickLabel(this.focusIframe);            
+            this.clickLabel(this.focusIframe);
           }
         }
       },
-      
       generateList(items, $parent, className) {
-        let self = this;
         for (let key in items) {
           if (items.hasOwnProperty(key)) {
             let $li = $('<li class="' + className +  ' menu"> <span>' + key + '</span></li>');
@@ -330,8 +401,8 @@
         }
         $parent.on('click', '.menu', function (event) {
           event.stopPropagation();// 阻止事件冒泡，防止父菜单隐藏
-          self.pullDown($(this));
-          self.addIframe($(this));
+          app.pullDown($(this));
+          app.addIframe({$element :$(this)});
         });
       },
       pullDown($element) {
@@ -350,70 +421,67 @@
           $ul.show(); // 显示子元素
         }
       },
-      addIframe($element) {
-        // 1. 获取元素内最近的子元素 span
-        let $span = $element.find('span');
-
-        // 2. 获取 span 内的字符串
-        let spanText = $span.text().trim();
-        if (this.itemUrls.hasOwnProperty(spanText)) {
+      addIframe({ $element = null, name = null }) {
+        let labelName;
+        if(name) {
+          labelName = name;
+        }else {
+          // 1. 获取元素内最近的子元素 span
+          let $span = $element.find('span');
+          // 2. 获取 span 内的字符串
+          labelName = $span.text().trim();          
+        }
+        if (this.itemUrls.hasOwnProperty(labelName)) {
           // 如果字符串在 itemUrls 中存在，则切换 iframe 的 src 属性
-          if(!this.openIframes.includes(spanText)) {
-            let url = this.itemUrls[spanText];
-            this.generateLabel(spanText, url);
-            this.openIframes.push(spanText);            
+          if(!this.openIframes.includes(labelName)) {
+            let url = this.itemUrls[labelName];
+            this.generateLabel(labelName, url);
+            this.openIframes.push(labelName);            
           }
 
         }
       },
       generateLabel(name, url) {
-        let self = this;
         let $labelContainer = $("#labelContainer");
         let $buttonIframeContainer = $("#buttonIframeContainer");
         let $iframeLabel = $('<div class="openLabel" id="' + name + 'Label" title=' + name + '></div>');
-        let $iframeSelf = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
+        let $iframeapp = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
         let $labelTitle = $('<span class="labelTitle">' + name + '</span>');
         let $xLogo = $('<i class="bi bi-x-lg" id="' + name +  'xLogo"></i>');
         $iframeLabel.append($xLogo);
         $xLogo.on('click', function() {
           let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
           let iframeName = clickedLabelId.replace('xLogo', ''); // 去除ID中的 "Label"
-          self.removeLabel(iframeName);    
+          app.removeLabel(iframeName);    
         });
         $labelContainer.append($iframeLabel);
-        $buttonIframeContainer.append($iframeSelf);
+        $buttonIframeContainer.append($iframeapp);
         this.clickLabel(name);
         $iframeLabel.append($labelTitle);
         
         
         $defaultLabel = $("#defaultLabel");
         $defaultLabel.on('click', function() {
-          self.clickLabel('default'); 
+          app.clickLabel('default'); 
         });
         $iframeLabel.on('click', function() {
           let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
           let iframeName = clickedLabelId.replace('Label', ''); // 去除ID中的 "Label"
-          self.clickLabel(iframeName);
+          app.clickLabel(iframeName);
         });
-      },
-      
+      },      
       clickLabel(name) {
         let $focusIframe = $("#" + this.focusIframe + "Iframe");
         let $focusLabel = $("#" + this.focusIframe + "Label");
         let $iframeLabel = $("#" + name + "Label");
-        let $iframeSelf = $("#" + name + "Iframe");
+        let $iframeapp = $("#" + name + "Iframe");
         $focusLabel.addClass("noFocusLabel");
         $focusIframe.hide();
-        $iframeSelf.show();
+        $iframeapp.show();
         $iframeLabel.removeClass("noFocusLabel");
         this.focusIframe = name;
       },
-      closeLabel(name) {
-
-      },
-
     }
-
   })
 </script>
 </html>
