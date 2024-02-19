@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页</title>
+  <style>
+    #app {
+      position: relative;
+      display: flex;
+      color: white;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    #sideBar {
+      background-color: rgb(57, 61, 73);
+      width: 12%;
+      height: 100vh;
+      overflow: scroll;
+    }
+
+    #buttonIframeContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      flex-grow: 1;
+
+    }
+
+    #buttonLabelContainer {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+      height: 1%;
+      width: 80%;
+    }
+
+    #labelContainer {
+      width: 100%;
+      height: 100%;
+      overflow: scroll;
+      flex-direction: row;
+      display: flex;
+    }
+
+    * ::-webkit-scrollbar {
+      display: none;
+    }
+
+    .openLabel {
+      display: flex;
+      flex-direction: row-reverse;
+      background-color: white;
+      position: relative;
+      width: 8%;
+      height: 90%;
+      border-radius: 4%;
+      margin-top: 0.25%;
+      margin-right: 0.25%;
+      border: 1px solid black;
+      /* 添加边框样式 */
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .noFocusLabel {
+      background-color: rgb(211, 227, 253);
+    }
+
+    .noFocusLabel:hover {
+      background-color: rgb(168, 199, 250);
+    }
+
+    #toggleButton {
+      width: 50px;
+      height: 25px;
+      font-size: 25px;
+      text-align: center;
+      cursor: pointer;
+
+    }
+
+    .myIframe {
+      height: 90vh;
+      flex-grow: 1;
+    }
+
+    #headBar {
+      display: block;
+      position: absolute;
+      background-color: rgb(35, 38, 46);
+      width: 100%;
+      height: 8vh;
+      z-index: -1;
+    }
+
+    .menu-child span {
+      background-color: rgb(30, 32, 38);
+      display: block;
+      width: 94%;
+      left: 3%;
+      overflow: hidden;
+      text-wrap: nowrap;
+      color: rgb(210, 210, 210);
+
+    }
+
+    .menu-child span:hover {
+      cursor: pointer;
+      background-color: rgb(95, 184, 120);
+    }
+
+    .menu-father>span {
+      background-color: rgb(57, 61, 73);
+      display: block;
+      width: 100%;
+      z-index: 3;
+      color: white;
+    }
+
+    .menu-father:hover>span {
+      background-color: rgb(78, 84, 101);
+      cursor: pointer;
+    }
+
+    .menu-father span {
+      position: relative;
+      padding: 10px;
+      transition: background-color 0.3s;
+      padding-left: 30px;
+    }
+
+    #userInfo {
+      position: relative;
+      height: 25%;
+    }
+
+    .menu-father {
+      position: relative;
+    }
+    .menu-father i, .menu-child i{
+      top: 50%;
+      transform: translate(-50%, -50%);
+      position: absolute;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .menu-icon {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      height: 44px;
+      z-index: 3;
+    }
+    .menu-child li {
+      position: relative;
+    }
+    .menu-child i {
+      left: 15%;
+      color: rgb(210, 210, 210);
+    }
+    
+    .menu-father .menu-icon i:nth-child(2) {
+      right: 0;
+    }
+    .menu-father .menu-icon i:nth-child(1) {
+      left: 10%;
+    }
+
+    :has(>.labelTitle) {
+
+      display: block;
+      position: relative;
+      left: 5%;
+      line-height: 100%;
+      margin-right: 5px;
+      margin-left: 5px;
+      width: 90%;
+      overflow: hidden;
+      font-size: 12px;
+      color: black;
+    }
+
+    .labelTitle {
+      top: 50%;
+      transform: translate(0%, -50%);
+      display: block;
+      position: absolute;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .bi-x-lg {
+      top: 50%;
+      transform: translate(0%, -50%);
+      color: black;
+      position: relative;
+      font-size: 10px;
+      width: 15px;
+      height: 15px;
+      display: block;
+      margin-right: 5%;
+      text-align: center;
+    }
+
+    .bi-x-lg:hover {
+      background-color: rgb(147, 173, 217);
+      border-radius: 50%;
+      /* 将元素的边框样式设置为圆形 */
+    }
+
+    .bi-x-lg::before {
+      width: 15px;
+    }
+
+    #bigAvatar {
+      display: block;
+      width: 80px;
+      height: 80px;
+      position: relative;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.5);
+    }
+
+    #welcomeText {
+      position: relative;
+      top: 25%;
+      display: block;
+      font-size: 80%;
+      text-align: center;
+    }
+
+    #iconsContainer {
+      color: white;
+      position: absolute;
+      right: 0;
+      width: 12%;
+      height: 6%;
+      display: flex;
+      flex-direction: row-reverse;
+    }
+
+    #iconsContainer i {
+      display: block;
+      font-size: 25px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+
+    #iconsContainer i::after {
+      display: none;
+
+    }
+    
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- CSS 部分 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- JavaScript 部分 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <!-- jQuery (required for Bootstrap) -->
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+  <div id="app">
+    <div id="iconsContainer">
+      <i class="bi bi-person-circle dropdown-toggle" data-bs-toggle="dropdown"></i>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a id="changeProfile" class="dropdown-item" @click.prevent="addIframe({name:'修改资料'})">修改资料</a></li>
+        <li><a id="changePassword" class="dropdown-item" @click.prevent="addIframe({name:'修改密码'})">修改密码</a></li>
+      </ul>
+    </div>
+    <div id="headBar">
+    </div>
+    <div id="sideBar">
+      <div id="userInfo">
+        <img id="bigAvatar"
+         src="D:\05.code\02.java_code\project\sportgoods\src\main\resources\static\resources\images\face.jpg">
+        <span id="welcomeText">你好,亲爱的用户</span>
+      </div>
+      <ul class="list-unstyled"></ul>
+    </div>
+    <div id="buttonIframeContainer">
+      <div id="buttonLabelContainer">
+        <i id='toggleButton' class="bi bi-menu-button-wide"></i>
+        <div id="labelContainer">
+          <div class="openLabel" id="defaultLabel">
+            <div>
+              <span class="labelTitle">首页</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <iframe class="myIframe" id="defaultIframe"></iframe>
+    </div>
+  </div>
+
+  </div>
+
+</body>
+<script>
+  window.addEventListener('message', function (event) {
+    // 校验消息的来源
+    // 解析接收到的JSON数据
+    var jsonData = event.data;
+    var name = jsonData.name;
+    var url = jsonData.url;
+    app.itemUrls[name] = url;
+    app.addIframe({ name: name })
+  });
+  $(document).ready(function () {
+    $("#toggleButton").click(function () {
+      $("#sideBar").animate({
+        width: "toggle" // 切换侧边栏的宽度
+      }, 200); // 动画持续时间为0.5秒
+    });
+  });
+  var app = new Vue({
+    el: '#app',
+    data: {
+      items: {},
+      itemUrls: {},
+      itemIcons: {},
+      focusIframe: 'default',
+      openIframes: [],
+      personMenuVisible: false,
+      headIcons: ['chat', 'star', 'cart'],
+    },
+    mounted() {
+      // 调用函数生成嵌套的li元素
+      this.getMenusAll().then(() => {
+        this.generateList(this.items, $('#sideBar ul'));
+      });
+      this.generateIcons();
+      this.openIframes.push("default");
+      
+    },
+
+    methods: {
+      getMenusAll() {
+        return Promise.all([
+          axios.get("/user/getMenu"),
+          axios.get("/user/getMenuIcons"),
+          axios.get("/user/getMenuUrls")
+        ]).then(responses => {
+          const [menuRes, iconsRes, urlsRes] = responses;
+          this.items = menuRes.data.data;
+          this.itemIcons = iconsRes.data.data;
+          this.itemUrls = {...this.itemUrls, ...urlsRes.data.data};
+        }).catch(err => {
+          console.error(err); 
+        });
+      },
+      generateIcons() {
+        let $iconsContainer = $("#iconsContainer");
+        this.headIcons.forEach(item => {
+          let $icon = $('<i class="bi bi-' + item + '"> </i>');
+          $iconsContainer.append($icon);
+          $icon.on('click', function () {
+            app.addIframe({ name: item });
+          })
+        });
+        let $colseAll = $('<i class="bi bi-x-circle"></i>');
+        $iconsContainer.append($colseAll);
+        $colseAll.on('click', function () {
+          let newArray = app.openIframes.slice(1);
+          newArray.forEach((item) => {
+            app.removeLabel(item);
+          });
+        })
+      },
+      removeLabel(name) {
+        let index = this.openIframes.indexOf(name);
+        if (index > 0) {
+          this.openIframes.splice(index, 1);
+          let $theLabel = $('#' + name + 'Label');
+          let $theIframe = $('#' + name + 'Iframe');
+          $theLabel.remove();
+          $theIframe.remove();
+
+          if (name == this.focusIframe) {
+            this.focusIframe = this.openIframes[index - 1]; // 更新选择为前一个元素
+            this.clickLabel(this.focusIframe);
+          }
+        }
+      },
+      generateList(items, $parent) {
+        console.log(items)
+        for (let key in items) {
+          
+          if (items.hasOwnProperty(key)) {
+            
+            let $icon = $('<i class="bi bi-' + this.itemIcons[key] + '">');
+            let $span = $('<span>' + key + '</span>');
+            let $li = $('<li class="menu-father menu"></li>');
+            let $div = $('<div class="menu-icon"> </div>');
+            $li.append($span);
+            $li.append($div);
+            $div.append($icon);
+            $div.append('<i class="bi bi-caret-left-fill"></i>');
+            let $ul = $('<ul class="list-unstyled menu-child"></ul>');
+            $ul.hide();
+            $li.append($ul);
+            items[key].forEach(menu => {
+              let $childIcon = $('<i class="bi bi-' + this.itemIcons[menu] + '">');
+              let $childLi = $('<li class="menu-child menu"> <span>' + menu + '</span></li>');
+              $childLi.append($childIcon);
+              $ul.append($childLi);
+            })
+            $parent.append($li);
+          }
+        }
+        $parent.on('click', '.menu', function (event) {
+          event.stopPropagation();// 阻止事件冒泡，防止父菜单隐藏
+          app.pullDown($(this));
+          app.addIframe({ $element: $(this) });
+        });
+      },
+      pullDown($element) {
+        let $ul = $element.children('ul');
+        // 如果 ul 元素是可见的，则隐藏它，否则显示它
+        var $icon = $element.children("div").children("i").eq(1);
+        if ($ul.is(':visible')) {
+          $icon.removeClass("bi-caret-down-fill");
+          $icon.addClass("bi-caret-left-fill");
+          $element.children("span").removeAttr("style");
+          $ul.hide(); // 隐藏子元素
+        } else {
+          $icon.addClass("bi-caret-down-fill");
+          $icon.removeClass("bi-caret-left-fill");
+          if ($element.attr("class") == "menu-father menu") {
+            $element.children("span").css("background-color", "rgb(43, 46, 55)");
+          }
+
+          $ul.show(); // 显示子元素
+        }
+      },
+      addIframe({ $element = null, name = null }) {
+        let labelName;
+        if (name) {
+          labelName = name;
+        } else {
+          // 1. 获取元素内最近的子元素 span
+          let $span = $element.find('span');
+          // 2. 获取 span 内的字符串
+          labelName = $span.text().trim();
+        }
+        if (this.itemUrls.hasOwnProperty(labelName)) {
+          // 如果字符串在 itemUrls 中存在，则切换 iframe 的 src 属性
+          if (!this.openIframes.includes(labelName)) {
+            let url = this.itemUrls[labelName];
+            this.generateLabel(labelName, url);
+            this.openIframes.push(labelName);
+          } else {
+            app.clickLabel(labelName);
+          }
+
+        }
+      },
+      generateLabel(name, url) {
+        let $labelContainer = $("#labelContainer");
+        let $buttonIframeContainer = $("#buttonIframeContainer");
+        let $iframeLabel = $('<div class="openLabel" id="' + name + 'Label" title=' + name + '></div>');
+        let $iframeapp = $('<iframe class="myIframe" id="' + name + 'Iframe" src="' + url + '"></iframe>');
+        let $labelTitle = $('<div> <span class="labelTitle">' + name + '</span><div>');
+        let $xLogo = $('<i class="bi bi-x-lg" id="' + name + 'xLogo"></i>');
+        $iframeLabel.append($xLogo);
+        $xLogo.on('click', function () {
+          let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
+          let iframeName = clickedLabelId.replace('xLogo', ''); // 去除ID中的 "Label"
+          app.removeLabel(iframeName);
+        });
+        $labelContainer.append($iframeLabel);
+        $buttonIframeContainer.append($iframeapp);
+        this.clickLabel(name);
+        $iframeLabel.append($labelTitle);
+
+
+        $defaultLabel = $("#defaultLabel");
+        $defaultLabel.on('click', function () {
+          app.clickLabel('default');
+        });
+        $iframeLabel.on('click', function () {
+          let clickedLabelId = $(this).attr('id'); // 获取被点击标签的ID
+          let iframeName = clickedLabelId.replace('Label', ''); // 去除ID中的 "Label"
+          app.clickLabel(iframeName);
+        });
+      },
+      clickLabel(name) {
+        let $focusIframe = $("#" + this.focusIframe + "Iframe");
+        let $focusLabel = $("#" + this.focusIframe + "Label");
+        let $iframeLabel = $("#" + name + "Label");
+        let $iframeapp = $("#" + name + "Iframe");
+        $focusLabel.addClass("noFocusLabel");
+        $focusIframe.hide();
+        $iframeapp.show();
+        $iframeLabel.removeClass("noFocusLabel");
+        this.focusIframe = name;
+      },
+    }
+  })
+</script>
+</html>

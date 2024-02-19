@@ -118,7 +118,7 @@
                         alert(response.data.msg);
                         if(response.data.code === 200){
                             // 登录成功后的操作，比如页面跳转等
-                            location.href = "/sys/createCustomerService";
+                            location.href = "/sys/index";
                         } else {
                             this.isLoginDisabled = false;
                             // 登录失败，刷新验证码

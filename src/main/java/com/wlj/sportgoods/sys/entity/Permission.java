@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author wlj
- * @since 2024-02-04
+ * @since 2024-02-18
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -28,6 +28,12 @@ public class Permission implements Serializable {
     private String title;
 
     private String percode;
+
+    private String href;
+
+    private String icon;
+
+    private String type;
 
 
 }

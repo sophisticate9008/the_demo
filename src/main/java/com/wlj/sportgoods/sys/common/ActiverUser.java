@@ -1,6 +1,7 @@
 package com.wlj.sportgoods.sys.common;
 
 import java.util.List;
+import java.util.Map;
 
 import com.wlj.sportgoods.sys.entity.User;
 
@@ -15,4 +16,8 @@ public class ActiverUser {
     private User user;
     private List<String> roles;
     private List<String> permission;
+    private Map<String, List<String>> menus;
+    private Map<String, String> menuUrls;
+    private Map<String, String> menuIcons;
+    
 }

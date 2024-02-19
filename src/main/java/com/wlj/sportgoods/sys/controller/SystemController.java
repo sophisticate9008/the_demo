@@ -18,4 +18,8 @@ public class SystemController {
     public String toCreateCustomerService() {
         return "merchant/createCustomerService";
     }
+    @RequestMapping("index")
+    public String toIndex(){
+        return "system/index/index";
+    }
 }

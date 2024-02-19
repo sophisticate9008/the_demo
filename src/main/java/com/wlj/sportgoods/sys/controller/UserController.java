@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wlj.sportgoods.sys.common.ActiverUser;
+import com.wlj.sportgoods.sys.common.DataGridView;
 import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.RoleService;
@@ -45,9 +46,9 @@ public class UserController {
     @RequestMapping("createCustomerService")
     @RequiresPermissions(value = {"merchant:createCustomerService"},logical = Logical.AND)
     public ResultObj createCustomer(@RequestBody User user) {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         if (user.getType() == 3) {
-            Subject subject = SecurityUtils.getSubject();
-            ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
             user.setMerchant(activerUser.getUser().getAccount());
             userService.register(user);
             return ResultObj.DISPATCH_SUCCESS;
@@ -56,8 +57,25 @@ public class UserController {
         }
         
     }
-    
 
+    @RequestMapping("getMenu")
+    public DataGridView getMenu() {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        return new DataGridView(activerUser.getMenus());
+    }
+    @RequestMapping("getMenuUrls")
+    public DataGridView getMenuUrls() {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        return new DataGridView(activerUser.getMenuUrls());
+    }
+    @RequestMapping("getMenuIcons")
+    public DataGridView getMenuIcons() {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        return new DataGridView(activerUser.getMenuIcons());
+    } 
 
 }
 

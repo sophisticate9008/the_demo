@@ -1,9 +1,9 @@
 package com.wlj.sportgoods.sys.realm;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -82,12 +82,29 @@ public class UserRealm extends AuthorizingRealm{
                 list = permissionService.list(qw);
             }
             List<String> percodes = new ArrayList<>();
+            List<String> menuList = new ArrayList<>();
+            Map<String, String> menuUrls = new HashMap<>();
+            Map<String, String> menuIcons = new HashMap<>();
             for (Permission permission : list) {
-                percodes.add(permission.getPercode());
+                String percode = permission.getPercode();
+                String[] parts = percode.split(":");
+                if(permission.getType().equals("permission")) {
+                    percodes.add(percode);
+                }
+                if(permission.getType().equals("menu")) {
+                    menuList.add(percode);
+                    menuIcons.put(parts[2], permission.getIcon());
+                    if(!permission.getHref().equals("")) {
+                        menuUrls.put(parts[2], permission.getHref());
+                    }
+                }
+                
             }
+            activerUser.setMenuIcons(menuIcons);
+            activerUser.setMenus(getMenuMap(menuList));
             //放到activerUser
             activerUser.setPermission(percodes);
-
+            activerUser.setMenuUrls(menuUrls);
             //生成盐
             ByteSource credentialsSalt=ByteSource.Util.bytes(user.getSalt());
             /**
@@ -102,5 +119,22 @@ public class UserRealm extends AuthorizingRealm{
         }
         return null;
     }
-    
+
+    public Map<String,List<String>> getMenuMap(List<String> data) {
+        Map<String, List<String>> menuMap = new HashMap<>();
+        for (String line : data) {
+            String[] parts = line.split(":");
+            String key = parts[1];
+            String value = parts[2];
+            String flag = parts[3];
+            if(flag.equals("1")) {
+                menuMap.put(key, new ArrayList<>());
+            }else {
+                menuMap.computeIfAbsent(key, k -> new ArrayList<>());
+                menuMap.get(key).add(value);
+            }
+        
+        }
+        return menuMap;
+    }
 }

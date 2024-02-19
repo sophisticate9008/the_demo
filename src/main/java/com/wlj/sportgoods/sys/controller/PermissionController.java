@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
  * </p>
  *
  * @author wlj
- * @since 2024-02-04
+ * @since 2024-02-18
  */
 @RestController
 @RequestMapping("/permission")
 public class PermissionController {
-
+    
 }
 
