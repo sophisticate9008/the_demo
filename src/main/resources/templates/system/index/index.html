@@ -373,8 +373,6 @@
       loadData() {
         if(localStorage.getItem('loadVueData')) {
           const savedData = JSON.parse(localStorage.getItem('vueData'));
-
-          console.log(savedData);
           savedData["openIframes"].forEach(item => {
             this.addIframe({'name': item});
           });

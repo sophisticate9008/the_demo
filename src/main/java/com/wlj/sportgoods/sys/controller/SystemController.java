@@ -22,4 +22,12 @@ public class SystemController {
     public String toIndex(){
         return "system/index/index";
     }
+    @RequestMapping("cropper")
+    public String avataHandle() {
+        return "system/tool/cropper.html";
+    }
+    @RequestMapping("changeProfile") 
+    public String changeProfile() {
+        return "user/changeProfile.html";
+    }
 }
