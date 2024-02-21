@@ -1,148 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>创建客服--体育器材商城系统</title>
-    <!-- 引入 Bootstrap CSS 文件 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* 居中对齐 */
-        #app {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column; /* 垂直居中 */
-        }
-        
-        /* 注册框样式 */
-        .register-container {
-            background-color: #f0f0f0; /* 设置背景色 */
-            padding: 20px; /* 添加内边距 */
-            border-radius: 10px; /* 设置圆角 */
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-            width: 300px; /* 设置宽度 */
-            margin-bottom: 20px; /* 添加底部外边距 */
-        }
-        .input-item {
-            margin-bottom: 15px;
-        }
-        .btn-block {
-            width: 100%;
-        }
-        /* 美化文件上传按钮 */
-        .custom-file-upload {
-            margin: 0 auto 0; /* 顶部留出20px的空白，左右自动居中 */
-            display: block; /* 将按钮显示为块级元素，使其水平居中 */
-            text-align: center;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
-            border-radius: 50%; /* 圆形按钮 */
-            border: none;
-            font-size: 24px; /* 图标大小 */
-            width: 80px; /* 按钮宽度 */
-            height: 80px; /* 按钮高度 */
-            line-height: 80px; /* 按钮内部文本的行高与按钮高度相等，使其垂直居中 */
-            overflow: hidden; /* 隐藏溢出内容 */
-            margin-bottom: 20px;
-        }
-        .custom-file-upload input[type=file] {
-            position: absolute; /* 绝对定位 */
-            top: 0;
-            left: 0;
-            font-size: 100px; /* 隐藏原生文件上传按钮 */
-            opacity: 0;
-        }
-        /* 上传图片预览样式 */
-        .avatar-preview {
-            border-radius: 50%; /* 圆形 */
-            max-width: 80px; /* 最大宽度 */
-            max-height: 80px; /* 最大高度 */
-             /* 与注册框之间的垂直间距 */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建客服--体育器材商城系统</title>
+  <!-- 引入 Bootstrap CSS 文件 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* 居中对齐 */
+    #app {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      /* 垂直居中 */
+    }
+
+    /* 注册框样式 */
+    .register-container {
+      background-color: #f0f0f0;
+      /* 设置背景色 */
+      padding: 20px;
+      /* 添加内边距 */
+      border-radius: 10px;
+      /* 设置圆角 */
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      /* 添加阴影效果 */
+      width: 300px;
+      /* 设置宽度 */
+      margin-bottom: 20px;
+      /* 添加底部外边距 */
+    }
+
+    .input-item {
+      margin-bottom: 15px;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* 美化文件上传按钮 */
+    .custom-file-upload {
+      margin: 0 auto 0;
+      /* 顶部留出20px的空白，左右自动居中 */
+      display: block;
+      /* 将按钮显示为块级元素，使其水平居中 */
+      text-align: center;
+      cursor: pointer;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 50%;
+      /* 圆形按钮 */
+      border: none;
+      font-size: 24px;
+      /* 图标大小 */
+      width: 80px;
+      /* 按钮宽度 */
+      height: 80px;
+      /* 按钮高度 */
+      line-height: 80px;
+      /* 按钮内部文本的行高与按钮高度相等，使其垂直居中 */
+      overflow: hidden;
+      /* 隐藏溢出内容 */
+      margin-bottom: 20px;
+    }
+
+    .custom-file-upload input[type=file] {
+      position: absolute;
+      /* 绝对定位 */
+      top: 0;
+      left: 0;
+      font-size: 100px;
+      /* 隐藏原生文件上传按钮 */
+      opacity: 0;
+    }
+
+    /* 上传图片预览样式 */
+    .avatar-preview {
+      border-radius: 50%;
+      /* 圆形 */
+      max-width: 80px;
+      /* 最大宽度 */
+      max-height: 80px;
+      /* 最大高度 */
+      /* 与注册框之间的垂直间距 */
+    }
+  </style>
 </head>
 <body>
-    <div id="app">
-        <div class="register-container">
-            <!-- 图片预览 -->
-            <!-- 上传头像按钮 -->
-            <label for="avatar" class="custom-file-upload">
-                <span v-if="!avatarUrl">头像</span> <!-- 使用一个图标作为按钮 -->
-                <img v-else :src="avatarUrl" alt="头像预览" style="width: 100%; height: 100%; border-radius: 50%;">
-            </label>
-            <input type="file" id="avatar" @change="handleAvatarChange" style="display: none;">
-            
-            <div class="input-item">
-                <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control" required>
-            </div>
-            <div class="input-item">
-                <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password" class="form-control" required>
-            </div>
-            <div class="input-item">
-                <button class="btn btn-primary btn-block" @click="register" :disabled="isregisterDisabled">注册</button>
-            </div>
-        </div>
-    </div>
+  <div id="app">
+    <div class="register-container">
+      <!-- 图片预览 -->
+      <!-- 上传头像按钮 -->
+      <label for="avatar" class="custom-file-upload">
+        <span v-if="!avatarUrl">头像</span> <!-- 使用一个图标作为按钮 -->
+        <img v-else :src="avatarUrl" alt="头像预览" style="width: 100%; height: 100%; border-radius: 50%;">
+      </label>
+      <input type="file" id="avatar" @change="handleAvatarChange" style="display: none;">
 
-    <!-- 引入 Vue.js -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-    <!-- 引入 Axios -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        new Vue({
-            el: '#app',
-            data: {
-                account: '',
-                password: '',
-                avatarFile: null, // 保存上传的头像文件
-                avatarUrl: '', // 保存头像预览图片的URL
-                isregisterDisabled: false // 注册按钮是否禁用
-            },
-            methods: {
-                handleAvatarChange(event) {
-                    // 选择文件后将文件保存到 avatarFile 中
-                    this.avatarFile = event.target.files[0];
-                    // 读取图片文件并显示预览
-                    this.avatarUrl = URL.createObjectURL(this.avatarFile);
-                },
-                register() {
-                    var formData = new FormData();
-                    this.isregisterDisabled = true;
-                    formData.append('mf', this.avatarFile);
-                    axios.post("/file/uploadFile", formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
-                        }
-                    }).then(response => {
-                        axios.post("/user/createCustomerService", {
-                            account: this.account,
-                            password: this.password,
-                            type: 3, // 发送用户选择的类型
-                            available: 1,
-                            avatarpath: response.data.path
-                        })
-                        .then(response1 => {
-                            alert(response1.data.msg);
-                            if(response1.data.code != 200) {
-                                this.isregisterDisabled = false;
-                            }
-                            // 处理注册结果
-                        })
-                        .catch(error => {
-                            // 处理注册失败的逻辑
-                            this.isregisterDisabled = false;
-                            console.error('分配失败:', error);
-                            // 允许重新注册
-                        });
-                    })
-                    // 禁用注册按钮
-                    
-                },
+      <div class="input-item">
+        <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control"
+         required>
+      </div>
+      <div class="input-item">
+        <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password"
+         class="form-control" required>
+      </div>
+      <div class="input-item">
+        <button class="btn btn-primary btn-block" @click="avatarUpload" :disabled="isregisterDisabled">注册</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入 Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <!-- 引入 Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        account: '',
+        password: '',
+        avatarFile: null, // 保存上传的头像文件
+        avatarUrl: '', // 保存头像预览图片的URL
+        avatarPath: "",
+        isregisterDisabled: false // 注册按钮是否禁用
+      },
+      methods: {
+        handleAvatarChange(event) {
+          // 选择文件后将文件保存到 avatarFile 中
+          this.avatarFile = event.target.files[0];
+          // 读取图片文件并显示预览
+          this.avatarUrl = URL.createObjectURL(this.avatarFile);
+        },
+        avatarUpload() {
+          var formData = new FormData();
+          this.isregisterDisabled = true;
+          formData.append('mf', this.avatarFile);
+          axios.post("/file/uploadFile", formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
             }
-        });
-    </script>
+          }).then(response => {
+            this.avatarPath = response.data.path;
+            this.register();
+          }).catch(error => {
+            this.register();
+          })
+          // 禁用注册按钮
+        },
+        register() {
+          axios.post("/user/createCustomerService", {
+            account: this.account,
+            password: this.password,
+            type: 3, // 发送用户选择的类型
+            available: 1,
+            avatarpath: this.avatarPath
+          }).then(response => {
+            alert(response.data.msg);
+            if (response.data.code != 200) {
+              this.isregisterDisabled = false;
+            }
+            // 处理注册结果
+          }).catch(error => {
+            // 处理注册失败的逻辑
+            this.isregisterDisabled = false;
+            console.error('分配失败:', error);
+            // 允许重新注册
+          });
+        }
+      }
+    });
+  </script>
 </body>
 </html>
