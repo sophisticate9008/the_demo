@@ -17,7 +17,7 @@ public class    Constast {
     public static final String TYPE_PERMISSION = "permission";
 
     /**
-     * 用户类型   0 超级管理员   1 系统用户
+     * 用户类型   4 超级管理员
      */
     public static final Integer USER_TYPE_SUPER = 4;
 

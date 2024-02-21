@@ -32,6 +32,7 @@ shiro:
   hash-iterations: 2
   anon-urls:
   - /index.html*
+  - /sys/index
   - /file*
   - /sys/toLogin*
   - /sys/toRegister*
@@ -40,7 +41,7 @@ shiro:
   - /login/login*
   - /login/getCode
   - /resources/**
-  login-url: /index.html
+  login-url: /sys/toLogin
   log-out-url: /login/logout*
   authc-ulrs:
   - /**

@@ -19,5 +19,5 @@ public class ActiverUser {
     private Map<String, List<String>> menus;
     private Map<String, String> menuUrls;
     private Map<String, String> menuIcons;
-    
+    private List<String> headIcons;
 }

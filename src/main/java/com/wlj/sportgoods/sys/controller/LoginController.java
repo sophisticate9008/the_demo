@@ -71,5 +71,13 @@ public class LoginController {
             e.printStackTrace();
         }
     }
+    @RequestMapping("logout")
+    public String logout() {
+        Subject activeUser = SecurityUtils.getSubject();
+        activeUser.logout();
+        return "system/index/index.html";
+
+    }
+    
 
 }

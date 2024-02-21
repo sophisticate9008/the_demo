@@ -279,14 +279,14 @@
       <ul class="dropdown-menu dropdown-menu-dark">
         <li><a id="changeProfile" class="dropdown-item" @click.prevent="addIframe({name:'修改资料'})">修改资料</a></li>
         <li><a id="changePassword" class="dropdown-item" @click.prevent="addIframe({name:'修改密码'})">修改密码</a></li>
+        <li><a id="changePassword" class="dropdown-item" @click.prevent="logout">退出登录</a></li>
       </ul>
     </div>
     <div id="headBar">
     </div>
     <div id="sideBar">
       <div id="userInfo">
-        <img id="bigAvatar"
-         src="D:\05.code\02.java_code\project\sportgoods\src\main\resources\static\resources\images\face.jpg">
+        <img id="bigAvatar" :src="'/file/showImageByPath?path=' + userBasic.avatarpath">
         <span id="welcomeText">你好,亲爱的用户</span>
       </div>
       <ul class="list-unstyled"></ul>
@@ -311,6 +311,11 @@
 
 </body>
 <script>
+  function refreshWithSession() {
+   
+    app.saveData();
+  }
+
   window.addEventListener('message', function (event) {
     // 校验消息的来源
     // 解析接收到的JSON数据
@@ -331,36 +336,83 @@
     el: '#app',
     data: {
       items: {},
-      itemUrls: {},
+      itemUrls: {
+        'chat': "/sys/chat",
+        'star': "/sys/star",
+        'cart': "/sys/cart",
+        "修改资料": "/sys/changeProfile",
+        "修改密码": "/sys/changePassword",
+        
+      },
       itemIcons: {},
       focusIframe: 'default',
       openIframes: [],
       personMenuVisible: false,
-      headIcons: ['chat', 'star', 'cart'],
+      headIcons: [],
+      userBasic: "",
+    },
+    created() {
     },
     mounted() {
       // 调用函数生成嵌套的li元素
-      this.getMenusAll().then(() => {
+      this.getInfoAll().then(() => {
         this.generateList(this.items, $('#sideBar ul'));
+        this.generateIcons();
+        this.loadData();
       });
-      this.generateIcons();
+      
       this.openIframes.push("default");
       
     },
-
     methods: {
-      getMenusAll() {
+      saveData() {
+        localStorage.setItem('loadVueData', "true");
+        // 将Vue实例的数据转换成JSON字符串并保存到localStorage
+        localStorage.setItem('vueData', JSON.stringify(this.$data));
+      },
+      loadData() {
+        if(localStorage.getItem('loadVueData')) {
+          const savedData = JSON.parse(localStorage.getItem('vueData'));
+
+          console.log(savedData);
+          savedData["openIframes"].forEach(item => {
+            this.addIframe({'name': item});
+          });
+          this.clickLabel(savedData["focusIframe"]);
+          localStorage.removeItem('loadVueData');
+        }
+        
+      },
+      checkLogin() {
+        if(!this.userBasic) {
+          $("#sideBar").remove();
+        }
+      },
+      logout() {
+        axios.post("/login/logout");
+      },
+      refreshIframe() {
+        let $theIframe = $('#' + this.focusIframe + 'Iframe');
+        $theIframe.attr('src', $theIframe.attr('src'));
+      },
+      getInfoAll() {
         return Promise.all([
           axios.get("/user/getMenu"),
           axios.get("/user/getMenuIcons"),
-          axios.get("/user/getMenuUrls")
+          axios.get("/user/getMenuUrls"),
+          axios.get("/user/getHeadIcons"),
+          axios.get("/user/getUserBasic")
         ]).then(responses => {
-          const [menuRes, iconsRes, urlsRes] = responses;
+          const [menuRes, iconsRes, urlsRes, headIconRes, userBasicRes] = responses;
           this.items = menuRes.data.data;
           this.itemIcons = iconsRes.data.data;
           this.itemUrls = {...this.itemUrls, ...urlsRes.data.data};
+          this.headIcons = headIconRes.data.data;
+          this.userBasic = userBasicRes.data.data;
+          this.checkLogin();
         }).catch(err => {
           console.error(err); 
+          
         });
       },
       generateIcons() {
@@ -372,8 +424,14 @@
             app.addIframe({ name: item });
           })
         });
+
+        let $refresh = $('<i class="bi bi-arrow-clockwise"></i>');
         let $colseAll = $('<i class="bi bi-x-circle"></i>');
         $iconsContainer.append($colseAll);
+        $iconsContainer.append($refresh);
+        $refresh.on('click', function() {
+          app.refreshIframe();
+        })
         $colseAll.on('click', function () {
           let newArray = app.openIframes.slice(1);
           newArray.forEach((item) => {
@@ -397,7 +455,6 @@
         }
       },
       generateList(items, $parent) {
-        console.log(items)
         for (let key in items) {
           
           if (items.hasOwnProperty(key)) {

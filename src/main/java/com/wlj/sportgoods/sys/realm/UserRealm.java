@@ -1,6 +1,7 @@
 package com.wlj.sportgoods.sys.realm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,13 @@ public class UserRealm extends AuthorizingRealm{
             //放到activerUser
             activerUser.setPermission(percodes);
             activerUser.setMenuUrls(menuUrls);
+            if(user.getType() == 1) {
+                activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("star", "cart", "chat")));
+            }else if (user.getType() == 2) {
+                activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("chat")));
+            }else {
+
+            }
             //生成盐
             ByteSource credentialsSalt=ByteSource.Util.bytes(user.getSalt());
             /**

@@ -75,7 +75,22 @@ public class UserController {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         return new DataGridView(activerUser.getMenuIcons());
-    } 
-
+    }
+    @RequestMapping("getHeadIcons")
+    public DataGridView getHeadIcons() {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        return new DataGridView(activerUser.getHeadIcons());
+    }
+    @RequestMapping("getUserBasic")
+    public DataGridView getUserBasic() {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        User userBasic = new User();
+        User userIntact = activerUser.getUser();
+        userBasic.setAccount(userIntact.getAccount()).setNickname(userIntact.getNickname()).setAddress(userIntact.getNickname())
+        .setAvatarpath(userIntact.getAvatarpath()).setSex(userIntact.getSex());
+        return new DataGridView(userBasic);
+    }
 }
 
