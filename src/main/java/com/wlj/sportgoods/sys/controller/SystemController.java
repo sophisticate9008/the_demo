@@ -30,4 +30,8 @@ public class SystemController {
     public String changeProfile() {
         return "user/changeProfile.html";
     }
+    @RequestMapping("changePassword")
+    public String changePassword() {
+        return "user/changePassword.html";
+    }
 }

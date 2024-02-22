@@ -8,10 +8,13 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.wlj.sportgoods.sys.common.ActiverUser;
 import com.wlj.sportgoods.sys.common.DataGridView;
+import com.wlj.sportgoods.sys.common.PasswordUtils;
 import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.RoleService;
@@ -108,7 +111,25 @@ public class UserController {
         }else {
             return ResultObj.UPDATE_ERROR;
         }
-        
     }
+    @RequestMapping("changePassword")
+    public ResultObj changePassword(@RequestBody JsonNode requestBody) {
+        String oldPassword = requestBody.get("oldPassword").asText();
+        String newPassword = requestBody.get("newPassword").asText();
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        User user = activerUser.getUser();
+        String oldHashPassword = PasswordUtils.hashPassword(oldPassword, user.getSalt());
+        String newHashPassword = PasswordUtils.hashPassword(newPassword, user.getSalt());
+        if(oldHashPassword.equals(user.getPassword())) {
+            user.setPassword(newHashPassword);
+            userService.updateById(user);
+            subject.logout();
+            return ResultObj.UPDATE_SUCCESS;
+        }else {
+            return ResultObj.UPDATE_ERROR;
+        }
+    }
+
 }
 

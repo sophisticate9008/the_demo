@@ -58,6 +58,8 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
     <!-- 引入 Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script>
         new Vue({
             el: '#app',
@@ -93,7 +95,7 @@
                     })
                     .then(response => {
                         // 处理注册结果
-                        alert(response.data.msg);
+                        this.$alert(response.data.msg);
                         if(response.data.code === 200){
                             // 注册成功后的操作，比如页面跳转等
                             location.href = "/sys/toLogin";
