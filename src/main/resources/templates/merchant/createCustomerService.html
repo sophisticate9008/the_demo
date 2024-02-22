@@ -18,7 +18,7 @@
     }
 
     /* 注册框样式 */
-    .register-container {
+    .form-container {
       background-color: #f0f0f0;
       /* 设置背景色 */
       padding: 20px;
@@ -56,59 +56,64 @@
       border: none;
       font-size: 24px;
       /* 图标大小 */
-      width: 80px;
+      width: 100px;
       /* 按钮宽度 */
-      height: 80px;
+      height: 100px;
       /* 按钮高度 */
-      line-height: 80px;
+      line-height: 100px;
       /* 按钮内部文本的行高与按钮高度相等，使其垂直居中 */
       overflow: hidden;
       /* 隐藏溢出内容 */
       margin-bottom: 20px;
     }
 
-    .custom-file-upload input[type=file] {
-      position: absolute;
-      /* 绝对定位 */
-      top: 0;
-      left: 0;
-      font-size: 100px;
-      /* 隐藏原生文件上传按钮 */
-      opacity: 0;
-    }
+
 
     /* 上传图片预览样式 */
     .avatar-preview {
+      bottom: 2.0%;
+      position: relative;
       border-radius: 50%;
       /* 圆形 */
-      max-width: 80px;
+      max-width: 100px;
       /* 最大宽度 */
-      max-height: 80px;
+      max-height: 100px;
       /* 最大高度 */
       /* 与注册框之间的垂直间距 */
+    }
+    #picture-cropper{
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <div class="register-container">
+    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'" ></iframe>    
+    <div class="form-container">
       <!-- 图片预览 -->
       <!-- 上传头像按钮 -->
       <label for="avatar" class="custom-file-upload">
         <span v-if="!avatarUrl">头像</span> <!-- 使用一个图标作为按钮 -->
-        <img v-else :src="avatarUrl" alt="头像预览" style="width: 100%; height: 100%; border-radius: 50%;">
+        <img class="avatar-preview" v-else :src="avatarUrl" alt="头像" style="width: 100%; height: 100%; border-radius: 50%;">
       </label>
-      <input type="file" id="avatar" @change="handleAvatarChange" style="display: none;">
+      <input id="avatar" @click="callCropper" style="display: none;">
+      
+      <div class="mb-3">
 
-      <div class="input-item">
-        <input type="text" placeholder="请输入账户" autocomplete="off" id="account" v-model="account" class="form-control"
-         required>
+        <input type="text" class="form-control" id="account" placeholder="请输入账户"  v-model="form.account">
       </div>
-      <div class="input-item">
-        <input type="password" placeholder="请输入密码" autocomplete="off" id="password" v-model="password"
-         class="form-control" required>
+      <div class="mb-3">
+
+        <input type="text" class="form-control" id="password" placeholder="请输入密码" v-model="form.password">
       </div>
-      <div class="input-item">
+      <div class="mb-3">
+
+        <input type="text" class="form-control" id="nickname" placeholder="请输入昵称" v-model="form.nickname">
+      </div>
+      <div class="mb-3">
         <button class="btn btn-primary btn-block" @click="avatarUpload" :disabled="isregisterDisabled">注册</button>
       </div>
     </div>
@@ -119,22 +124,41 @@
   <!-- 引入 Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
-    new Vue({
+    function getCropPic(data) {
+      var uuid = generateUUID();
+      app.useCropper =false;
+      if(data == '') {
+
+        return;
+      }
+      app.avatarFile = new File([data], uuid + '.jpg', { type: 'image/*'});
+      app.avatarUrl = URL.createObjectURL(app.avatarFile);
+    }
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
       el: '#app',
       data: {
-        account: '',
-        password: '',
+        form: {
+          account: '',
+          password: '',
+          nickname: '',
+        },
+
         avatarFile: null, // 保存上传的头像文件
         avatarUrl: '', // 保存头像预览图片的URL
         avatarPath: "",
-        isregisterDisabled: false // 注册按钮是否禁用
+        isregisterDisabled: false, // 注册按钮是否禁用
+        useCropper: false,
       },
       methods: {
-        handleAvatarChange(event) {
-          // 选择文件后将文件保存到 avatarFile 中
-          this.avatarFile = event.target.files[0];
-          // 读取图片文件并显示预览
-          this.avatarUrl = URL.createObjectURL(this.avatarFile);
+        callCropper() {
+          this.useCropper = true;
         },
         avatarUpload() {
           var formData = new FormData();
@@ -154,9 +178,8 @@
         },
         register() {
           axios.post("/user/createCustomerService", {
-            account: this.account,
-            password: this.password,
-            type: 3, // 发送用户选择的类型
+            account: this.form.account,
+            password: this.form.password,
             available: 1,
             avatarpath: this.avatarPath
           }).then(response => {
@@ -168,7 +191,7 @@
           }).catch(error => {
             // 处理注册失败的逻辑
             this.isregisterDisabled = false;
-            console.error('分配失败:', error);
+            console.error('创建失败:', error);
             // 允许重新注册
           });
         }

@@ -6,12 +6,6 @@
   <title>创建客服--体育器材商城系统</title>
   <!-- 引入 Bootstrap CSS 文件 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- 引入 Vue.js -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-  <!-- 引入 Axios -->
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <!-- 引入 Vue Cropper -->
-  <script src="https://cdn.jsdelivr.net/npm/vue-cropper"></script>
   <style>
     /* 居中对齐 */
     #app {
@@ -23,8 +17,8 @@
       /* 垂直居中 */
     }
 
-    /* 注册框样式 */
-    .update-container {
+    /* 提交框样式 */
+    .form-container {
       background-color: #f0f0f0;
       /* 设置背景色 */
       padding: 20px;
@@ -85,7 +79,7 @@
       /* 最大宽度 */
       max-height: 100px;
       /* 最大高度 */
-      /* 与注册框之间的垂直间距 */
+      /* 与提交框之间的垂直间距 */
     }
     #picture-cropper{
       width: 100%;
@@ -98,7 +92,7 @@
 <body>
   <div id="app">
     <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'" ></iframe>    
-    <div class="update-container">
+    <div class="form-container">
       <!-- 图片预览 -->
       <!-- 上传头像按钮 -->
       <label for="avatar" class="custom-file-upload">
@@ -108,24 +102,32 @@
       <input id="avatar" @click="callCropper" style="display: none;">
       
       <div class="mb-3">
-        <label for="nickname" class="form-label">Nickname</label>
-        <input type="text" class="form-control" id="nickname" v-model="form.nickname">
+
+        <input type="text" class="form-control" id="nickname" placeholder="请输入昵称" v-model="form.nickname">
       </div>
       <div class="mb-3">
-        <label for="address" class="form-label">Address</label>
-        <input type="text" class="form-control" id="address" v-model="form.address">
+
+        <input type="text" class="form-control" id="address" placeholder="请输入地址" v-model="form.address">
       </div>
       <div class="mb-3">
-        <label for="sex" class="form-label">Sex</label>
+
         <select class="form-select" id="sex" v-model="form.sex">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
+          <option value="secret">保密</option>
+          <option value="male">男</option>
+          <option value="female">女</option>
         </select>
       </div>
+      <div class="mb-3">
 
+        <button class="btn btn-primary btn-block" @click="avatarUpload" :disabled="isupdateDisabled">提交</button>
+      </div>
     </div>
   </div>
 
+  <!-- 引入 Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <!-- 引入 Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
     function getCropPic(data) {
       var uuid = generateUUID();
@@ -150,20 +152,60 @@
         form: {
           nickname: '',
           address: '',
-          sex: 'male',
-          avatarpath: ''
+          sex: 'secret',
         },
+
         avatarFile: null, // 保存上传的头像文件
         avatarUrl: '', // 保存头像预览图片的URL
+        avatarPath: "",
+        isupdateDisabled: false, // 提交按钮是否禁用
         useCropper: false,
       },
       methods: {
         callCropper() {
           this.useCropper = true;
         },
-        update() {
-          // 这里添加更新个人信息的逻辑
+        handleAvatarChange(event) {
+          // 选择文件后将文件保存到 avatarFile 中
+          this.avatarFile = event.target.files[0];
+          // 读取图片文件并显示预览
+          this.avatarUrl = URL.createObjectURL(this.avatarFile);
         },
+        avatarUpload() {
+          var formData = new FormData();
+          this.isupdateDisabled = true;
+          formData.append('mf', this.avatarFile);
+          axios.post("/file/uploadFile", formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
+            }
+          }).then(response => {
+            this.avatarPath = response.data.path;
+            this.update();
+          }).catch(error => {
+            this.update();
+          })
+          // 禁用提交按钮
+        },
+        update() {
+          axios.post("/user/changeProfile", {
+            account: this.form.account,
+            address: this.form.address,
+            nickname: this.form.nickname,
+            avatarpath: this.avatarPath
+          }).then(response => {
+            alert(response.data.msg);
+            if (response.data.code != 200) {
+              this.isupdateDisabled = false;
+            }
+            // 处理提交结果
+          }).catch(error => {
+            // 处理提交失败的逻辑
+            this.isupdateDisabled = false;
+            console.error('创建失败:', error);
+            // 允许重新提交
+          });
+        }
       }
     });
   </script>

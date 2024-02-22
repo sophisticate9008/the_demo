@@ -287,7 +287,7 @@
     <div id="sideBar">
       <div id="userInfo">
         <img id="bigAvatar" :src="'/file/showImageByPath?path=' + userBasic.avatarpath">
-        <span id="welcomeText">你好,亲爱的用户</span>
+        <span v-show="welcomeMessage" id="welcomeText">{{ welcomeMessage }}</span>
       </div>
       <ul class="list-unstyled"></ul>
     </div>
@@ -350,6 +350,7 @@
       personMenuVisible: false,
       headIcons: [],
       userBasic: "",
+      welcomeMessage: null
     },
     created() {
     },
@@ -359,6 +360,7 @@
         this.generateList(this.items, $('#sideBar ul'));
         this.generateIcons();
         this.loadData();
+        this.welcomeMessage = "你好，亲爱的" + this.userBasic.nickname
       });
       
       this.openIframes.push("default");

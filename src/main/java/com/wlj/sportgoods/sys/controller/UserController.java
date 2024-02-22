@@ -48,7 +48,7 @@ public class UserController {
     public ResultObj createCustomer(@RequestBody User user) {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        if (user.getType() == 3) {
+        if (activerUser.getUser().getType() == 3) {
             user.setMerchant(activerUser.getUser().getAccount());
             userService.register(user);
             return ResultObj.DISPATCH_SUCCESS;
@@ -88,9 +88,27 @@ public class UserController {
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         User userBasic = new User();
         User userIntact = activerUser.getUser();
-        userBasic.setAccount(userIntact.getAccount()).setNickname(userIntact.getNickname()).setAddress(userIntact.getNickname())
-        .setAvatarpath(userIntact.getAvatarpath()).setSex(userIntact.getSex());
+        userBasic.setAccount(userIntact.getAccount())
+        .setNickname(userIntact.getNickname())
+        .setAddress(userIntact.getAddress()) // 修正此处，使用 userIntact.getAddress()
+        .setAvatarpath(userIntact.getAvatarpath())
+        .setSex(userIntact.getSex());
         return new DataGridView(userBasic);
+    }
+    @RequestMapping("changeProfile")
+    public ResultObj changeProfile(@RequestBody User user) {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        user.setAccount(activerUser.getUser().getAccount());
+        if(user.getAvatarpath().equals("")) {
+            user.setAvatarpath(null);
+        }
+        if(userService.updateById(user)) {
+            return ResultObj.UPDATE_SUCCESS;
+        }else {
+            return ResultObj.UPDATE_ERROR;
+        }
+        
     }
 }
 
