@@ -1,6 +1,7 @@
 package com.wlj.sportgoods.sys.controller;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wlj.sportgoods.sys.common.ActiverUser;
 import com.wlj.sportgoods.sys.common.DataGridView;
@@ -19,6 +23,7 @@ import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.RoleService;
 import com.wlj.sportgoods.sys.service.UserService;
+import com.wlj.sportgoods.sys.vo.UserVo;
 
 /**
  * <p>
@@ -51,7 +56,7 @@ public class UserController {
     public ResultObj createCustomer(@RequestBody User user) {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        if (activerUser.getUser().getType() == 3) {
+        if (activerUser.getUser().getType() == 2) {
             user.setMerchant(activerUser.getUser().getAccount());
             userService.register(user);
             return ResultObj.DISPATCH_SUCCESS;
@@ -129,6 +134,40 @@ public class UserController {
         }else {
             return ResultObj.UPDATE_ERROR;
         }
+    }
+    @RequestMapping("loadCustomerServices")
+    public DataGridView loadCustomerService(@RequestBody UserVo userVo) {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        String merchant = activerUser.getUser().getAccount();
+        IPage<User> page = new Page<>(userVo.getPage(), userVo.getLimit());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("merchant", merchant);
+        queryWrapper.like(StringUtils.isNotBlank(userVo.getAccount()), "account", userVo.getAccount());
+        queryWrapper.like(StringUtils.isNotBlank(userVo.getNickname()), "nickname", userVo.getNickname());
+        queryWrapper.orderByDesc("account");
+        userService.page(page, queryWrapper);
+        return new DataGridView(page.getTotal(), page.getRecords());
+    }
+    @RequestMapping("controlCustomerService")
+    @RequiresPermissions({"merchant:controlCustomerService"})
+    public ResultObj controlUser(@RequestBody UserVo userVo) {
+        Subject subject = SecurityUtils.getSubject();
+        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        if(userService.getById(userVo.getAccount()).getMerchant().equals(activerUser.getUser().getAccount())) {
+            if(userVo.getDelete()) {
+                userService.removeById(userVo.getAccount());
+                return ResultObj.DELETE_SUCCESS;
+            }else {
+                User tempUser = new User();
+                tempUser.setAccount(userVo.getAccount()).setAvailable(userVo.getAvailable());
+                userService.updateById(tempUser);
+                return ResultObj.UPDATE_SUCCESS;
+            }
+        }else {
+            return ResultObj.UPDATE_ERROR;
+        }        
+
     }
 
 }

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagination Example</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/vue@2"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    /* Add your custom li styles here */
+    body {
+      height: 100%;
+      background-color: white;
+      /* 垂直居中 */
+    }
+
+    .list-item {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      padding: 8px;
+      margin: 4px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      align-items: center; 
+      width: 48%;
+    }
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+    #args label {
+      display: flex;
+      align-items: center; /* 垂直居中 */
+      padding-left: 1%;
+    }
+    .arg.el-input {
+      width: 16.4%;
+    }
+    .list-item img {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+    #button-container {
+      display: block;
+      position: absolute;
+      right: 1%;
+    }
+    #button-container button {
+      padding: 12px 12px;
+      width: 35px;
+      height: 35px;
+    }
+    #items-container {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <div id="args">
+        <label for="limit">每页数量</label>
+        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-option value="10">10</el-option>
+          <el-option value="20">20</el-option>
+        </el-select>
+        <label for="account">账户</label>
+        <el-input class="arg" type="text" id="account"  v-model="account"></el-input>
+        <label for="nickname">昵称</label>
+        <el-input class="arg" type="text" id="nickname" v-model="nickname"></el-input>
+      </div>
+    </div>
+    <div id="items-container">
+      <div v-for="item in dataList" :key="item.account" class="list-item">
+        <img :src="'/file/showImageByPath?path=' + item.avatarpath">
+        <span> &nbsp; &nbsp; &nbsp;账户:{{ item.account}} &nbsp; &nbsp; &nbsp;   昵称: {{ item.nickname}} </span>
+        <div id="button-container">
+          <el-button :class="getButtonClass(item.available)" @click="banCustomerService($event,item.account)">{{ item.available === 1 ? '√' : '!' }}</el-button>
+          <el-button type="danger" @click="deleteCustomerService(item.account)">×</el-button>
+        </div>
+
+      </div>      
+    </div>
+
+
+    <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+     :total="total">
+    </el-pagination>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 10,
+        account: '', // 新增账户筛选条件
+        nickname: '' // 新增昵称筛选条件
+      },
+      mounted() {
+        this.getData();
+      },
+      watch: {
+        // 监听分页或筛选条件的变化，重新获取数据
+        currentPage() {
+          this.getData();
+        },
+        account() {
+          this.currentPage = 1; // Reset to first page when account filter changes
+          this.getData();
+        },
+        nickname() {
+          this.currentPage = 1; // Reset to first page when nickname filter changes
+          this.getData();
+        }
+      },
+      methods: {
+        getButtonClass(available) {
+          // 根据按钮的类型返回对应的样式类
+          return available === 1 ? 'el-button--success' : 'el-button--warning';
+        },
+        banCustomerService(event, account) {
+          let button = event.target;
+          
+          if (button.className.includes("el-button--success")) {
+            axios.post("/user/controlCustomerService", {
+              available: 0,
+              account: account
+            })
+            button.innerText = '!'
+            button.className = button.className.replace('el-button--success', 'el-button--warning')
+          } else {
+            axios.post("/user/controlCustomerService", {
+              available: 1,
+              account: account
+            })
+            button.innerText = '√'
+            button.className = button.className.replace('el-button--warning', 'el-button--success')
+          }
+        },
+        deleteCustomerService(account) {
+          this.$alert('删除后操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/user/controlCustomerService", {
+                delete: true,
+                account: account
+              })
+              .then(response => {
+                this.$message(response.data.msg);
+              })
+            }
+          },error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        },
+        getData() {
+          const url = "/user/loadCustomerServices";
+          axios.post(url, {
+            page: this.currentPage,
+            limit: this.limit,
+            account: this.account,
+            nickname: this.nickname
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

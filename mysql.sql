@@ -22,7 +22,6 @@ CREATE TABLE Role (
 
 CREATE TABLE Permission (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    pid INT DEFAULT NULL,
     title VARCHAR(255) DEFAULT NULL,
     percode VARCHAR(50) DEFAULT NULL,
     icon VARCHAR(255) DEFAULT NULL,
@@ -91,7 +90,8 @@ INSERT INTO Permission VALUES(1,"创建客服权限","merchant:createCustomerSer
 INSERT INTO permission VALUES(2, "客服管理菜单", "merchant:客服管理:客服管理:1", "", "people", "menu");
 INSERT INTO permission VALUES(3, "客服概览", "merchant:客服管理:客服概览:2", "sys/customerServiceManagement", "person", "menu");
 INSERT INTO permission VALUES(4, "添加客服", "merchant:客服管理:添加客服:2", "sys/createCustomerService", "person-add", "menu");
-INSERT INTO permission VALUES(5, "删除客服权限", "merchant:deleteCustomerService", "", "", "permission");
+INSERT INTO permission VALUES(5, "删除客服权限", "merchant:controlCustomerService", "", "", "permission");
+
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);

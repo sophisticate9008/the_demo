@@ -16,5 +16,6 @@ public class UserVo extends User {
      * 验证码
      */
     private String code;
+    private Boolean delete = false;
 }
 

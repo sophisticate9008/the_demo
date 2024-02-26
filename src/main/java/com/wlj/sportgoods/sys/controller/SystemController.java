@@ -34,4 +34,8 @@ public class SystemController {
     public String changePassword() {
         return "user/changePassword.html";
     }
+    @RequestMapping("customerServiceManagement")
+    public String ustomerServiceManagement() {
+        return "merchant/customerServiceManagement";
+    }
 }

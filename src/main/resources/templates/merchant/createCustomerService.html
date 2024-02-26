@@ -180,6 +180,7 @@
           axios.post("/user/createCustomerService", {
             account: this.form.account,
             password: this.form.password,
+            nickname: this.form.nickname,
             available: 1,
             avatarpath: this.avatarPath
           }).then(response => {
