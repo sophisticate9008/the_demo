@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wlj.sportgoods.sys.common.ActiverUser;
+import com.wlj.sportgoods.sys.common.AppFileUtils;
 import com.wlj.sportgoods.sys.common.DataGridView;
 import com.wlj.sportgoods.sys.common.PasswordUtils;
 import com.wlj.sportgoods.sys.common.ResultObj;
@@ -154,9 +155,11 @@ public class UserController {
     public ResultObj controlUser(@RequestBody UserVo userVo) {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        if(userService.getById(userVo.getAccount()).getMerchant().equals(activerUser.getUser().getAccount())) {
+        User targetUser = userService.getById(userVo.getAccount());
+        if(targetUser.getMerchant().equals(activerUser.getUser().getAccount())) {
             if(userVo.getDelete()) {
                 userService.removeById(userVo.getAccount());
+                AppFileUtils.removeFileByPath(targetUser.getAvatarpath());
                 return ResultObj.DELETE_SUCCESS;
             }else {
                 User tempUser = new User();
