@@ -46,7 +46,7 @@ public class FileController {
             e.printStackTrace();
         }
         Map<String,Object> map=new HashMap<String, Object>();
-        map.put("path",dirName+"/"+newName);
+        map.put("path",dirName+"/" + newName + "_temp");
         return map;
     }
 

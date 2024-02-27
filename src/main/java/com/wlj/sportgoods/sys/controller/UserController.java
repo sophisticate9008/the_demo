@@ -58,8 +58,11 @@ public class UserController {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         if (activerUser.getUser().getType() == 2) {
+            user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
             user.setMerchant(activerUser.getUser().getAccount());
-            userService.register(user);
+            if(!userService.register(user).equals(ResultObj.REGISTER_SUCCESS)) {
+                AppFileUtils.removeFileByPath(user.getAvatarpath());
+            };
             return ResultObj.DISPATCH_SUCCESS;
         }else {
             return ResultObj.DISPATCH_ERROR;
@@ -112,9 +115,12 @@ public class UserController {
         if(user.getAvatarpath().equals("")) {
             user.setAvatarpath(null);
         }
+        user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
         if(userService.updateById(user)) {
+
             return ResultObj.UPDATE_SUCCESS;
         }else {
+            AppFileUtils.removeFileByPath(user.getAvatarpath());
             return ResultObj.UPDATE_ERROR;
         }
     }

@@ -38,4 +38,13 @@ public class SystemController {
     public String ustomerServiceManagement() {
         return "merchant/customerServiceManagement";
     }
+    @RequestMapping("goodsManagement")
+    public String goodsManagement() {
+        return "goods/goodsManagement";
+
+    }
+    @RequestMapping("addGoods") 
+    public String addGoods() {
+        return "goods/addGoods";
+    }
 }

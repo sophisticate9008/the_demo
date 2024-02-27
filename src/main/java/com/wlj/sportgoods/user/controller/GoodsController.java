@@ -3,6 +3,7 @@ package com.wlj.sportgoods.user.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +24,7 @@ import com.wlj.sportgoods.user.vo.GoodsVo;
  * </p>
  *
  * @author wlj
- * @since 2024-02-06
+ * @since 2024-02-27
  */
 @RestController
 @RequestMapping("/goods")
@@ -44,13 +45,15 @@ public class GoodsController {
     }
 
     @RequestMapping("addGoods")
-    public ResultObj addGoods(GoodsVo goodsVo) {
+    public ResultObj addGoods(@RequestBody Goods goods) {
         try {
-            if (goodsVo.getImagePath()!=null&&goodsVo.getImagePath().endsWith("_temp")){
-                String newName = AppFileUtils.renameFile(goodsVo.getImagePath());
-                goodsVo.setImagePath(newName);
+            if (goods.getImagePath()!=null&&goods.getImagePath().endsWith("_temp")){
+                String newName = AppFileUtils.renameFile(goods.getImagePath());
+                goods.setImagePath(newName);
             }
-            goodsService.save(goodsVo);
+            if(!goodsService.save(goods)) {
+                AppFileUtils.removeFileByPath(goods.getImagePath());
+            }
             return ResultObj.ADD_SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();

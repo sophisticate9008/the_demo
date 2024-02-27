@@ -8,6 +8,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     /* 居中对齐 */
+    body {
+      background-color: #47474742;
+    }
     #app {
       display: flex;
       justify-content: center;
@@ -149,11 +152,10 @@
           password: '',
           nickname: '',
         },
-
+        isregisterDisabled: false, // 注册按钮是否禁用
+        avatarPath: "",        
         avatarFile: null, // 保存上传的头像文件
         avatarUrl: '', // 保存头像预览图片的URL
-        avatarPath: "",
-        isregisterDisabled: false, // 注册按钮是否禁用
         useCropper: false,
       },
       methods: {
@@ -161,8 +163,9 @@
           this.useCropper = true;
         },
         avatarUpload() {
-          var formData = new FormData();
           this.isregisterDisabled = true;
+          var formData = new FormData();
+          
           formData.append('mf', this.avatarFile);
           axios.post("/file/uploadFile", formData, {
             headers: {

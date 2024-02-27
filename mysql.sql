@@ -91,10 +91,17 @@ INSERT INTO permission VALUES(2, "客服管理菜单", "merchant:客服管理:�
 INSERT INTO permission VALUES(3, "客服概览", "merchant:客服管理:客服概览:2", "sys/customerServiceManagement", "person", "menu");
 INSERT INTO permission VALUES(4, "添加客服", "merchant:客服管理:添加客服:2", "sys/createCustomerService", "person-add", "menu");
 INSERT INTO permission VALUES(5, "删除客服权限", "merchant:controlCustomerService", "", "", "permission");
-
+INSERT INTO Permission VALUES(6, "商品管理菜单", "merchant:商品管理:商品管理:1", "", "box2", "menu");
+INSERT INTO Permission VALUES(7, "商品概览", "merchant:商品管理:商品概览:2", "/sys/goodsManagement", "bar-chart", "menu");
+INSERT INTO Permission VALUES(8, "商品概览", "merchant:商品管理:添加商品:2", "/sys/addGoods", "plus", "menu");
+INSERT INTO Permission VALUES(9,"添加商品权限","merchant:addGoods", "", "", "permission");
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
 INSERT INTO role_permission VALUES(2, 3);
 INSERT INTO role_permission VALUES(2, 4);
 INSERT INTO role_permission VALUES(2, 5);
+INSERT INTO role_permission VALUES(2, 6);
+INSERT INTO role_permission VALUES(2, 7);
+INSERT INTO role_permission VALUES(2, 8);
+INSERT INTO role_permission VALUES(2, 9);

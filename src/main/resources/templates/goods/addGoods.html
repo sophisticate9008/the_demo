@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/vue@2"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    #app {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95vh;
+      
+    }
+
+    #add-container {
+      position: relative;
+      width: 90%;
+      height: 95%;
+      padding: 20px;
+      /* 添加内边距 */
+      border-radius: 10px;
+      /* 设置圆角 */
+      display: flex;
+      flex-direction: row;
+    }
+
+    .custom-file-upload {
+      display: block;
+      text-align: center;
+      cursor: pointer;
+      background-color: #6c8cb39b;
+      box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.5);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      width: 285px;
+      height: 285px;
+      line-height: 200px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    #picture-cropper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 10;
+    }
+    .el-form-item__label{
+      color: white;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
+    <div id="add-container">
+      <label for="goodImage" class="custom-file-upload">
+        <span v-if="!goodImageUrl">添加商品图片</span> <!-- 使用一个图标作为按钮 -->
+        <img class="goodImage-preview" v-else :src="goodImageUrl" alt="头像" style="width: 100%; height: 100%;">
+      </label>
+      <input id="goodImage" @click="callCropper" style="display: none;" required>
+      <el-form :model="form" ref="form" :rules="rules" label-width="100px" color="black">
+        <el-form-item label="商品名称" prop="goodName">
+          <el-input v-model="form.goodName" placeholder="请输入商品名称"></el-input>
+        </el-form-item>
+        <el-form-item label="介绍" prop="introduction">
+          <el-input v-model="form.introduction" placeholder="请输入商品介绍"></el-input>
+        </el-form-item>
+        <el-form-item label="标签" prop="label">
+          <el-input v-model="form.label" placeholder="请输入商品标签"></el-input>
+        </el-form-item>
+        <el-form-item label="价格" prop="price">
+          <el-input v-model="form.price" placeholder="请输入商品价格"></el-input>
+        </el-form-item>
+        <el-form-item label="库存" prop="stock">
+          <el-input v-model="form.stock" placeholder="请输入商品库存"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+  <script>
+    function getCropPic(data) {
+      var uuid = generateUUID();
+      app.useCropper = false;
+      if (data == '') {
+        return;
+      }
+      app.goodImageFile = new File([data], uuid + '.jpg', { type: 'image/*' });
+      app.goodImageUrl = URL.createObjectURL(app.goodImageFile);
+    }
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
+      el: "#app",
+      data: {
+        goodImageFile: null, // 保存上传的头像文件
+        goodImageUrl: '', // 保存头像预览图片的URL
+        useCropper: false,
+        form: {
+          goodName: '',
+          introduction: '',
+          label: '',
+          price: '',
+          stock: '',
+          imagePath: null
+        },
+        rules: {
+          goodName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
+          introduction: [{ required: true, message: '请输入商品介绍', trigger: 'blur' }],
+          label: [{ required: true, message: '请输入商品标签', trigger: 'blur' }],
+          price: [{ required: true, message: '请输入商品价格', trigger: 'blur' }],
+          stock: [{ required: true, message: '请输入商品库存', trigger: 'blur' }]
+        }
+      },
+      methods: {
+        submitForm() {
+          this.form.price = parseFloat(this.form.price);
+          this.form.stock = parseInt(this.form.stock);
+          this.isregisterDisabled = true;
+          var formData = new FormData();
+          
+          formData.append('mf', this.goodImageFile);
+          axios.post("/file/uploadFile", formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
+            }
+          }).then(response => {
+            this.form.imagePath = response.data.path;
+            this.addGoods();
+          }).catch(error => {
+            this.$alert("请添加图片");
+          })
+        },
+        addGoods() {
+          axios.post("/goods/addGoods", this.form)
+            .then(response => {
+              this.$message(response.data.msg);
+            }).catch(error => {
+              this.$alert(error);
+            })
+        },
+        callCropper() {
+          this.useCropper = true;
+        },
+      }
+    });
+  </script>
+</body>
+</html>

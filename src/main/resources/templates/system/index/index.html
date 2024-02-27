@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>首页</title>
   <style>
+    .myIframe {
+      position: relative;
+      background-image: url("/resources/images/background.jpg");
+      background-size: cover;
+    }
+
+
     #app {
       position: relative;
       display: flex;
@@ -91,7 +98,7 @@
       position: absolute;
       background-color: rgb(35, 38, 46);
       width: 100%;
-      height: 8vh;
+      height: 5.5vh;
       z-index: -1;
     }
 
@@ -139,13 +146,16 @@
     .menu-father {
       position: relative;
     }
-    .menu-father i, .menu-child i{
+
+    .menu-father i,
+    .menu-child i {
       top: 50%;
       transform: translate(-50%, -50%);
       position: absolute;
       z-index: 2;
       pointer-events: none;
     }
+
     .menu-icon {
       position: absolute;
       width: 100%;
@@ -153,17 +163,20 @@
       height: 44px;
       z-index: 3;
     }
+
     .menu-child li {
       position: relative;
     }
+
     .menu-child i {
       left: 15%;
       color: rgb(210, 210, 210);
     }
-    
+
     .menu-father .menu-icon i:nth-child(2) {
       right: 0;
     }
+
     .menu-father .menu-icon i:nth-child(1) {
       left: 10%;
     }
@@ -256,7 +269,6 @@
       display: none;
 
     }
-    
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- CSS 部分 -->
@@ -312,7 +324,7 @@
 </body>
 <script>
   function refreshWithSession() {
-   
+
     app.saveData();
   }
 
@@ -342,7 +354,7 @@
         'cart': "/sys/cart",
         "修改资料": "/sys/changeProfile",
         "修改密码": "/sys/changePassword",
-        
+
       },
       itemIcons: {},
       focusIframe: 'default',
@@ -362,9 +374,9 @@
         this.loadData();
         this.welcomeMessage = "你好，亲爱的" + this.userBasic.nickname
       });
-      
+
       this.openIframes.push("default");
-      
+
     },
     methods: {
       saveData() {
@@ -373,18 +385,18 @@
         localStorage.setItem('vueData', JSON.stringify(this.$data));
       },
       loadData() {
-        if(localStorage.getItem('loadVueData')) {
+        if (localStorage.getItem('loadVueData')) {
           const savedData = JSON.parse(localStorage.getItem('vueData'));
           savedData["openIframes"].forEach(item => {
-            this.addIframe({'name': item});
+            this.addIframe({ 'name': item });
           });
           this.clickLabel(savedData["focusIframe"]);
           localStorage.removeItem('loadVueData');
         }
-        
+
       },
       checkLogin() {
-        if(!this.userBasic) {
+        if (!this.userBasic) {
           $("#sideBar").remove();
         }
       },
@@ -406,13 +418,13 @@
           const [menuRes, iconsRes, urlsRes, headIconRes, userBasicRes] = responses;
           this.items = menuRes.data.data;
           this.itemIcons = iconsRes.data.data;
-          this.itemUrls = {...this.itemUrls, ...urlsRes.data.data};
+          this.itemUrls = { ...this.itemUrls, ...urlsRes.data.data };
           this.headIcons = headIconRes.data.data;
           this.userBasic = userBasicRes.data.data;
           this.checkLogin();
         }).catch(err => {
-          console.error(err); 
-          
+          console.error(err);
+
         });
       },
       generateIcons() {
@@ -429,7 +441,7 @@
         let $colseAll = $('<i class="bi bi-x-circle"></i>');
         $iconsContainer.append($colseAll);
         $iconsContainer.append($refresh);
-        $refresh.on('click', function() {
+        $refresh.on('click', function () {
           app.refreshIframe();
         })
         $colseAll.on('click', function () {
@@ -456,9 +468,9 @@
       },
       generateList(items, $parent) {
         for (let key in items) {
-          
+
           if (items.hasOwnProperty(key)) {
-            
+
             let $icon = $('<i class="bi bi-' + this.itemIcons[key] + '">');
             let $span = $('<span>' + key + '</span>');
             let $li = $('<li class="menu-father menu"></li>');
