@@ -34,6 +34,8 @@ public class ResultObj {
     public static final ResultObj DISPATCH_SUCCESS = new ResultObj(Constast.OK,"分配成功");
     public static final ResultObj DISPATCH_ERROR = new ResultObj(Constast.ERROR,"分配失败");
 
+    public static final ResultObj EXCEED_PERMISSION = new ResultObj(Constast.ERROR, "越权操作");
+
     public static final ResultObj BACKINPORT_SUCCESS = new ResultObj(Constast.OK,"退货成功");
     public static final ResultObj BACKINPORT_ERROR = new ResultObj(Constast.ERROR,"退货失败");
     public static final ResultObj SYNCCACHE_SUCCESS = new ResultObj(Constast.OK,"同步缓存成功");

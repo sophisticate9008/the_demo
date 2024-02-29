@@ -2,10 +2,260 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Pagination Example</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <style>
+    /* Add your custom li styles here */
+    body {
+      height: 100%;
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    .list-item {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      padding: 8px;
+      margin: 4px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      align-items: center;
+      width: 48%;
+    }
+
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    .list-item img {
+      display: block;
+      width: 235px;
+      height: 235px;
+    }
+
+    #button-container {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      justify-content: space-between;
+      right: 2.5%;
+      height: 90%;
+    }
+
+    #button-container button {
+      padding: 12px 12px;
+      width: 35px;
+      height: 35px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    i {
+      display: block;
+      position: relative;
+      left: -25%;
+    }
+
+    #items-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .el-pagination__jump {
+      color: white;
+    }
+  </style>
 </head>
 <body>
-  
+  <div id="app">
+    <div>
+      <div id="args">
+        <label for="limit">每页数量</label>
+        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-option value=10>10</el-option>
+          <el-option value=20>20</el-option>
+        </el-select>
+        <label for="goodName">商品名称</label>
+        <el-input class="arg" type="text" id="goodName" v-model="goodName"></el-input>
+        <label for="label">标签</label>
+        <el-input class="arg" type="text" id="label" v-model="label"></el-input>
+      </div>
+    </div>
+    <div id="items-container">
+      <div v-for="item in dataList" :key="item.id" class="list-item">
+        <img :src="'/file/showImageByPath?path=' + item.imagePath">
+        <el-table :data="transformedData(item)" :show-header="false" size="small" border>
+          <el-table-column prop="property" width="80px">
+          </el-table-column>
+          <el-table-column prop="value" width="270px">
+          </el-table-column>
+        </el-table>
+        <div id="button-container">
+          <el-button :class="getButtonClass(item.available)" @click="banGoods($event,item.id)">{{
+            item.available === 1 ? '√' : '!' }}</el-button>
+          <el-button type="primary" icon="el-icon-edit" ></el-button>
+          <el-button type="danger" icon="el-icon-delete" @click="deletegood(item.id)"></el-button>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+     :total="total">
+    </el-pagination>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 10,
+        goodName: '',
+        label: ''
+      },
+      mounted() {
+        this.getData();
+      },
+
+      watch: {
+        // 监听分页或筛选条件的变化，重新获取数据
+        currentPage() {
+          this.getData();
+        },
+        goodName() {
+          this.currentPage = 1; // Reset to first page when goodName filter changes
+          this.getData();
+        },
+        label() {
+          this.currentPage = 1; // Reset to first page when label filter changes
+          this.getData();
+        }
+      },
+      methods: {
+        transformedData(item) {
+          return [
+            { "property": "商品名称", "value": item.goodName },
+            { "property": "商品标签", "value": item.label },
+            { "property": "商品介绍", "value": item.introduction },
+            { "property": "商品价格", "value": item.price },
+            { "property": "商品库存", "value": item.stock },
+            { "property": "商品销量", "value": 0 }
+          ]
+        },
+        getButtonClass(available) {
+          // 根据按钮的类型返回对应的样式类
+          return available === 1 ? 'el-button--success' : 'el-button--warning';
+        },
+        banGoods(event, goodID) {
+          goodID = parseInt(goodID)
+          let button = event.target;
+
+          if (button.className.includes("el-button--success")) {
+            axios.post("/goods/updateGoods", {
+              available: 0,
+              id: goodID
+            })
+            button.innerText = '!'
+            button.className = button.className.replace('el-button--success', 'el-button--warning')
+          } else {
+            axios.post("/goods/updateGoods", {
+              available: 1,
+              id: goodID
+            })
+            button.innerText = '√'
+            button.className = button.className.replace('el-button--warning', 'el-button--success')
+          }
+        },
+        deletegood(goodID) {
+          goodID = parseInt(goodID);
+          this.$alert('删除后操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/goods/updateGoods", {
+                delete: true,
+                id: goodID
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        },
+        getData() {
+          const url = "/goods/loadAllGoods";
+          axios.post(url, {
+            page: this.currentPage,
+            limit: parseInt(this.limit),
+            showMygoods: true,
+            goodName: this.goodName,
+            label: this.label
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        }
+      }
+    });
+  </script>
 </body>
 </html>

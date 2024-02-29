@@ -85,6 +85,7 @@ CREATE TABLE comments(
 INSERT INTO Role VALUES(1, "普通用户", "普通用户,拥有查看,购买,评论等权限", 1);
 INSERT INTO Role VALUES(2, "商家", "商家,拥有发布,修改,创建客服账号等权限", 1);
 INSERT INTO Role VALUES(3, "客服", "仅仅可以由商家在系统创建", 1);
+INSERT INTO Role VALUES(4, "管理员", "拥有高级权限", 1);
 
 INSERT INTO Permission VALUES(1,"创建客服权限","merchant:createCustomerService", "", "", "permission");
 INSERT INTO permission VALUES(2, "客服管理菜单", "merchant:客服管理:客服管理:1", "", "people", "menu");
@@ -95,6 +96,7 @@ INSERT INTO Permission VALUES(6, "商品管理菜单", "merchant:商品管理:�
 INSERT INTO Permission VALUES(7, "商品概览", "merchant:商品管理:商品概览:2", "/sys/goodsManagement", "bar-chart", "menu");
 INSERT INTO Permission VALUES(8, "商品概览", "merchant:商品管理:添加商品:2", "/sys/addGoods", "plus", "menu");
 INSERT INTO Permission VALUES(9,"添加商品权限","merchant:addGoods", "", "", "permission");
+INSERT INTO Permission VALUES(10,"更新商品权限","merchant:updateGoods", "", "", "permission");
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -105,3 +107,4 @@ INSERT INTO role_permission VALUES(2, 6);
 INSERT INTO role_permission VALUES(2, 7);
 INSERT INTO role_permission VALUES(2, 8);
 INSERT INTO role_permission VALUES(2, 9);
+INSERT INTO role_permission VALUES(2, 10);

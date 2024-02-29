@@ -11,4 +11,6 @@ import lombok.EqualsAndHashCode;
 public class GoodsVo extends Goods{
     private Integer page = 1;
     private Integer limit= 10;
+    private Boolean showMygoods = false;
+    private Boolean delete = false;
 }

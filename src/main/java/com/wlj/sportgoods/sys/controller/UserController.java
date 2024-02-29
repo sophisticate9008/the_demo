@@ -53,7 +53,7 @@ public class UserController {
         }
     }
     @RequestMapping("createCustomerService")
-    @RequiresPermissions(value = {"merchant:createCustomerService"},logical = Logical.AND)
+    @RequiresPermissions(value = {"merchant:createCustomerService", "*:*"},logical = Logical.AND)
     public ResultObj createCustomer(@RequestBody User user) {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
@@ -168,9 +168,7 @@ public class UserController {
                 AppFileUtils.removeFileByPath(targetUser.getAvatarpath());
                 return ResultObj.DELETE_SUCCESS;
             }else {
-                User tempUser = new User();
-                tempUser.setAccount(userVo.getAccount()).setAvailable(userVo.getAvailable());
-                userService.updateById(tempUser);
+                userService.updateById(userVo);
                 return ResultObj.UPDATE_SUCCESS;
             }
         }else {
