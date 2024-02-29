@@ -260,7 +260,10 @@
               console.log(error);
               this.updateGoods(changeForm);
             })
+          }else {
+            this.updateGoods(changeForm);
           }
+          
         },
         updateGoods(form) {
           axios.post("/goods/updateGoods", form)
