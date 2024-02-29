@@ -5,6 +5,7 @@
   <title>Pagination Example</title>
   <script src="/resources/js/vue.min.js"></script>
   <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
   <link rel="stylesheet" href="/resources/css/element-ui.index.css">
   <script src="/resources/js/element-ui.index.js"></script>
   <style>
@@ -37,7 +38,7 @@
     .list-item {
       position: relative;
       display: flex;
-      flex-direction: row;
+      flex-direction: row-reverse;
       padding: 8px;
       margin: 4px;
       background-color: #f0f0f0;
@@ -67,6 +68,8 @@
       display: block;
       width: 235px;
       height: 235px;
+      object-fit: fill;
+      cursor: pointer;
     }
 
     #button-container {
@@ -101,10 +104,18 @@
     .el-pagination__jump {
       color: white;
     }
+
+    #picture-cropper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
   <div id="app">
+    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
     <div>
       <div id="args">
         <label for="limit">每页数量</label>
@@ -119,19 +130,33 @@
       </div>
     </div>
     <div id="items-container">
-      <div v-for="item in dataList" :key="item.id" class="list-item">
-        <img :src="'/file/showImageByPath?path=' + item.imagePath">
-        <el-table :data="transformedData(item)" :show-header="false" size="small" border>
+      <div v-for="(item, index) in dataList" :key="item.id" class="list-item">
+
+        <el-table :data="item.tempTableData" :show-header="false" size="small" max-height="240px">
           <el-table-column prop="property" width="80px">
           </el-table-column>
-          <el-table-column prop="value" width="270px">
+          <el-table-column prop="value" width="320px">
+            <!-- 使用作用域插槽来自定义每一列的内容 -->
+            <template slot-scope="scope">
+              <span v-if="item.disabled">{{scope.row.value}}</span>
+              <el-input size="mini" v-if="!item.disabled && scope.row.property !== '商品销量'"
+               v-model="scope.row.value"></el-input>
+            </template>
           </el-table-column>
         </el-table>
+
+        <label :for="'goodImage' + item.id">
+          <img :src="getIntactImagePath(item)" alt="图片">
+        </label>
+        <input v-if="!item.disabled" :id="'goodImage' + item.id" @click="callCropper(item)" style="display: none;">
         <div id="button-container">
-          <el-button :class="getButtonClass(item.available)" @click="banGoods($event,item.id)">{{
-            item.available === 1 ? '√' : '!' }}</el-button>
-          <el-button type="primary" icon="el-icon-edit" ></el-button>
-          <el-button type="danger" icon="el-icon-delete" @click="deletegood(item.id)"></el-button>
+          <el-button :type="item.available === 1 ? 'success' : 'warning'" @click="banGoods($event,item)"
+           :icon="item.available === 1 ? 'el-icon-open' : 'el-icon-turn-off'">
+          </el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="editGood(item)"></el-button>
+          <el-button type="primary" :disabled="item.disabled" icon="el-icon-check"
+           @click="submitEdit(item)"></el-button>
+          <el-button type="danger" icon="el-icon-delete" @click="deletegood(item, index)"></el-button>
 
         </div>
 
@@ -145,20 +170,48 @@
   </div>
 
   <script>
-    new Vue({
+    function getCropPic(data) {
+      var uuid = generateUUID();
+      app.useCropper = false;
+      if (data == '') {
+        return;
+      }
+      app.focusItem["goodImageFile"] = new File([data], uuid + '.jpg', { type: 'image/*' });
+      app.focusItem.imagePath = URL.createObjectURL(app.focusItem["goodImageFile"]);
+    }
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
       el: '#app',
       data: {
+        useCropper: false,
+        focusItem: null,
+        disabledEdit: false,
         dataList: [],
         total: 0,
         currentPage: 1,
         limit: 10,
         goodName: '',
-        label: ''
+        label: '',
+        reflexData: {
+          "goodName": "商品名称",
+          "label": "商品标签",
+          "introduction": "商品介绍",
+          "price": "商品价格",
+          "stock": "商品库存",
+          "sales": "商品销量"
+        },
+        form: null
+
       },
       mounted() {
         this.getData();
       },
-
       watch: {
         // 监听分页或筛选条件的变化，重新获取数据
         currentPage() {
@@ -174,42 +227,92 @@
         }
       },
       methods: {
-        transformedData(item) {
-          return [
-            { "property": "商品名称", "value": item.goodName },
-            { "property": "商品标签", "value": item.label },
-            { "property": "商品介绍", "value": item.introduction },
-            { "property": "商品价格", "value": item.price },
-            { "property": "商品库存", "value": item.stock },
-            { "property": "商品销量", "value": 0 }
-          ]
-        },
-        getButtonClass(available) {
-          // 根据按钮的类型返回对应的样式类
-          return available === 1 ? 'el-button--success' : 'el-button--warning';
-        },
-        banGoods(event, goodID) {
-          goodID = parseInt(goodID)
-          let button = event.target;
-
-          if (button.className.includes("el-button--success")) {
-            axios.post("/goods/updateGoods", {
-              available: 0,
-              id: goodID
-            })
-            button.innerText = '!'
-            button.className = button.className.replace('el-button--success', 'el-button--warning')
+        getIntactImagePath(item) {
+          if (item.imagePath.indexOf("blob") == -1) {
+            return '/file/showImageByPath?path=' + item.imagePath;
           } else {
-            axios.post("/goods/updateGoods", {
-              available: 1,
-              id: goodID
-            })
-            button.innerText = '√'
-            button.className = button.className.replace('el-button--warning', 'el-button--success')
+            return item.imagePath;
           }
         },
-        deletegood(goodID) {
-          goodID = parseInt(goodID);
+        callCropper(item) {
+          this.focusItem = item;
+          this.useCropper = true;
+        },
+        editGood(item) {
+          item.disabled = false;
+        },
+        submitEdit(item) {
+          item.disabled = true;
+          var changeForm = this.recoveryData(item);
+          changeForm["id"] = item.id;
+
+          if ("goodImageFile" in item) {
+            var formData = new FormData();
+            formData.append('mf', item.goodImageFile);
+            axios.post("/file/uploadFile", formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
+              }
+            }).then(response => {
+              changeForm["imagePath"] = response.data.path;
+              this.updateGoods(changeForm);
+            }).catch(error => {
+              console.log(error);
+              this.updateGoods(changeForm);
+            })
+          }
+        },
+        updateGoods(form) {
+          axios.post("/goods/updateGoods", form)
+            .then(response => {
+              this.$message(response.data.msg);
+            }).catch(error => {
+              this.$alert(error);
+            })
+        },
+        recoveryData(item) {
+          var returnForm = {};
+          item.tempTableData.forEach(theData => {
+            for (let key in this.reflexData) {
+              if (theData["property"] == this.reflexData[key]) {
+                returnForm[key] = theData["value"];
+                break;
+              }
+            }
+
+          });
+          console.log(returnForm);
+          return returnForm;
+        },
+        transformedData(item) {
+
+          var tmpItem = item;
+          var theList = [];
+          for (var tmp in tmpItem) {
+            if (tmp in this.reflexData) {
+              theList.push({ "property": this.reflexData[tmp], "value": tmpItem[tmp.toString()] })
+            }
+          }
+          return theList;
+
+        },
+        banGoods(event, item) {
+          let button = event.target;
+          if (item.available == 1) {
+            item.available = 0;
+            axios.post("/goods/updateGoods", {
+              available: 0,
+              id: item.id
+            })
+          } else {
+            item.available = 1
+            axios.post("/goods/updateGoods", {
+              available: 1,
+              id: item.id
+            })
+          }
+        },
+        deletegood(item, index) {
           this.$alert('删除后操作不可回退，是否删除？', {
             dangerouslyUseHTMLString: true,
             showClose: false,
@@ -220,15 +323,19 @@
             if (action === 'confirm') {
               axios.post("/goods/updateGoods", {
                 delete: true,
-                id: goodID
+                id: item.id
               })
                 .then(response => {
                   this.$message(response.data.msg);
+                  this.dataList.splice(index, 1);
                 })
             }
           }, error => {
             console.error('Promise 被拒绝:', error);
           });
+        },
+        getSales() {
+          return 1;
         },
         getData() {
           const url = "/goods/loadAllGoods";
@@ -242,6 +349,11 @@
             .then(response => {
               this.dataList = response.data.data;
               this.total = response.data.count;
+              this.dataList.forEach(item => {
+                this.$set(item, 'disabled', true);
+                this.$set(item, 'sales', this.getSales());
+                this.$set(item, 'tempTableData', this.transformedData(item));
+              })
             })
             .catch(error => {
               console.error('Error:', error);
