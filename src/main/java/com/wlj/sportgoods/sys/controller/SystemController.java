@@ -47,4 +47,20 @@ public class SystemController {
     public String addGoods() {
         return "goods/addGoods";
     }
+    @RequestMapping("goodsShop") 
+    public String toGoodsShop() {
+        return "goods/goodsShop";
+    }
+    @RequestMapping("goodDetail")
+    public String toGoodDetail() {
+        return "goods/goodDetail";
+    }
+    @RequestMapping("history")
+    public String history() {
+        return "goods/history";
+    }
+    @RequestMapping("star")
+    public String star() {
+        return "goods/star";
+    }
 }

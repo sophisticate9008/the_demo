@@ -107,7 +107,7 @@ public class UserRealm extends AuthorizingRealm{
             activerUser.setPermission(percodes);
             activerUser.setMenuUrls(menuUrls);
             if(user.getType() == 1) {
-                activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("star", "cart", "chat")));
+                activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("star", "cart", "chat", "clock-history")));
             }else if (user.getType() == 2) {
                 activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("chat")));
             }else {

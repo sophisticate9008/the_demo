@@ -1,6 +1,9 @@
 package com.wlj.sportgoods.sys.controller;
 
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
@@ -9,9 +12,7 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,6 +26,7 @@ import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.RoleService;
 import com.wlj.sportgoods.sys.service.UserService;
 import com.wlj.sportgoods.sys.vo.UserVo;
+import com.wlj.sportgoods.user.entity.Goods;
 
 /**
  * <p>
@@ -175,6 +177,26 @@ public class UserController {
             return ResultObj.UPDATE_ERROR;
         }        
 
+    }
+    @RequestMapping("getAllUser") 
+    @RequiresPermissions({"*:*"})
+    public DataGridView getAllUser(@RequestBody UserVo userVo) {
+        IPage<User> page = new Page<>(userVo.getPage(), userVo.getLimit());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.like(StringUtils.isNotBlank(userVo.getAccount()), "account", userVo.getAccount());
+        queryWrapper.like("available", userVo.getAvailable());
+        userService.page(page, queryWrapper);
+        return new DataGridView(page.getTotal(), page.getRecords());
+    }
+    @RequestMapping("userManagement")
+    @RequiresPermissions({"*:*"})
+    public ResultObj userManagement(@RequestBody UserVo userVo) {
+        if(userService.updateById(userVo)) {
+            return ResultObj.UPDATE_SUCCESS;
+        }else {
+            return ResultObj.UPDATE_ERROR;
+        }
     }
 
 }

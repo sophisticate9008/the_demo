@@ -64,6 +64,7 @@ CREATE TABLE user_goods(
     num INT,
     finishTime TIMESTAMP DEFAULT NULL,
     status int COMMENT '0未完成,也就是在购物车里. 1完成交易, -1退货',
+    cost DECIMAL(10, 2),
     FOREIGN KEY(account) REFERENCES User(account),
     FOREIGN KEY(gid) REFERENCES goods(id),
     PRIMARY KEY(account, gid)
@@ -81,6 +82,14 @@ CREATE TABLE comments(
     FOREIGN KEY(gid) REFERENCES goods(id)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE TABLE history(
+    account VARCHAR(50),
+    gid int,
+    view_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(account) REFERENCES User(account),
+    FOREIGN KEY(gid) REFERENCES goods(id),
+    PRIMARY KEY(account, gid)
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO Role VALUES(1, "普通用户", "普通用户,拥有查看,购买,评论等权限", 1);
 INSERT INTO Role VALUES(2, "商家", "商家,拥有发布,修改,创建客服账号等权限", 1);

@@ -41,6 +41,6 @@ public class Goods implements Serializable {
     private String goodName;
 
     private Integer stock;
-
+    
 
 }

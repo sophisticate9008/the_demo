@@ -15,6 +15,7 @@ public class ResultObj {
     public static final ResultObj LOGIN_SUCCESS=new ResultObj(Constast.OK,"登陆成功");
     public static final ResultObj LOGIN_ERROR_PASS=new ResultObj(Constast.ERROR,"用户名或密码错误");
     public static final ResultObj LOGIN_ERROR_CODE=new ResultObj(Constast.ERROR,"验证码错误");
+    public static final ResultObj LOGIN_ERROR_BAN=new ResultObj(Constast.ERROR,"用户当前不可登录"); 
 
     public static final ResultObj ADD_SUCCESS = new ResultObj(Constast.OK,"添加成功");
     public static final ResultObj ADD_ERROR = new ResultObj(Constast.ERROR,"添加失败");

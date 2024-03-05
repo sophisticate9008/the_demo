@@ -24,11 +24,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User existingUser = this.getById(user.getAccount());
         if(existingUser != null) {
             return ResultObj.REGISTER_ERROR;
+        }else if(user.getType() == 4) {
+            return ResultObj.EXCEED_PERMISSION;
         }else {
             String salt = PasswordUtils.generateRandomSalt();
             user.setAccount(user.getAccount());
             user.setSalt(salt);
             user.setPassword(PasswordUtils.hashPassword(user.getPassword(), salt));
+            if(user.getType() == 2) {
+                user.setAvailable(0);
+            }
             this.save(user);
             return ResultObj.REGISTER_SUCCESS;
         }

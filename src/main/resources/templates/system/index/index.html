@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>首页</title>
   <style>
-
-
-
     #app {
       position: relative;
       display: flex;
@@ -314,7 +311,7 @@
           </div>
         </div>
       </div>
-      <iframe class="myIframe" id="defaultIframe"></iframe>
+      <iframe class="myIframe" id="defaultIframe" src="/sys/goodsShop"></iframe>
     </div>
   </div>
 
@@ -340,7 +337,9 @@
     $("#toggleButton").click(function () {
       $("#sideBar").animate({
         width: "toggle" // 切换侧边栏的宽度
-      }, 200); // 动画持续时间为0.5秒
+      }, 200, function () {
+        // 动画完成后执行的回调函数
+      }); // 动画持续时间为0.5秒
     });
   });
   var app = new Vue({
@@ -353,7 +352,7 @@
         'cart': "/sys/cart",
         "修改资料": "/sys/changeProfile",
         "修改密码": "/sys/changePassword",
-
+        "clock-history": "/sys/history"
       },
       itemIcons: {},
       focusIframe: 'default',
@@ -428,13 +427,17 @@
       },
       generateIcons() {
         let $iconsContainer = $("#iconsContainer");
-        this.headIcons.forEach(item => {
-          let $icon = $('<i class="bi bi-' + item + '"> </i>');
-          $iconsContainer.append($icon);
-          $icon.on('click', function () {
-            app.addIframe({ name: item });
-          })
-        });
+        try {
+          this.headIcons.forEach(item => {
+            let $icon = $('<i class="bi bi-' + item + '"> </i>');
+            $iconsContainer.append($icon);
+            $icon.on('click', function () {
+              app.addIframe({ name: item });
+            })
+          });
+        } catch (e) {
+          console.log(e)
+        }
 
         let $refresh = $('<i class="bi bi-arrow-clockwise"></i>');
         let $colseAll = $('<i class="bi bi-x-circle"></i>');

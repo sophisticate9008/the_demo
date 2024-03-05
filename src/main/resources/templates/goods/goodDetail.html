@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    #app {
+      width: 100%;
+      height: 95vh;
+      position: relative;
+    }
+
+    #card {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      top: 5%;
+      width: 80%;
+      height: 90%;
+      margin: auto auto;
+      border-radius: 0.5%;
+      background-color: rgba(248, 248, 248, 0.548);
+    }
+
+    #card-info {
+      width: 900px;
+      padding: 15px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #text-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #text-info span {
+      margin: 0px 0 10px 20px;
+    }
+
+    #card-info img {
+      border-radius: 1%;
+      width: 400px;
+      height: 400px;
+    }
+
+    .info-sales {
+      position: relative;
+      top: -2%;
+      font-size: 14px;
+      color: gray;
+    }
+
+    .info-name {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .info-desc {
+      position: relative;
+      top:10%;
+    }
+    #label-container {
+      display: flex;
+      flex-direction: row;
+    }
+    .info-price {
+      color: rgba(255, 0, 0, 0.712);
+      font-size: 30px;
+    }
+    .info-desc {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="card">
+      <div id="card-info">
+        <img :src="'/file/showImageByPath?path=' + dataList[0].imagePath">
+        <div id="text-info">
+          <span class="info-name">{{dataList[0].goodName}} </span>
+          <span class="info-sales">销量: {{dataList[0].sales}}</span>
+          <span class="info-price">{{'￥' + dataList[0].price}}</span>
+          <div id="label-container">
+            
+            <div class="label-div" v-for="label in dataList[0].labelList">
+              <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
+            </div>
+          </div>
+
+          <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
+
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script>
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        dataList: null,
+        id: null,
+
+      },
+      mounted() {
+        this.getId();
+        this.getData();
+        this.addHistory();
+      },
+      methods: {
+        addHistory() {
+          axios.post("/history/updateHistory", {
+            gid: this.id,
+          })
+        },
+        getId() {
+          var url = window.location.href;
+          var queryString = url.split('?')[1];
+          var params = {};
+          var queryParams = queryString.split('&');
+          queryParams.forEach(function (param) {
+            var keyValue = param.split('=');
+            params[keyValue[0]] = decodeURIComponent(keyValue[1]);
+          });
+          var id = params['id'];
+          this.id = parseInt(id);
+          console.log(id)
+        },
+        getSales(item) {
+          return 1;
+        },
+        getData() {
+          const url = "/goods/loadAllGoods";
+          axios.post(url, {
+            id: this.id
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+              this.dataList.forEach(item => {
+                this.$set(item, 'disabled', true);
+                this.$set(item, 'sales', this.getSales(item));
+                this.$set(item, 'labelList', item.label.trim().split(/\s+/));
+              })
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        }
+      }
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <script src="/resources/js/vue-virtual-scroller.js"></script>
+  <link href="/resources/css/vue-virtual-scroller.css" rel="stylesheet">
+  <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+    body {
+      height: 100%;
+      background-color:  rgba(248, 248, 248, 0.548);
+      position: relative;
+    }
+    .table-img {
+      width: 50px;
+      height: 50px;
+    }
+    #app {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    #table-container {
+      position: relative;
+      width: 90%;
+      height: 90%;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="table-container">
+      <el-table :data="dataList" @row-dblclick="jumpGoodDetail">
+        <el-table-column label="双击跳转">
+          <template slot-scope="scope">
+            <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.goodInfo.imagePath">
+          </template>
+        </el-table-column>
+        <el-table-column prop="goodInfo.goodName" label="商品名字">
+        </el-table-column>
+        <el-table-column prop="goodInfo.introduction" label="简介">
+        </el-table-column>
+        <el-table-column prop="goodInfo.label" label="标签">
+        </el-table-column>
+        <el-table-column label="浏览时间">
+          <template slot-scope="scope">
+            {{convertToBeijingTime(scope.row.viewTime)}}
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+  </div>
+
+
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 10,
+        startTime: new Date(0),
+        endTime: new Date()
+      },
+      mounted() {
+        this.getData();
+      },
+      methods: {
+        jumpGoodDetail(row, column, event) {
+          var jsonData = {
+            name: row.goodInfo.goodName + row.gid,
+            url: '/sys/goodDetail?id=' + row.gid
+          };
+          window.parent.postMessage(jsonData, '*');
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+        getData() {
+          axios.post("/history/getHistory", {
+            showHistory: true,
+            showStar: false,
+            startTime: this.startTime,
+            endTime: this.endTime
+          }).then(response => {
+            this.dataList = response.data.data;
+            response.data.data.forEach(item => {
+              axios.post("/goods/loadAllGoods", {
+                id: item.gid
+              }).then(response => {
+                this.$set(item, "goodInfo", response.data.data[0]);
+              })
+
+            })
+
+          })
+        }
+      },
+    });
+  </script>
+</body>
+</html>

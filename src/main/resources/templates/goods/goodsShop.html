@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagination Example</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <style>
+    /* Add your custom li styles here */
+    body {
+      height: 100%;
+      background-color: #47474742;
+      position: relative;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    .list-item {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      padding: 8px;
+      margin: 4px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      align-items: center;
+
+    }
+
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      width: 95%;
+      margin: auto;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    .list-item img {
+      display: block;
+      width: 160px;
+      height: 160px;
+      object-fit: fill;
+    }
+
+    i {
+      display: block;
+      position: relative;
+      left: -25%;
+    }
+
+    #items-container {
+      cursor: pointer;
+      width: 95%;
+      margin: auto;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .el-pagination {
+      width: 95%;
+      margin: auto;
+    }
+
+    .el-pagination__jump {
+      color: white;
+      width: 90%;
+      margin: auto;
+    }
+
+    .el-pagination__total {
+      color: white;
+    }
+
+    #info-container {
+      width: 19vh;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    #info-container span {
+      margin: 5px 10px;
+    }
+
+    .info-name:hover {
+      color: red
+    }
+
+    .info-price {
+      font-size: 25px;
+      color: rgba(255, 0, 0, 0.721);
+    }
+
+    .info-sales {
+      color: gray;
+      font-size: 10px;
+    }
+
+    .info-comments {
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <div id="args">
+        <label for="limit">每页数量</label>
+        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-option value=16>16</el-option>
+          <el-option value=32>32</el-option>
+        </el-select>
+        <label for="goodName">商品名称</label>
+        <el-input class="arg" type="text" id="goodName" v-model="goodName"></el-input>
+        <label for="label">标签</label>
+        <el-input class="arg" type="text" id="label" v-model="label"></el-input>
+        <label for="merchant">商家名称</label>
+        <el-input class="arg" type="text" id="merchant" v-model="merchant"></el-input>
+      </div>
+    </div>
+    <div id="items-container">
+
+      <div v-for="(item, index) in dataList" :key="item.id" class="list-item" @click="jumpGoodDetail(item)">
+        <img :src="getIntactImagePath(item)" alt="图片">
+        <div id="info-container">
+          <span class="info-name">{{item.goodName}} </span>
+          <span class="info-sales">销量: {{item.sales}}</span>
+          <span class="info-price">{{'￥' + item.price}}</span>
+        </div>
+      </div>
+    </div>
+
+    <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+     :total="total">
+    </el-pagination>
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 16,
+        goodName: '',
+        label: '',
+        merchant: null,
+        form: null
+
+      },
+      mounted() {
+        this.getData();
+      },
+      watch: {
+        // 监听分页或筛选条件的变化，重新获取数据
+        currentPage() {
+          this.getData();
+        },
+        goodName() {
+          this.currentPage = 1; // Reset to first page when goodName filter changes
+          this.getData();
+        },
+        label() {
+          this.currentPage = 1; // Reset to first page when label filter changes
+          this.getData();
+        },
+        merchant() {
+          this.currentPage = 1; // Reset to first page when label filter changes
+          this.getData();
+        }
+      },
+      methods: {
+        jumpGoodDetail(item) {
+          var jsonData = {
+            name: item.goodName + item.id,
+            url: '/sys/goodDetail?id=' + item.id
+          };
+          window.parent.postMessage(jsonData, '*');
+        },
+        getIntactImagePath(item) {
+          if (item.imagePath.indexOf("blob") == -1) {
+            return '/file/showImageByPath?path=' + item.imagePath;
+          } else {
+            return item.imagePath;
+          }
+        },
+        getSales() {
+          return 1;
+        },
+        getData() {
+          const url = "/goods/loadAllGoods";
+          axios.post(url, {
+            merchant: this.merchant,
+            page: this.currentPage,
+            limit: parseInt(this.limit),
+            showInShop: true,
+            goodName: this.goodName,
+            label: this.label
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+              this.dataList.forEach(item => {
+                this.$set(item, 'sales', this.getSales());
+              })
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

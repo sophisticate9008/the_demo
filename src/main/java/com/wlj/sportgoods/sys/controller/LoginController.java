@@ -45,7 +45,10 @@ public class LoginController {
                 ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
                 //将user存储到session中
                 WebUtils.getSession().setAttribute("user",activerUser.getUser());
-
+                if(activerUser.getUser().getAvailable() == 0) {
+                    subject.logout();
+                    return ResultObj.LOGIN_ERROR_BAN;
+                }
                 return ResultObj.LOGIN_SUCCESS;
             } catch (AuthenticationException e) {
                 e.printStackTrace();

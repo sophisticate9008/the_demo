@@ -13,4 +13,5 @@ public class GoodsVo extends Goods{
     private Integer limit= 10;
     private Boolean showMygoods = false;
     private Boolean delete = false;
+    private Boolean showInShop = false;
 }
