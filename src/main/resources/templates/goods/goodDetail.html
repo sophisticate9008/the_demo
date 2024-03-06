@@ -84,20 +84,54 @@
       font-size: 24px;
       font-weight: bold;
     }
+
     .info-desc {
       position: relative;
-      top:10%;
+      top: 10%;
     }
+
     #label-container {
       display: flex;
       flex-direction: row;
     }
+
     .info-price {
       color: rgba(255, 0, 0, 0.712);
       font-size: 30px;
     }
+
     .info-desc {
       font-weight: bold;
+    }
+
+    #buttons {
+      position: absolute;
+      right: 1%;
+      margin: 0;
+    }
+    .leftButton{
+      color: white;
+      font-weight: bold;
+      position: relative;
+      height: 50px;
+      background-color: rgb(245, 201, 82);
+      border-radius:25px 0 0 25px;
+      margin-right: 0;
+      left: 3.5%;
+    }
+    .rightButton{
+      color: white;
+      font-weight: bold;
+      position: relative;
+      right: 3.5%;
+      height: 50px;
+      background-color: rgb(245, 87, 69);
+      border-radius:0 25px  25px 0 ;
+      margin-left: 0;
+    
+    }
+    .star {
+      font-size: 20px;
     }
   </style>
 </head>
@@ -111,18 +145,27 @@
           <span class="info-sales">销量: {{dataList[0].sales}}</span>
           <span class="info-price">{{'￥' + dataList[0].price}}</span>
           <div id="label-container">
-            
+
             <div class="label-div" v-for="label in dataList[0].labelList">
               <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
             </div>
           </div>
 
           <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
+        </div>
+        <div id="buttons">
+          <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
+          <el-button class="leftButton" @click="addToCart">
+            加入购物车
+          </el-button>
+          <el-button class="rightButton" @click="buy">
+            立刻购买
+          </el-button>
 
 
         </div>
-
       </div>
+
     </div>
   </div>
   <script>
@@ -132,7 +175,7 @@
       data: {
         dataList: null,
         id: null,
-
+        starIcon: "el-icon-star-off"
       },
       mounted() {
         this.getId();
@@ -140,6 +183,45 @@
         this.addHistory();
       },
       methods: {
+        getStar() {
+          axios.post("/history/getHistory", {
+            showStar: true,
+            showHistory: false,
+            gid: this.id
+          }).then(response=> {
+            if(response.data.count != 0) {
+              this.starIcon = "el-icon-star-on"
+            }else {
+              this.starIcon = "el-icon-star-off"
+            }
+          })
+        },
+        star() {
+          if(this.starIcon == "el-icon-star-off") {
+            this.starIcon = "el-icon-star-on"
+            axios.post("/history/updateHistory", {
+              gid: this.id,
+              star: 1
+            })
+          }else {
+            axios.post("/history/updateHistory", {
+              gid: this.id,
+              star: 0
+            })
+            this.starIcon = "el-icon-star-off"
+          }
+        },
+        addToCart() {
+          axios.post("/userGoods/cartAdd", {
+            gid: this.id,
+            num: 1
+          }).then(response => {
+            this.$alert(response.data.msg);
+          })
+        },
+        buy() {
+
+        },
         addHistory() {
           axios.post("/history/updateHistory", {
             gid: this.id,
@@ -167,6 +249,7 @@
             id: this.id
           })
             .then(response => {
+              this.getStar();
               this.dataList = response.data.data;
               this.total = response.data.count;
               this.dataList.forEach(item => {

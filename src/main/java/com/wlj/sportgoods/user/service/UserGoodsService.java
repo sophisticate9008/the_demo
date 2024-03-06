@@ -1,6 +1,9 @@
 package com.wlj.sportgoods.user.service;
 
 import com.wlj.sportgoods.user.entity.UserGoods;
+
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -19,4 +22,5 @@ public interface UserGoodsService extends IService<UserGoods> {
      * @return 如果用户购买了该商品返回true，否则返回false
      */
     boolean hasBoughtGoods(String account, Integer gid);
+    List<UserGoods> getRefoundApplymentByAccount(String account);
 }

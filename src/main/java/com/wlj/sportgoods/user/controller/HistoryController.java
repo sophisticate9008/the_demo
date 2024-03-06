@@ -76,8 +76,12 @@ public class HistoryController {
                 historyVo.setGid(ids[i]);
                 historyService.updateById(historyVo);
                 queryWrapper.eq("gid", ids[i]);
-                queryWrapper.eq("star", 1);
-                historyService.remove(queryWrapper);
+                queryWrapper.eq("star", 0);
+                if(!historyService.remove(queryWrapper)) {
+                    historyService.updateById(historyVo);
+                }
+                
+                
             }
             return ResultObj.DELETE_SUCCESS;
         }catch(Exception e) {

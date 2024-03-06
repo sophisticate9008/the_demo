@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wlj.sportgoods.user.mapper.UserGoodsMapper">
-
+    <select id="getRefoundApplymentByAccount" resultType="com.wlj.sportgoods.user.entity.UserGoods">
+        select * from user_goods where status = -1 and gid in (select id from goods where merchant = (select merchant from user where account = #{account}))
+    </select>  
 </mapper>

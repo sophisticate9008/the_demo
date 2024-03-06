@@ -1,6 +1,7 @@
 package com.wlj.sportgoods.sys.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -43,6 +44,7 @@ public class User implements Serializable {
     private String salt;
 
     private Integer available;
-
+    
+    private BigDecimal gold;
 
 }

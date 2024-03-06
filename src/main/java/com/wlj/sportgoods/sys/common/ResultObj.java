@@ -17,6 +17,14 @@ public class ResultObj {
     public static final ResultObj LOGIN_ERROR_CODE=new ResultObj(Constast.ERROR,"验证码错误");
     public static final ResultObj LOGIN_ERROR_BAN=new ResultObj(Constast.ERROR,"用户当前不可登录"); 
 
+    public static final ResultObj BUY_SUCCESS = new ResultObj(Constast.OK,"交易成功");
+    public static final ResultObj BUY_ERROR = new ResultObj(Constast.ERROR,"交易失败");
+
+    public static final ResultObj OP_SUCCESS = new ResultObj(Constast.OK,"操作成功");
+    public static final ResultObj OP_ERROR = new ResultObj(Constast.ERROR,"操作失败");
+
+    
+
     public static final ResultObj ADD_SUCCESS = new ResultObj(Constast.OK,"添加成功");
     public static final ResultObj ADD_ERROR = new ResultObj(Constast.ERROR,"添加失败");
 

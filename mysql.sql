@@ -59,15 +59,15 @@ CREATE TABLE goods (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE user_goods(
+    id INT AUTO_INCREMENT PRIMARY KEY,
     account VARCHAR(50),
     gid INT,
     num INT,
     finishTime TIMESTAMP DEFAULT NULL,
-    status int COMMENT '0未完成,也就是在购物车里. 1完成交易, -1退货',
+    status int COMMENT '0未完成,也就是在购物车里. 1完成交易, -1退货申请, 2退货成功 -2退货失败',
     cost DECIMAL(10, 2),
     FOREIGN KEY(account) REFERENCES User(account),
-    FOREIGN KEY(gid) REFERENCES goods(id),
-    PRIMARY KEY(account, gid)
+    FOREIGN KEY(gid) REFERENCES goods(id)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE comments(

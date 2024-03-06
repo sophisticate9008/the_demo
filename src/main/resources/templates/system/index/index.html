@@ -385,9 +385,11 @@
       loadData() {
         if (localStorage.getItem('loadVueData')) {
           const savedData = JSON.parse(localStorage.getItem('vueData'));
+          this.itemUrls = savedData["itemUrls"]
           savedData["openIframes"].forEach(item => {
             this.addIframe({ 'name': item });
           });
+          
           this.clickLabel(savedData["focusIframe"]);
           localStorage.removeItem('loadVueData');
         }
