@@ -32,31 +32,82 @@
       background-color: #a1a3a9;
       border-radius: 3px;
     }
+
     body {
       height: 100%;
-      background-color:  rgba(248, 248, 248, 0.548);
+      background-color: rgba(248, 248, 248, 0.548);
       position: relative;
     }
+
     .table-img {
       width: 50px;
       height: 50px;
     }
+
     #app {
       position: relative;
       display: flex;
       justify-content: center;
+
     }
+
     #table-container {
+      
       position: relative;
-      width: 90%;
+      width: 100%;
       height: 90%;
+    }
+
+    #args {
+      align-items: left;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+    #args * {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
     }
   </style>
 </head>
 <body>
   <div id="app">
+    <div id="args">
+      <label for="limit">每页数量</label>
+      <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+        <el-option value=10>10</el-option>
+        <el-option value=25>25</el-option>
+        <el-option value=50>50</el-option>
+        <el-option value=100>100</el-option>
+      </el-select>
+      <div class="block">
+        <span class="demonstration">选择时间</span>
+        <el-date-picker v-model="value2" type="datetimerange" :picker-options="pickerOptions" range-separator="至"
+         start-placeholder="开始日期" end-placeholder="结束日期" align="right">
+        </el-date-picker>
+      </div>
+      <label>删除选中</label>
+      <el-button @click="deleteSelection" icon="el-icon-delete" type="danger"> </el-button>
+    </div>
     <div id="table-container">
-      <el-table :data="dataList" @row-dblclick="jumpGoodDetail">
+      <el-table :data="dataList" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55">
+        </el-table-column>
         <el-table-column label="双击跳转">
           <template slot-scope="scope">
             <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.goodInfo.imagePath">
@@ -74,6 +125,9 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+       :total="total">
+      </el-pagination>
     </div>
 
   </div>
@@ -88,12 +142,108 @@
         currentPage: 1,
         limit: 10,
         startTime: new Date(0),
-        endTime: new Date()
+        endTime: new Date(),
+        ids: [],
+        multipleSelection: [],
+        pickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+        value2: '',
+      },
+      watch: {
+        value2() {
+          if(this.value2 == null) {
+            this.startTime = new Date(0);
+            this.endTime = new Date();
+          }else {
+            this.startTime = this.value2[0];
+            this.endTime = this.value2[1]; 
+          }
+          this.getData();
+        },
+        currentPage() {
+          this.getData();
+        },
       },
       mounted() {
         this.getData();
       },
       methods: {
+        deleteSelection() {
+     
+          this.$alert('操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              this.ids = []
+              this.multipleSelection.forEach(item => {
+                let index = this.dataList.indexOf(item);
+                if (index !== -1) {
+                  this.dataList.splice(index, 1);
+                }
+                this.ids.push(item.gid)
+              }) 
+              axios.post("/history/deleteHistory", {
+                ids: this.ids
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                  this.dataList.splice(index, 1);
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        toggleSelection(rows) {
+          if (rows) {
+            rows.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row);
+            });
+          } else {
+            this.$refs.multipleTable.clearSelection();
+          }
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+
         jumpGoodDetail(row, column, event) {
           var jsonData = {
             name: row.goodInfo.goodName + row.gid,
@@ -113,6 +263,7 @@
             startTime: this.startTime,
             endTime: this.endTime
           }).then(response => {
+            this.total = response.data.count;
             this.dataList = response.data.data;
             response.data.data.forEach(item => {
               axios.post("/goods/loadAllGoods", {
