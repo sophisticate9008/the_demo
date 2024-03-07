@@ -55,6 +55,7 @@ public class HistoryController {
         IPage<History> page = new Page<>(historyVo.getPage(), historyVo.getLimit());
         QueryWrapper<History> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", user.getAccount());
+        queryWrapper.eq(historyVo.getGid() != null, "gid", historyVo.getGid());
         queryWrapper.eq(historyVo.getShowHistory(),"available", 1);
         queryWrapper.eq(historyVo.getShowStar(), "star", 1);
         queryWrapper.ge(historyVo.getStartTime()!=null,"view_time", historyVo.getStartTime());

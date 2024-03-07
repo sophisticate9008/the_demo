@@ -1,8 +1,8 @@
 package com.wlj.sportgoods.user.controller;
 
-
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +21,14 @@ import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.UserService;
 import com.wlj.sportgoods.user.entity.Goods;
 import com.wlj.sportgoods.user.entity.UserGoods;
+import com.wlj.sportgoods.user.mapper.UserGoodsMapper;
 import com.wlj.sportgoods.user.service.GoodsService;
 import com.wlj.sportgoods.user.service.UserGoodsService;
+import com.wlj.sportgoods.user.vo.UserGoodsVo;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author wlj
@@ -35,15 +37,28 @@ import com.wlj.sportgoods.user.service.UserGoodsService;
 @RestController
 @RequestMapping("/userGoods")
 public class UserGoodsController {
-    
+
     @Autowired
     private UserGoodsService userGoodsService;
 
-    @Autowired 
+    @Autowired
     private GoodsService goodsService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserGoodsMapper userGoodsMapper;
+
+    @RequestMapping("cartLoad")
+    public DataGridView cartLoad() {
+        User user = (User) WebUtils.getSession().getAttribute("user");
+        QueryWrapper<UserGoods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("account", user.getAccount());
+        queryWrapper.eq("status", 0);
+        List<UserGoods> result = userGoodsService.list(queryWrapper);
+        return new DataGridView(result);
+    }
 
     @RequestMapping("cartAdd")
     public ResultObj cartAdd(@RequestBody UserGoods userGoods) {
@@ -56,48 +71,63 @@ public class UserGoodsController {
         queryWrapper.eq("account", userGoods.getAccount());
         queryWrapper.eq("gid", userGoods.getGid());
         UserGoods theUserGoods = userGoodsService.getOne(queryWrapper);
-        if(theUserGoods!= null) {
+        if (theUserGoods != null) {
             theUserGoods.setNum(theUserGoods.getNum() + userGoods.getNum());
             theUserGoods.setFinishTime(new Date());
-            if(userGoodsService.updateById(theUserGoods)) {
+            if (userGoodsService.updateById(theUserGoods)) {
                 return ResultObj.UPDATE_SUCCESS;
-            }else {
+            } else {
                 return ResultObj.UPDATE_ERROR;
-            }            
-        }else {
-            if(userGoodsService.save(userGoods)) {
+            }
+        } else {
+            if (userGoodsService.save(userGoods)) {
                 return ResultObj.ADD_SUCCESS;
-            }else {
+            } else {
                 return ResultObj.ADD_ERROR;
-            }            
+            }
         }
 
     }
+
     @RequestMapping("delete")
-    public ResultObj delete(@RequestBody UserGoods userGoods){
+    public ResultObj delete(@RequestBody UserGoodsVo userGoodsVo) {
         User user = (User) WebUtils.getSession().getAttribute("user");
-        userGoods.setAccount(user.getAccount());
-        if(userGoodsService.removeById(userGoods)) {
-            return ResultObj.DELETE_SUCCESS;
-        }else {
-            return ResultObj.DELETE_ERROR;
+        Integer[] ids = userGoodsVo.getIds();
+        userGoodsVo.setAccount(user.getAccount());
+
+        for (int i = 0; i < ids.length; i++) {
+            if (userGoodsService.getById(ids[i]).getId() != ids[i]) {
+                return ResultObj.EXCEED_PERMISSION;
+            }
+            userGoodsService.removeById(ids[i]);
         }
+        return ResultObj.DELETE_SUCCESS;
+
     }
 
     @Transactional
     @RequestMapping("buy")
     public ResultObj buy(@RequestBody UserGoods userGoods) {
         User user = (User) WebUtils.getSession().getAttribute("user");
+        if (userGoods.getId() != null) {
+            userGoods = userGoodsService.getById(userGoods.getId());
+            if (!userGoods.getAccount().equals(user.getAccount())) {
+                return ResultObj.EXCEED_PERMISSION;
+            }
+        }
         Goods goods = goodsService.getById(userGoods.getGid());
         BigDecimal total = goods.getPrice().multiply(BigDecimal.valueOf(userGoods.getNum()));
+        if (goods.getStock() < userGoods.getNum()) {
+            return ResultObj.Nostock;
+        }
         userGoods.setCost(total);
         userGoods.setFinishTime(new Date());
         userGoods.setStatus(1);
         user.setGold(user.getGold().subtract(total));
-        userService.save(user);
-        if(userGoodsService.save(userGoods)) {
+        userService.updateById(user);
+        if (userGoodsService.saveOrUpdate(userGoods)) {
             return ResultObj.BUY_SUCCESS;
-        }else {
+        } else {
             return ResultObj.BUY_ERROR;
         }
     }
@@ -108,13 +138,12 @@ public class UserGoodsController {
         User user = (User) WebUtils.getSession().getAttribute("user");
         userGoods.setAccount(user.getAccount());
         userGoods.setStatus(-1);
-        if(userGoodsService.updateById(userGoods)) {
+        if (userGoodsService.updateById(userGoods)) {
             return ResultObj.OP_SUCCESS;
-        }else {
+        } else {
             return ResultObj.OP_ERROR;
         }
     }
-
 
     @RequestMapping("getRefoundApply")
     public DataGridView getRefoundApply() {
@@ -124,34 +153,34 @@ public class UserGoodsController {
 
     @Transactional
     @RequestMapping("agreeRefound")
-    @RequiresPermissions({"customerService:agreeRefound"})
+    @RequiresPermissions({ "customerService:agreeRefound" })
     public ResultObj agreeRefound(@RequestBody UserGoods userGoods) {
 
         User user = (User) WebUtils.getSession().getAttribute("user");
         Goods goods = goodsService.getById(userGoods.getGid());
         UserGoods theUserGoods = userGoodsService.getById(userGoods.getId());
-        if(theUserGoods.getStatus() != 1) {
+        if (theUserGoods.getStatus() != 1) {
             return new ResultObj(Constast.OK, "已被其他客服处理");
         }
-        if(!goods.getMerchant().equals(user.getMerchant()) ) {
+        if (!goods.getMerchant().equals(user.getMerchant())) {
             return ResultObj.EXCEED_PERMISSION;
-        }else {
-            if(userGoods.getStatus() == 2) {
+        } else {
+            if (userGoods.getStatus() == 2) {
                 userGoods.setCost(theUserGoods.getCost());
                 user.setGold(user.getGold().add(userGoods.getCost()));
                 userService.updateById(user);
                 userGoods.setFinishTime(new Date());
-                if(userGoodsService.updateById(userGoods)) {
+                if (userGoodsService.updateById(userGoods)) {
                     return ResultObj.OP_SUCCESS;
-                }else {
+                } else {
                     return ResultObj.OP_ERROR;
                 }
-                
-            }else {
+
+            } else {
                 userGoods.setFinishTime(new Date());
-                if(userGoodsService.updateById(userGoods)) {
+                if (userGoodsService.updateById(userGoods)) {
                     return ResultObj.OP_SUCCESS;
-                }else {
+                } else {
                     return ResultObj.OP_ERROR;
                 }
             }
@@ -159,4 +188,3 @@ public class UserGoodsController {
     }
 
 }
-

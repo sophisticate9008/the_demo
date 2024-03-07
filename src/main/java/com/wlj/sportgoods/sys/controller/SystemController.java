@@ -63,4 +63,8 @@ public class SystemController {
     public String star() {
         return "goods/star";
     }
+    @RequestMapping("cart")
+    public String cart() {
+        return "goods/cart";
+    }
 }

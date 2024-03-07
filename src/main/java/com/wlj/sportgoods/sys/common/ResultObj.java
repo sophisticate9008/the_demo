@@ -12,10 +12,12 @@ public class ResultObj {
     private Integer code;
     private String msg;
 
-    public static final ResultObj LOGIN_SUCCESS=new ResultObj(Constast.OK,"登陆成功");
-    public static final ResultObj LOGIN_ERROR_PASS=new ResultObj(Constast.ERROR,"用户名或密码错误");
-    public static final ResultObj LOGIN_ERROR_CODE=new ResultObj(Constast.ERROR,"验证码错误");
-    public static final ResultObj LOGIN_ERROR_BAN=new ResultObj(Constast.ERROR,"用户当前不可登录"); 
+    public static final ResultObj Nostock = new ResultObj(Constast.ERROR,"商品无货");
+
+    public static final ResultObj LOGIN_SUCCESS= new ResultObj(Constast.OK,"登陆成功");
+    public static final ResultObj LOGIN_ERROR_PASS= new ResultObj(Constast.ERROR,"用户名或密码错误");
+    public static final ResultObj LOGIN_ERROR_CODE= new ResultObj(Constast.ERROR,"验证码错误");
+    public static final ResultObj LOGIN_ERROR_BAN= new ResultObj(Constast.ERROR,"用户当前不可登录"); 
 
     public static final ResultObj BUY_SUCCESS = new ResultObj(Constast.OK,"交易成功");
     public static final ResultObj BUY_ERROR = new ResultObj(Constast.ERROR,"交易失败");

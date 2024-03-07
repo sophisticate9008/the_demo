@@ -216,7 +216,7 @@
             gid: this.id,
             num: 1
           }).then(response => {
-            this.$alert(response.data.msg);
+            this.$message(response.data.msg);
           })
         },
         buy() {
