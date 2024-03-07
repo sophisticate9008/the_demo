@@ -23,4 +23,5 @@ public interface UserGoodsService extends IService<UserGoods> {
      */
     boolean hasBoughtGoods(String account, Integer gid);
     List<UserGoods> getRefoundApplymentByAccount(String account);
+    Integer getSalesByGid(Integer gid);
 }

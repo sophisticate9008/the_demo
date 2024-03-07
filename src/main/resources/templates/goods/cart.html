@@ -300,7 +300,7 @@
           return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
         },
         getData() {
-          axios.get("/userGoods/cartLoad").then(response => {
+          axios.post("/userGoods/load", { status: 0 }).then(response => {
             this.total = response.data.count;
             this.dataList = response.data.data;
             response.data.data.forEach(item => {

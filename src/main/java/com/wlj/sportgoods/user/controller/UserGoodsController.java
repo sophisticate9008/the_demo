@@ -21,7 +21,6 @@ import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.UserService;
 import com.wlj.sportgoods.user.entity.Goods;
 import com.wlj.sportgoods.user.entity.UserGoods;
-import com.wlj.sportgoods.user.mapper.UserGoodsMapper;
 import com.wlj.sportgoods.user.service.GoodsService;
 import com.wlj.sportgoods.user.service.UserGoodsService;
 import com.wlj.sportgoods.user.vo.UserGoodsVo;
@@ -47,15 +46,13 @@ public class UserGoodsController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserGoodsMapper userGoodsMapper;
 
-    @RequestMapping("cartLoad")
-    public DataGridView cartLoad() {
+    @RequestMapping("load")
+    public DataGridView load(@RequestBody UserGoods userGoods) {
         User user = (User) WebUtils.getSession().getAttribute("user");
         QueryWrapper<UserGoods> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", user.getAccount());
-        queryWrapper.eq("status", 0);
+        queryWrapper.eq("status", userGoods.getStatus());
         List<UserGoods> result = userGoodsService.list(queryWrapper);
         return new DataGridView(result);
     }
@@ -109,6 +106,7 @@ public class UserGoodsController {
     @RequestMapping("buy")
     public ResultObj buy(@RequestBody UserGoods userGoods) {
         User user = (User) WebUtils.getSession().getAttribute("user");
+        userGoods.setAccount(user.getAccount());
         if (userGoods.getId() != null) {
             userGoods = userGoodsService.getById(userGoods.getId());
             if (!userGoods.getAccount().equals(user.getAccount())) {
@@ -136,7 +134,10 @@ public class UserGoodsController {
     @RequestMapping("refound")
     public ResultObj refound(@RequestBody UserGoods userGoods) {
         User user = (User) WebUtils.getSession().getAttribute("user");
-        userGoods.setAccount(user.getAccount());
+        userGoods = userGoodsService.getById(userGoods.getId());
+        if(!userGoods.getAccount().equals(user.getAccount())) {
+            return ResultObj.EXCEED_PERMISSION;
+        }
         userGoods.setStatus(-1);
         if (userGoodsService.updateById(userGoods)) {
             return ResultObj.OP_SUCCESS;
@@ -186,5 +187,10 @@ public class UserGoodsController {
             }
         }
     }
+    @RequestMapping("getSales")
+    public DataGridView getSales(@RequestBody UserGoods userGoods) {
+        return new DataGridView(userGoodsService.getSalesByGid(userGoods.getGid()));
+    }
+
 
 }

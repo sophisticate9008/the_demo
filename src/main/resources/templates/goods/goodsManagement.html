@@ -338,8 +338,12 @@
             console.error('Promise 被拒绝:', error);
           });
         },
-        getSales() {
-          return 1;
+        getSales(item) {
+          axios.post("/userGoods/getSales", {
+            gid: item.id
+          }).then(response=> {
+            this.$set(item, 'sales', response.data.data ? response.data.data : 0);
+          })
         },
         getData() {
           const url = "/goods/loadAllGoods";
@@ -355,8 +359,8 @@
               this.total = response.data.count;
               this.dataList.forEach(item => {
                 this.$set(item, 'disabled', true);
-                this.$set(item, 'sales', this.getSales());
                 this.$set(item, 'tempTableData', this.transformedData(item));
+                this.getSales(item);
               })
             })
             .catch(error => {

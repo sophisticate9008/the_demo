@@ -1,8 +1,5 @@
 package com.wlj.sportgoods.user.vo;
 
-import java.time.LocalDateTime;
-
-import com.wlj.sportgoods.user.entity.History;
 import com.wlj.sportgoods.user.entity.UserGoods;
 
 import lombok.Data;

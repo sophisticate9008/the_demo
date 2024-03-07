@@ -39,4 +39,9 @@ public class UserGoodsServiceImpl extends ServiceImpl<UserGoodsMapper, UserGoods
         return this.getBaseMapper().getRefoundApplymentByAccount(account);
     }
 
+    @Override
+    public Integer getSalesByGid(Integer gid) {
+        return this.getBaseMapper().getSalesByGid(gid);
+    }
+
 }

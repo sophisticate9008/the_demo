@@ -19,4 +19,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface UserGoodsMapper extends BaseMapper<UserGoods> {
     List<UserGoods> getRefoundApplymentByAccount(@Param("account") String account);
+    Integer getSalesByGid(@Param("gid") Integer gid);
 }

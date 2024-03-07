@@ -4,4 +4,9 @@
     <select id="getRefoundApplymentByAccount" resultType="com.wlj.sportgoods.user.entity.UserGoods">
         select * from user_goods where status = -1 and gid in (select id from goods where merchant = (select merchant from user where account = #{account}))
     </select>  
+    <select id="getSalesByGid" resultType="Integer">
+        SELECT SUM(num) AS total_sales 
+        FROM user_goods 
+        WHERE gid = #{gid} AND status = 1;
+    </select>      
 </mapper>

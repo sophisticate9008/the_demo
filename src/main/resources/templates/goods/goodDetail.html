@@ -108,30 +108,65 @@
       position: absolute;
       right: 1%;
       margin: 0;
+
     }
-    .leftButton{
+
+    .leftButton {
       color: white;
       font-weight: bold;
       position: relative;
       height: 50px;
       background-color: rgb(245, 201, 82);
-      border-radius:25px 0 0 25px;
+      border-radius: 25px 0 0 25px;
       margin-right: 0;
       left: 3.5%;
+      border: 1px solid transparent;
+      /* 需要添加一个透明的边框 */
+      box-shadow: -4px 0 10px rgba(0, 0, 0, 0.5);
+      border-right: none;
     }
-    .rightButton{
+
+    .rightButton {
+      border: 1px solid transparent;
+      /* 需要添加一个透明的边框 */
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+      border-left: none;
       color: white;
       font-weight: bold;
       position: relative;
       right: 3.5%;
       height: 50px;
       background-color: rgb(245, 87, 69);
-      border-radius:0 25px  25px 0 ;
+      border-radius: 0 25px 25px 0;
       margin-left: 0;
-    
+
     }
+
     .star {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      color: rgb(70, 70, 70);
       font-size: 20px;
+    }
+
+    .selNum {
+      position: absolute;
+      top: 115%;
+      right: 8%;
+    }
+
+    .el-input-number__increase,
+    .el-input-number__decrease {
+      background-color: #eaecf100;
+      color: rgb(63, 63, 63);
+    }
+
+    .el-input__inner {
+      border: 1px solid transparent;
+      /* 需要添加一个透明的边框 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      color: rgb(70, 70, 70);
+      background-color: #eaecf100;
+      border-radius: 19px;
     }
   </style>
 </head>
@@ -155,12 +190,14 @@
         </div>
         <div id="buttons">
           <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
+
           <el-button class="leftButton" @click="addToCart">
             加入购物车
           </el-button>
           <el-button class="rightButton" @click="buy">
             立刻购买
           </el-button>
+          <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
 
 
         </div>
@@ -175,7 +212,8 @@
       data: {
         dataList: null,
         id: null,
-        starIcon: "el-icon-star-off"
+        starIcon: "el-icon-star-off",
+        num: 1
       },
       mounted() {
         this.getId();
@@ -188,22 +226,22 @@
             showStar: true,
             showHistory: false,
             gid: this.id
-          }).then(response=> {
-            if(response.data.count != 0) {
+          }).then(response => {
+            if (response.data.count != 0) {
               this.starIcon = "el-icon-star-on"
-            }else {
+            } else {
               this.starIcon = "el-icon-star-off"
             }
           })
         },
         star() {
-          if(this.starIcon == "el-icon-star-off") {
+          if (this.starIcon == "el-icon-star-off") {
             this.starIcon = "el-icon-star-on"
             axios.post("/history/updateHistory", {
               gid: this.id,
               star: 1
             })
-          }else {
+          } else {
             axios.post("/history/updateHistory", {
               gid: this.id,
               star: 0
@@ -214,13 +252,33 @@
         addToCart() {
           axios.post("/userGoods/cartAdd", {
             gid: this.id,
-            num: 1
+            num: this.num
           }).then(response => {
             this.$message(response.data.msg);
           })
         },
         buy() {
+          this.$alert('实际扣费以实时商品价格为准,是否结算？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/userGoods/buy", {
+                gid: this.id,
+                num: this.num
+              }).then(response => {
+                this.$message(response.data.msg);
+              }).catch(error => {
+                console.log(error)
+              });
 
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          })
         },
         addHistory() {
           axios.post("/history/updateHistory", {
@@ -241,7 +299,11 @@
           console.log(id)
         },
         getSales(item) {
-          return 1;
+          axios.post("/userGoods/getSales", {
+            gid: item.id
+          }).then(response=> {
+            this.$set(item, 'sales', response.data.data ? response.data.data : 0);
+          })
         },
         getData() {
           const url = "/goods/loadAllGoods";
@@ -254,8 +316,8 @@
               this.total = response.data.count;
               this.dataList.forEach(item => {
                 this.$set(item, 'disabled', true);
-                this.$set(item, 'sales', this.getSales(item));
                 this.$set(item, 'labelList', item.label.trim().split(/\s+/));
+                this.getSales(item);
               })
             })
             .catch(error => {

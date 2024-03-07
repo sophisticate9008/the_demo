@@ -43,6 +43,7 @@ shiro:
   - /sys/goodsShop*
   - /sys/goodDetail**
   - /goods/loadAllGoods*
+  - /userGoods/getSales
   - /resources/**
   login-url: /sys/toLogin
   log-out-url: /login/logout*
