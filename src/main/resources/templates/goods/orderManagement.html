@@ -18,7 +18,7 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background-color: #182d63;
+      background-color: rgb(57,61,73);
       border-radius: 3px;
     }
 
@@ -85,22 +85,46 @@
       display: flex;
       flex-direction: column;
     }
+    .el-radio-group {
+      display: flex;
+      flex-direction: row;
+    }
+    .el-table .new-row {
+      background: #f0f9eb; /* 初始渐变色 */
+      animation: gradientAnimation 3s forwards; /* 添加动画效果 */
+    }
+  
+    @keyframes gradientAnimation {
+      0% {
+        background: #f0f9eb;  /* 初始渐变色 */
+      }
+
+      100% {
+        background: white /* 结束渐变色 */
+      }
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <div id="args">
       <div class="block">
-        <span class="demonstration">选择时间</span>
+
         <el-date-picker v-model="value2" type="datetimerange" :picker-options="pickerOptions" range-separator="至"
          start-placeholder="开始日期" end-placeholder="结束日期" align="right">
         </el-date-picker>
       </div>
       <label>删除选中</label>
       <el-button @click="deleteSelection" icon="el-icon-delete" type="danger"> </el-button>
+      <el-radio-group v-model="status">
+        <el-radio :label=5>全部</el-radio>
+        <el-radio :label=-1>申请退货中</el-radio>
+        <el-radio :label=2>退货成功</el-radio>
+        <el-radio :label=1>交易成功</el-radio>
+      </el-radio-group>
     </div>
     <div id="table-container">
-      <el-table :data="tableData" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange" >
+      <el-table :data="tableData" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange"  :row-class-name="tableRowClassName">
         <el-table-column type="selection" width="55">
         </el-table-column>
         <el-table-column prop="id" label="id" width="100">
@@ -148,11 +172,12 @@
     var app = new Vue({
       el: "#app",
       data: {
-        count: 10,
+        oldCount: 0,
+        count: 8,
         tableData: null,
         loading: false,
         showAppend: true,
-        status: 1,
+        status: 5,
         dataList: [],
         startTime: new Date(0),
         endTime: new Date(),
@@ -188,6 +213,9 @@
         value2: '',
       },
       watch: {
+        status() {
+          this.getData();
+        },
         value2() {
           if (this.value2 == null) {
             this.startTime = new Date(0);
@@ -203,9 +231,19 @@
         this.getData();
       },
       methods: {
+        tableRowClassName({row, rowIndex}) {
+          if (rowIndex >= this.oldCount) {
+            return 'new-row';
+          }
+          return '';
+        },
         loadMore() {
           this.loading = true;
-          this.count += 10;
+          if(this.count < this.dataList.length) {
+            this.oldCount = this.count
+            this.count += 4;            
+          }
+
           setTimeout(() => {
             this.tableData = this.dataList.slice(0, Math.min(this.dataList.length, this.count));
             this.loading = false;
@@ -237,9 +275,9 @@
             if (action === 'confirm') {
               this.ids = []
               this.multipleSelection.forEach(item => {
-                let index = this.dataList.indexOf(item);
+                let index = this.tableData.indexOf(item);
                 if (index !== -1) {
-                  this.dataList.splice(index, 1);
+                  this.tableData.splice(index, 1);
                 }
                 this.ids.push(item.id)
               })

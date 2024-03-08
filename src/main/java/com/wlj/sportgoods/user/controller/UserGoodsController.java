@@ -55,6 +55,7 @@ public class UserGoodsController {
         queryWrapper.le(userGoodsVo.getEndTime() != null, "finishTime", userGoodsVo.getEndTime());
         queryWrapper.eq("account", user.getAccount());
         queryWrapper.eq(userGoodsVo.getStatus() != 5, "status", userGoodsVo.getStatus());
+        queryWrapper.ne(userGoodsVo.getStatus() == 5, "status", 0);
         queryWrapper.eq(userGoodsVo.getId() != null, "id", userGoodsVo.getId());
         queryWrapper.orderByDesc("finishTime");
         List<UserGoods> result = userGoodsService.list(queryWrapper);
