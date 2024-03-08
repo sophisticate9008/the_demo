@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <script src="/resources/js/vue-virtual-scroller.js"></script>
+  <link href="/resources/css/vue-virtual-scroller.css" rel="stylesheet">
+  <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #182d63;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    body {
+      height: 100%;
+      background-color: rgba(248, 248, 248, 0.548);
+      position: relative;
+    }
+
+    .table-img {
+      width: 50px;
+      height: 50px;
+    }
+
+    #app {
+      position: relative;
+      display: flex;
+      justify-content: center;
+
+    }
+
+    #table-container {
+
+      position: relative;
+      width: 100%;
+      height: 90%;
+    }
+
+    #args {
+      align-items: left;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+
+    #args * {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="args">
+      <div class="block">
+        <span class="demonstration">选择时间</span>
+        <el-date-picker v-model="value2" type="datetimerange" :picker-options="pickerOptions" range-separator="至"
+         start-placeholder="开始日期" end-placeholder="结束日期" align="right">
+        </el-date-picker>
+      </div>
+      <label>删除选中</label>
+      <el-button @click="deleteSelection" icon="el-icon-delete" type="danger"> </el-button>
+    </div>
+    <div id="table-container">
+      <el-table :data="tableData" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange" >
+        <el-table-column type="selection" width="55">
+        </el-table-column>
+        <el-table-column prop="id" label="id" width="100">
+        </el-table-column>
+        <el-table-column prop="goodInfo.id" label="gid" width="100">
+        </el-table-column>
+        <el-table-column label="双击跳转" width="100">
+          <template slot-scope="scope">
+            <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.goodInfo.imagePath">
+          </template>
+        </el-table-column>
+        <el-table-column prop="goodInfo.goodName" label="商品名字">
+        </el-table-column>
+        <el-table-column prop="goodInfo.introduction" label="简介">
+        </el-table-column>
+        <el-table-column prop="num" label="数量" width="100">
+        </el-table-column>
+        <el-table-column label="金额" width="100">
+          <template slot-scope="scope">
+            <span :style="'font-weight:bold; color:' + getStatusColorReverse(scope.row.status)"  >{{scope.row.cost}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新时间">
+          <template slot-scope="scope">
+            {{convertToBeijingTime(scope.row.finishTime)}}
+          </template>
+        </el-table-column>
+        <el-table-column label="状态">
+          <template slot-scope="scope">
+            <span :style="'font-weight:bold; color:' + getStatusColor(scope.row.status)"  >{{getStatusName(scope.row.status)}}</span>
+          </template>
+        </el-table-column>
+        <template slot="append">
+          <div v-if="showAppend" style="text-align: center; margin: 20px 0;">
+            <el-button v-loading="loading" @click="loadMore">加载更多</el-button>
+          </div>
+        </template>
+      </el-table>
+    </div>
+
+  </div>
+
+
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        count: 10,
+        tableData: null,
+        loading: false,
+        showAppend: true,
+        status: 1,
+        dataList: [],
+        startTime: new Date(0),
+        endTime: new Date(),
+        ids: [],
+        multipleSelection: [],
+        pickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+        value2: '',
+      },
+      watch: {
+        value2() {
+          if (this.value2 == null) {
+            this.startTime = new Date(0);
+            this.endTime = new Date();
+          } else {
+            this.startTime = this.value2[0];
+            this.endTime = this.value2[1];
+          }
+          this.getData();
+        },
+      },
+      mounted() {
+        this.getData();
+      },
+      methods: {
+        loadMore() {
+          this.loading = true;
+          this.count += 10;
+          setTimeout(() => {
+            this.tableData = this.dataList.slice(0, Math.min(this.dataList.length, this.count));
+            this.loading = false;
+          }, 1000);
+        },
+        getStatusColor(val) {
+          if(val == 1) {
+            return "rgb(22,160,133)"
+          }
+        },
+        getStatusColorReverse(val) {
+          if(val == 1) {
+            return "#F04C3D"
+          }
+        },
+        getStatusName(val) {
+          if(val == 1) {
+            return "交易完成"
+          }
+        },
+        deleteSelection() {
+          this.$alert('操作不可回退，且删除后不能退货，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              this.ids = []
+              this.multipleSelection.forEach(item => {
+                let index = this.dataList.indexOf(item);
+                if (index !== -1) {
+                  this.dataList.splice(index, 1);
+                }
+                this.ids.push(item.id)
+              })
+              axios.post("/userGoods/delete", {
+                ids: this.ids
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                  this.dataList.splice(index, 1);
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+
+        },
+        toggleSelection(rows) {
+          if (rows) {
+            rows.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row);
+            });
+          } else {
+            this.$refs.multipleTable.clearSelection();
+          }
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+        jumpGoodDetail(row, column, event) {
+          var jsonData = {
+            name: row.goodInfo.goodName + row.gid,
+            url: '/sys/goodDetail?id=' + row.gid
+          };
+          window.parent.postMessage(jsonData, '*');
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+        getData() {
+          axios.post("/userGoods/load", {
+            status: this.status,
+            startTime: this.startTime,
+            endTime: this.endTime
+          }).then(response => {
+            this.total = response.data.count;
+            this.dataList = response.data.data;
+            this.tableData = this.dataList.slice(0, Math.min(this.dataList.length, this.count));
+            response.data.data.forEach(item => {
+              axios.post("/goods/loadAllGoods", {
+                id: item.gid
+              }).then(response => {
+                this.$set(item, "goodInfo", response.data.data[0]);
+              })
+
+            })
+
+          })
+        }
+      },
+    });
+  </script>
+</body>
+</html>

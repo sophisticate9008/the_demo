@@ -48,11 +48,15 @@ public class UserGoodsController {
 
 
     @RequestMapping("load")
-    public DataGridView load(@RequestBody UserGoods userGoods) {
+    public DataGridView load(@RequestBody UserGoodsVo userGoodsVo) {
         User user = (User) WebUtils.getSession().getAttribute("user");
         QueryWrapper<UserGoods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ge(userGoodsVo.getStartTime() != null, "finishTime", userGoodsVo.getStartTime());
+        queryWrapper.le(userGoodsVo.getEndTime() != null, "finishTime", userGoodsVo.getEndTime());
         queryWrapper.eq("account", user.getAccount());
-        queryWrapper.eq("status", userGoods.getStatus());
+        queryWrapper.eq(userGoodsVo.getStatus() != 5, "status", userGoodsVo.getStatus());
+        queryWrapper.eq(userGoodsVo.getId() != null, "id", userGoodsVo.getId());
+        queryWrapper.orderByDesc("finishTime");
         List<UserGoods> result = userGoodsService.list(queryWrapper);
         return new DataGridView(result);
     }
@@ -93,7 +97,7 @@ public class UserGoodsController {
         userGoodsVo.setAccount(user.getAccount());
 
         for (int i = 0; i < ids.length; i++) {
-            if (userGoodsService.getById(ids[i]).getId() != ids[i]) {
+            if (!userGoodsService.getById(ids[i]).getAccount().equals(user.getAccount())) {
                 return ResultObj.EXCEED_PERMISSION;
             }
             userGoodsService.removeById(ids[i]);
@@ -124,6 +128,8 @@ public class UserGoodsController {
         user.setGold(user.getGold().subtract(total));
         userService.updateById(user);
         if (userGoodsService.saveOrUpdate(userGoods)) {
+            goods.setStock(goods.getStock() - userGoods.getNum());
+            goodsService.updateById(goods);
             return ResultObj.BUY_SUCCESS;
         } else {
             return ResultObj.BUY_ERROR;

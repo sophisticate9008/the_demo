@@ -369,7 +369,6 @@
       this.getInfoAll().then(() => {
         this.generateList(this.items, $('#sideBar ul'));
         this.generateIcons();
-        this.loadData();
         this.welcomeMessage = "你好，亲爱的" + this.userBasic.nickname
       });
 
@@ -408,6 +407,7 @@
         $theIframe.attr('src', $theIframe.attr('src'));
       },
       getInfoAll() {
+        this.loadData();
         return Promise.all([
           axios.get("/user/getMenu"),
           axios.get("/user/getMenuIcons"),
@@ -474,7 +474,6 @@
         for (let key in items) {
 
           if (items.hasOwnProperty(key)) {
-
             let $icon = $('<i class="bi bi-' + this.itemIcons[key] + '">');
             let $span = $('<span>' + key + '</span>');
             let $li = $('<li class="menu-father menu"></li>');

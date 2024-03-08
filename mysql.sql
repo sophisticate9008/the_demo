@@ -106,6 +106,10 @@ INSERT INTO Permission VALUES(7, "商品概览", "merchant:商品管理:商品�
 INSERT INTO Permission VALUES(8, "商品概览", "merchant:商品管理:添加商品:2", "/sys/addGoods", "plus", "menu");
 INSERT INTO Permission VALUES(9,"添加商品权限","merchant:addGoods", "", "", "permission");
 INSERT INTO Permission VALUES(10,"更新商品权限","merchant:updateGoods", "", "", "permission");
+INSERT INTO Permission VALUES(11, "同意退货权限", "customerService:agreeRefound", "", "", "permission");
+INSERT INTO Permission VALUES(12, "订单管理菜单", "user:订单管理:订单管理:1", "", "clipboard", "menu");
+INSERT INTO Permission VALUES(13, "订单概览", "user:订单管理:订单概览:2", "/sys/orderManagement", "clipboard-data", "menu");
+
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -117,3 +121,6 @@ INSERT INTO role_permission VALUES(2, 7);
 INSERT INTO role_permission VALUES(2, 8);
 INSERT INTO role_permission VALUES(2, 9);
 INSERT INTO role_permission VALUES(2, 10);
+INSERT INTO role_permission VALUES(3, 11);
+INSERT INTO role_permission VALUES(1, 12);
+INSERT INTO role_permission VALUES(1, 13);

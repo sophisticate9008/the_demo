@@ -67,4 +67,8 @@ public class SystemController {
     public String cart() {
         return "goods/cart";
     }
+    @RequestMapping("orderManagement")
+    public String order() {
+        return "goods/orderManagement";
+    }
 }
