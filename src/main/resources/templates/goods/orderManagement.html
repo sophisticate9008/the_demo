@@ -140,7 +140,7 @@
         </el-table-column>
         <el-table-column prop="goodInfo.introduction" label="简介">
         </el-table-column>
-        <el-table-column prop="num" label="数量" width="100">
+        <el-table-column prop="num" label="数量" width="50">
         </el-table-column>
         <el-table-column label="金额" width="100">
           <template slot-scope="scope">
@@ -155,6 +155,11 @@
         <el-table-column label="状态">
           <template slot-scope="scope">
             <span :style="'font-weight:bold; color:' + getStatusColor(scope.row.status)"  >{{getStatusName(scope.row.status)}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="退货" width="100">
+          <template slot-scope="scope">
+            <el-button @click="refound(scope.row)" :disabled="scope.row.status == 1 ? false : true" type="warning" icon="el-icon-sold-out" circle></el-button>
           </template>
         </el-table-column>
         <template slot="append">
@@ -212,6 +217,20 @@
         },
         value2: '',
       },
+      computed:{
+        costStyle() {
+          return {
+            'font-weight': 'bold',
+            'color': this.getStatusColorReverse(this.scope.row.status)
+          }
+        },
+        infoStyle() {
+          return {
+            'font-weight': 'bold',
+            'color': this.getStatusColorReverse(this.scope.row.status)
+          }
+        }
+      },
       watch: {
         status() {
           this.getData();
@@ -231,6 +250,14 @@
         this.getData();
       },
       methods: {
+        refound(row) {
+          row.status = -1;
+          axios.post("/userGoods/refound", {
+            id: row.id
+          }).then(response=> {
+            this.$message(response.data.msg);
+          })
+        },
         tableRowClassName({row, rowIndex}) {
           if (rowIndex >= this.oldCount) {
             return 'new-row';
@@ -252,16 +279,22 @@
         getStatusColor(val) {
           if(val == 1) {
             return "rgb(22,160,133)"
+          }else if(val == -1) {
+            return "rgb(230,162,60)"
           }
         },
         getStatusColorReverse(val) {
           if(val == 1) {
             return "#F04C3D"
+          }else if(val == -1) {
+            return "rgb(230,162,60)"
           }
         },
         getStatusName(val) {
           if(val == 1) {
             return "交易完成"
+          }else if(val == -1) {
+            return "申请退货"
           }
         },
         deleteSelection() {

@@ -71,4 +71,8 @@ public class SystemController {
     public String order() {
         return "goods/orderManagement";
     }
+    @RequestMapping("refoundManagement")
+    public String refoundManagement() {
+        return "goods/refoundManagement";
+    }
 }

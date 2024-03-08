@@ -22,6 +22,7 @@ import com.wlj.sportgoods.sys.common.AppFileUtils;
 import com.wlj.sportgoods.sys.common.DataGridView;
 import com.wlj.sportgoods.sys.common.PasswordUtils;
 import com.wlj.sportgoods.sys.common.ResultObj;
+import com.wlj.sportgoods.sys.common.WebUtils;
 import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.sys.service.RoleService;
 import com.wlj.sportgoods.sys.service.UserService;
@@ -55,13 +56,13 @@ public class UserController {
         }
     }
     @RequestMapping("createCustomerService")
-    @RequiresPermissions(value = {"merchant:createCustomerService", "*:*"},logical = Logical.AND)
+    @RequiresPermissions(value = {"merchant:createCustomerService", "*:*"},logical = Logical.OR)
     public ResultObj createCustomer(@RequestBody User user) {
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        if (activerUser.getUser().getType() == 2) {
+        User theUser = (User) WebUtils.getSession().getAttribute("user");
+        if (theUser.getType() == 2) {
             user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
-            user.setMerchant(activerUser.getUser().getAccount());
+            user.setMerchant(theUser.getAccount());
+            user.setType(3);
             if(!userService.register(user).equals(ResultObj.REGISTER_SUCCESS)) {
                 AppFileUtils.removeFileByPath(user.getAvatarpath());
             };
