@@ -277,17 +277,21 @@
           }, 1000);
         },
         getStatusColor(val) {
-          if(val == 1) {
+          if(val == 1 || val == 2) {
             return "rgb(22,160,133)"
           }else if(val == -1) {
             return "rgb(230,162,60)"
+          }else if(val == -2) {
+            return "#F04C3D"
           }
         },
         getStatusColorReverse(val) {
-          if(val == 1) {
+          if(val == 1 || val == -2) {
             return "#F04C3D"
           }else if(val == -1) {
             return "rgb(230,162,60)"
+          }else if(val == 2) {
+            return "rgb(22,160,133)"
           }
         },
         getStatusName(val) {
@@ -295,6 +299,10 @@
             return "交易完成"
           }else if(val == -1) {
             return "申请退货"
+          }else if( val == 2) {
+            return "退货成功"
+          }else if( val == -2) {
+            return "退货失败"
           }
         },
         deleteSelection() {

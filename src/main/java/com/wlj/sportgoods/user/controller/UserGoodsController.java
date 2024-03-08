@@ -159,15 +159,16 @@ public class UserGoodsController {
         return new DataGridView(userGoodsService.getRefoundApplymentByAccount(user.getAccount()));
     }
 
+    
+
     @Transactional
     @RequestMapping("agreeRefound")
     @RequiresPermissions({ "customerService:agreeRefound" })
     public ResultObj agreeRefound(@RequestBody UserGoods userGoods) {
-
         User user = (User) WebUtils.getSession().getAttribute("user");
-        Goods goods = goodsService.getById(userGoods.getGid());
         UserGoods theUserGoods = userGoodsService.getById(userGoods.getId());
-        if (theUserGoods.getStatus() != 1) {
+        Goods goods = goodsService.getById(theUserGoods.getGid());
+        if (theUserGoods.getStatus() != -1) {
             return new ResultObj(Constast.OK, "已被其他客服处理");
         }
         if (!goods.getMerchant().equals(user.getMerchant())) {
