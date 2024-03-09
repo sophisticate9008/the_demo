@@ -1,5 +1,6 @@
 package com.wlj.sportgoods.user.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +42,8 @@ public class GoodsController {
 
     @RequestMapping("loadAllGoods")
     public DataGridView loadAllGoods(@RequestBody GoodsVo goodsVo) {
+        List<Goods> allGoods = new ArrayList<>();
+
         if (!goodsVo.getShowInShop()) {
             Subject subject = SecurityUtils.getSubject();
             ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
@@ -49,7 +52,6 @@ public class GoodsController {
             }
         }
 
-        IPage<Goods> page = new Page<>(goodsVo.getPage(), goodsVo.getLimit());
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         queryWrapper.like(goodsVo.getGoodName() != null, "good_name", goodsVo.getGoodName());
         queryWrapper.eq(goodsVo.getId() != null, "id", goodsVo.getId());
@@ -57,17 +59,22 @@ public class GoodsController {
         queryWrapper.ne("merchant", "dereliction");
         queryWrapper.like(StringUtils.isNotBlank(goodsVo.getLabel()), "label", goodsVo.getLabel());
         queryWrapper.like(StringUtils.isNotBlank(goodsVo.getIntroduction()), "introduction", goodsVo.getIntroduction());
+
         if (!goodsVo.getShowInShop()) {
-            goodsService.page(page, queryWrapper);
-            return new DataGridView(page.getTotal(), page.getRecords());
+            queryWrapper.orderByDesc("id");
+            allGoods = goodsService.list(queryWrapper); // 获取满足条件的所有数据
         } else {
             queryWrapper.ne("available", 0);
-            goodsService.page(page, queryWrapper);
-            List<Goods> records = page.getRecords();
-            Collections.shuffle(records);
-            return new DataGridView(page.getTotal(), records);
+            allGoods = goodsService.list(queryWrapper); // 获取满足条件的所有数据
+            Collections.shuffle(allGoods); // 随机排序
         }
 
+        // 分页处理
+        int startIndex = (goodsVo.getPage() - 1) * goodsVo.getLimit();
+        int endIndex = Math.min(startIndex + goodsVo.getLimit(), allGoods.size());
+        List<Goods> paginatedGoods = allGoods.subList(startIndex, endIndex);
+
+        return new DataGridView((long) allGoods.size(), paginatedGoods);
     }
 
     @RequestMapping("addGoods")
