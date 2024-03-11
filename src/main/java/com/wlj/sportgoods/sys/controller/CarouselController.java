@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wlj.sportgoods.sys.common.AppFileUtils;
 import com.wlj.sportgoods.sys.common.DataGridView;
 import com.wlj.sportgoods.sys.common.ResultObj;
 import com.wlj.sportgoods.sys.entity.Carousel;
@@ -31,9 +32,12 @@ public class CarouselController {
     @RequestMapping("addCarousel")
     @RequiresPermissions({"*:*"})
     public ResultObj addCarousel(@RequestBody Carousel carousel) {
+        String newPath = AppFileUtils.renameFile(carousel.getImagePath());
+        carousel.setImagePath(newPath);
         if(carouselService.save(carousel)) {
             return ResultObj.ADD_SUCCESS;
         }else {
+            AppFileUtils.removeFileByPath(newPath);
             return ResultObj.ADD_ERROR;
         }
     }

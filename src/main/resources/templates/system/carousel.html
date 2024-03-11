@@ -6,7 +6,7 @@
   <title>Document</title>
   <script src="/resources/js/vue.min.js"></script>
   <script src="/resources/js/axios.min.js"></script>
-  <script src="/resources/js/lodash.min.js"></script>
+  <script src="/resources/js/jquery.min.js"></script>
   <link rel="stylesheet" href="/resources/css/element-ui.index.css">
   <script src="/resources/js/element-ui.index.js"></script>
   <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
@@ -15,6 +15,7 @@
     body {
       background-color: #47474742;
     }
+
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -34,15 +35,63 @@
       background-color: #a1a3a9;
       border-radius: 3px;
     }
+
+    .el-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .el-form>div {
+      width: 50%;
+      margin: auto;
+    }
+
+    .table-img {
+      width: 150px;
+      height: 150px;
+    }
+
   </style>
 </head>
 <body>
   <div id="app">
-    <el-table :data="tableData" border style="width: 100%">
-      <el-table-column prop="date" label="Date" width="180" />
-      <el-table-column prop="name" label="Name" width="180" />
-      <el-table-column prop="address" label="Address" />
-    </el-table>
+    <div>
+      <el-table :data="tableData" style="width: 80%;margin: auto">
+        <el-table-column label="image">
+          <template slot-scope="scope">
+            <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.imagePath">
+          </template>
+        </el-table-column>
+        <el-table-column prop="gid" label="gid" /></el-table-column>
+        <el-table-column label="操作" width="80">
+          <template slot-scope="scope">
+            <el-button icon="el-icon-delete" type="danger" circle @click="deleteCarousel(scope.row)">
+          </template>
+        </el-table-column>
+        <template slot="append">
+          <el-button type="text" @click="dialogFormVisible = true">新增轮播图</el-button>
+          <el-dialog title="新增轮播图" :visible.sync="dialogFormVisible">
+            <el-form :rules="rules" :model="form" ref="form">
+              <el-upload action="#" list-type="picture-card" :auto-upload="false" :limit="1" :on-change="saveFile">
+                <i slot="default" class="el-icon-plus"></i>
+                <div slot="file" slot-scope="{file}">
+                  <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+                </div>
+              </el-upload>
+              <el-form-item label="商品id" :label-width="formLabelWidth" prop="gid">
+                <el-input v-model="form.gid" type="number"></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="submitForm">确 定</el-button>
+            </div>
+          </el-dialog>
+        </template>
+      </el-table>
+    </div>
+
   </div>
 
 
@@ -51,22 +100,78 @@
     var app = new Vue({
       el: "#app",
       data: {
-        tableData: null
+        file: null,
+        tableData: null,
+        dialogFormVisible: false,
+        formLabelWidth: '100px',
+        form: {
+          gid: null,
+          imagePath: null
+        },
+        rules: {
+          imagePath: [{ required: true, message: '请输入图片', trigger: 'blur' }],
+          gid: [{ required: true, message: '请输入公告内容', trigger: 'blur' }],
+        }
       },
+
       mounted() {
         this.getData();
       },
       methods: {
+        deleteCarousel(item) {
+          axios.post("/carousel/deleteCarousel", {
+            id: item.id
+          }).then(response => {
+            this.$message(response.data.msg)
+            let index = this.tableData.indexOf(item);
+            if (index !== -1) {
+              this.tableData.splice(index, 1);
+            }
+          })
+        },
+        saveFile(file, fileList) {
+          this.file = file
+        },
+        submitForm() {
+          this.isregisterDisabled = true;
+          var formData = new FormData();
+          formData.append('mf', this.file.raw);
+          axios.post("/file/uploadFile", formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
+            }
+          }).then(response => {
+            this.form.imagePath = response.data.path;
+            this.addCarousel();
+          }).catch(error => {
+            this.$alert("请添加图片");
+          })
+        },
+        addCarousel() {
+          this.$refs.form.validate(valid => {
+            if (valid) {
+              axios.post("/carousel/addCarousel", this.form)
+                .then(response => {
+                  this.$message(response.data.msg);
+                  this.getData();
+                  window.location.href = window.location.href;
+                })
+            } else {
+              this.$message("请先补全");
+              return false;
+            }
+          });
+
+        },
         getData() {
           axios.get("/carousel/getCarousel")
-          .then(Response => {
-            this.tableData = Response.data.data
-          })
-            
-          
-        }
+            .then(response => {
+              this.tableData = response.data.data
+            })
+
+        },
       },
-      
+
     })
   </script>
 </body>
