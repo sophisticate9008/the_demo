@@ -48,25 +48,6 @@
 
     }
 
-    #args {
-      position: relative;
-      display: flex;
-      flex-direction: row;
-      width: 95%;
-      margin: auto;
-    }
-
-    #args label {
-      display: flex;
-      align-items: center;
-      /* 垂直居中 */
-      padding-left: 1%;
-    }
-
-    .arg.el-input {
-      width: 16.4%;
-    }
-
     .list-item img {
       display: block;
       width: 160px;
@@ -134,17 +115,99 @@
     .info-comments {
       font-size: 10px;
     }
+
+    #carousel-notice-args {
+      justify-content: center;
+      align-items: center;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+    }
+
+    #notice {
+      border-radius: 0.5%;
+      margin: 2.8%;
+      width: 23%;
+      height: 330px;
+      background-color: black;
+      background-color: rgba(248, 248, 248, 0.548);
+    }
+
+    #args {
+      background-color: #878787;
+      margin: 2.8%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 23%;
+      border-radius: 0.5%;
+      height: 330px;
+      background-color: rgba(248, 248, 248, 0.548);
+    }
+
+    #args * {
+      margin: 1.5%;
+    }
+
+    #notice {
+      overflow: scroll;
+    }
+
+    #notice * {
+      margin-top: 1.0%;
+      margin-left: 1.2%;
+      cursor: pointer;
+    }
+
+    #carousel {
+      border-radius: 0.5%;
+      background-color: aqua;
+      width: 50%;
+      height: 330px;
+
+    }
+
+    #args label {
+      margin-left: 4%;
+    }
+
+    .arg.el-input {
+      width: 94%;
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <div>
+    <div id="carousel-notice-args">
+      <div id="notice">
+        <div v-for="item in notices" @click="showNoticeContent(item.content)">
+          <el-tooltip class="item" effect="dark"
+           :content="convertToBeijingTime(item.createTime) + '  -  ' + convertToBeijingTime(item.endTime)"
+           placement="right">
+            <el-card shadow="hover">
+              <div>
+                <span>{{item.title}}</span>
+              </div>
+
+            </el-card>
+          </el-tooltip>
+
+
+        </div>
+      </div>
+      <el-carousel id="carousel">
+        <el-carousel-item v-for="item in 8" :key="item">
+          <h3 text="2xl" justify="center">{{ item }}</h3>
+        </el-carousel-item>
+      </el-carousel>
       <div id="args">
         <label for="limit">每页数量</label>
-        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
-          <el-option value=16>16</el-option>
-          <el-option value=32>32</el-option>
-        </el-select>
+        <el-radio-group class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-radio :label=16>16</el-radio>
+          <el-radio :label=32>32</el-radio>
+          <el-radio :label=64>64</el-radio>
+          <el-radio :label=128>128</el-radio>
+        </el-radio-group>
         <label for="goodName">商品名称</label>
         <el-input class="arg" type="text" id="goodName" v-model="goodName"></el-input>
         <label for="label">标签</label>
@@ -152,7 +215,10 @@
         <label for="merchant">商家名称</label>
         <el-input class="arg" type="text" id="merchant" v-model="merchant"></el-input>
       </div>
+
     </div>
+
+
     <div id="items-container">
 
       <div v-for="(item, index) in dataList" :key="item.id" class="list-item" @click="jumpGoodDetail(item)">
@@ -174,6 +240,7 @@
     var app = new Vue({
       el: '#app',
       data: {
+        notices: null,
         dataList: [],
         total: 0,
         currentPage: 1,
@@ -186,6 +253,7 @@
       },
       mounted() {
         this.getData();
+        this.getNotices();
       },
       watch: {
         // 监听分页或筛选条件的变化，重新获取数据
@@ -206,6 +274,15 @@
         }
       },
       methods: {
+        showNoticeContent(val) {
+          this.$alert(val)
+        },
+        getNotices() {
+          axios.get("/notice/getNotice")
+            .then(response => {
+              this.notices = response.data.data
+            })
+        },
         jumpGoodDetail(item) {
           var jsonData = {
             name: item.goodName + item.id,
@@ -220,8 +297,12 @@
             return item.imagePath;
           }
         },
-        getSales() {
-          return 1;
+        getSales(item) {
+          axios.post("/userGoods/getSales", {
+            gid: item.id
+          }).then(response => {
+            this.$set(item, 'sales', response.data.data ? response.data.data : 0);
+          })
         },
         getData() {
           const url = "/goods/loadAllGoods";
@@ -237,7 +318,7 @@
               this.dataList = response.data.data;
               this.total = response.data.count;
               this.dataList.forEach(item => {
-                this.$set(item, 'sales', this.getSales());
+                this.getSales(item);
               })
             })
             .catch(error => {
@@ -250,7 +331,12 @@
         handleLimitChange() {
           this.currentPage = 1; // Reset to first page when limit changes
           this.getData();
-        }
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
       }
     });
   </script>

@@ -43,8 +43,8 @@ CREATE TABLE notice (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    publisher VARCHAR(100) NOT NULL,
-    duration INT NOT NULL
+
+    end_time TIMESTAMP DEFAULT null
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE goods (
@@ -91,6 +91,25 @@ CREATE TABLE history(
     PRIMARY KEY(account, gid)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE TABLE carousel(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    image_path VARCHAR(255) DEFAULT NULL,
+    gid int
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE message(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(255) DEFAULT null,
+    merchant VARCHAR(255) DEFAULT null,
+    customerService VARCHAR(255) DEFAULT null,
+    have_read_user tinyint DEFAULT 0,
+    have_read_customerService tinyint DEFAULT 0,
+    image_path VARCHAR(255) DEFAULT NULL,
+    send_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    content VARCHAR(1000) DEFAULT NULL
+);
+
+
 INSERT INTO Role VALUES(1, "普通用户", "普通用户,拥有查看,购买,评论等权限", 1);
 INSERT INTO Role VALUES(2, "商家", "商家,拥有发布,修改,创建客服账号等权限", 1);
 INSERT INTO Role VALUES(3, "客服", "仅仅可以由商家在系统创建", 1);
@@ -105,13 +124,17 @@ INSERT INTO Permission VALUES(6, "商品管理菜单", "merchant:商品管理:�
 INSERT INTO Permission VALUES(7, "商品概览", "merchant:商品管理:商品概览:2", "/sys/goodsManagement", "bar-chart", "menu");
 INSERT INTO Permission VALUES(8, "商品概览", "merchant:商品管理:添加商品:2", "/sys/addGoods", "plus", "menu");
 INSERT INTO Permission VALUES(9,"添加商品权限","merchant:addGoods", "", "", "permission");
-INSERT INTO Permission VALUES(10,"更新商品权限","merchant:updateGoods", "", "", "permission");
+INSERT INTO Permission VALUES(10,"更新商品权限","merchant:updateGoods", "", "", "permission");z
 INSERT INTO Permission VALUES(11, "同意退货权限", "customerService:agreeRefound", "", "", "permission");
 INSERT INTO Permission VALUES(12, "订单管理菜单", "user:订单管理:订单管理:1", "", "clipboard", "menu");
 INSERT INTO Permission VALUES(13, "订单概览", "user:订单管理:订单概览:2", "/sys/orderManagement", "clipboard-data", "menu");
 INSERT INTO Permission VALUES(14, "同意退订权限", "customerService:agreeRefound", "", "", "permisssion");
 INSERT INTO Permission VALUES(15, "退订管理菜单", "customerService:退订管理:退订管理:1", "", "clipboard", "menu");
 INSERT INTO Permission VALUES(16, "退订概览", "customerService:退订管理:退订概览:2", "/sys/refoundManagement", "clipboard-data", "menu");
+INSERT INTO Permission VALUES(17, "管理员权限", "*:*", "", "", "permission");
+INSERT INTO Permission VALUES(18, "首页管理菜单", "*:首页管理:首页管理:1", "" , "house", "menu");
+INSERT INTO Permission VALUES(19, "首页管理菜单", "*:首页管理:轮播管理:2", "/sys/carousel" , "image", "menu");
+INSERT INTO Permission VALUES(20, "首页管理菜单", "*:首页管理:公告管理:2", "/sys/notice" , "megaphone", "menu");
 
 
 INSERT INTO role_permission VALUES(2, 1);
@@ -130,3 +153,7 @@ INSERT INTO role_permission VALUES(1, 13);
 INSERT INTO role_permission VALUES(3, 14);
 INSERT INTO role_permission VALUES(3, 15);
 INSERT INTO role_permission VALUES(3, 16);
+INSERT INTO role_permission VALUES(4, 17);
+INSERT INTO role_permission VALUES(4, 18);
+INSERT INTO role_permission VALUES(4, 19);
+INSERT INTO role_permission VALUES(4, 20);

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <el-table :data="tableData" border style="width: 100%">
+        <el-table-column prop="title" label="title"></el-table-column>
+        <el-table-column prop="content" label="content" /></el-table-column>
+        <el-table-column label="创建时间">
+          <template slot-scope="scope">
+            {{convertToBeijingTime(scope.row.createTime)}}
+          </template>
+        </el-table-column>
+        <el-table-column label="结束时间">
+          <template slot-scope="scope">
+            {{convertToBeijingTime(scope.row.endTime)}}
+          </template>
+        </el-table-column>
+        <template slot="append">
+          <el-button type="text" @click="dialogFormVisible = true">新增公告</el-button>
+          <el-dialog title="新增公告" :visible.sync="dialogFormVisible">
+            <el-form :rules="rules" :model="form" ref="form">
+              <el-form-item label="公告标题" :label-width="formLabelWidth" prop="title">
+                <el-input v-model="form.title"></el-input>
+              </el-form-item>
+              <el-form-item label="公告内容" :label-width="formLabelWidth" prop="content">
+                <el-input v-model="form.content"></el-input>
+              </el-form-item>
+              <el-form-item label="结束时间" :label-width="formLabelWidth" prop="endTime">
+                <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择日期时间">
+                </el-date-picker>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="addNotice">确 定</el-button>
+            </div>
+          </el-dialog>
+        </template>
+      </el-table>
+    </div>
+
+  </div>
+
+
+  <script>
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        tableData: null,
+        dialogFormVisible: false,
+        formLabelWidth: '100px',
+        form: {
+          title: null,
+          content: null,
+          endTime: null,
+          createTime: new Date()
+        },
+        rules: {
+          title: [{ required: true, message: '请输入公告标题', trigger: 'blur' }],
+          content: [{ required: true, message: '请输入公告内容', trigger: 'blur' }],
+          endTime: [{ required: true, message: '请输入结束时间', trigger: 'blur' }],
+        }
+      },
+      mounted() {
+        this.getData();
+      },
+      methods: {
+        clearForm() {
+          this.form.title = null,
+            this.form.content = null,
+            this.form.endTime = null,
+            this.form.createTime = null
+        },
+        addNotice() {
+          this.$refs.form.validate(valid => {
+            if (valid) {
+              axios.post("/notice/addNotice", this.form)
+                .then(response => {
+                  this.$message(response.data.msg);
+                  this.getData();
+                  this.clearForm();
+                })
+            } else {
+              this.$message("请先补全");
+              return false;
+            }
+          });
+
+        },
+        getData() {
+          axios.get("/notice/getNotice")
+            .then(response => {
+              this.tableData = response.data.data
+            })
+
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+      },
+
+    })
+  </script>
+</body>
+</html>

@@ -38,14 +38,35 @@
 </head>
 <body>
   <div id="app">
-
+    <el-table :data="tableData" border style="width: 100%">
+      <el-table-column prop="date" label="Date" width="180" />
+      <el-table-column prop="name" label="Name" width="180" />
+      <el-table-column prop="address" label="Address" />
+    </el-table>
   </div>
 
 
   <script>
+
     var app = new Vue({
       el: "#app",
-      data: {}
+      data: {
+        tableData: null
+      },
+      mounted() {
+        this.getData();
+      },
+      methods: {
+        getData() {
+          axios.get("/carousel/getCarousel")
+          .then(Response => {
+            this.tableData = Response.data.data
+          })
+            
+          
+        }
+      },
+      
     })
   </script>
 </body>

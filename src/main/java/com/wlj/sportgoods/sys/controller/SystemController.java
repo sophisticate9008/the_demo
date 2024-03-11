@@ -75,4 +75,12 @@ public class SystemController {
     public String refoundManagement() {
         return "goods/refoundManagement";
     }
+    @RequestMapping("notice")
+    public String notice() {
+        return "system/notice";
+    }
+    @RequestMapping("carousel")
+    public String carousel() {
+        return "system/carousel";
+    }
 }
