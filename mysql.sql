@@ -135,7 +135,9 @@ INSERT INTO Permission VALUES(17, "管理员权限", "*:*", "", "", "permission"
 INSERT INTO Permission VALUES(18, "首页管理菜单", "*:首页管理:首页管理:1", "" , "house", "menu");
 INSERT INTO Permission VALUES(19, "首页管理菜单", "*:首页管理:轮播管理:2", "/sys/carousel" , "image", "menu");
 INSERT INTO Permission VALUES(20, "首页管理菜单", "*:首页管理:公告管理:2", "/sys/notice" , "megaphone", "menu");
-
+INSERT INTO Permission VALUES(21, "审核功能", "*:审核功能:审核功能:1", "" , "toggles", "menu");
+INSERT INTO Permission VALUES(22, "审核功能", "*:审核功能:人员审核:2", "/sys/userCheck", "person-check", "menu");
+INSERT INTO Permission VALUES(23, "审核功能", "*:审核功能:商品审核:2", "/sys/goodCheck", "patch-check", "menu");
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -157,3 +159,6 @@ INSERT INTO role_permission VALUES(4, 17);
 INSERT INTO role_permission VALUES(4, 18);
 INSERT INTO role_permission VALUES(4, 19);
 INSERT INTO role_permission VALUES(4, 20);
+INSERT INTO role_permission VALUES(4, 21);
+INSERT INTO role_permission VALUES(4, 22);
+INSERT INTO role_permission VALUES(4, 23);

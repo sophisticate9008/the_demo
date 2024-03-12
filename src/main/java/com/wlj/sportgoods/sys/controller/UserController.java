@@ -56,7 +56,7 @@ public class UserController {
         }
     }
     @RequestMapping("createCustomerService")
-    @RequiresPermissions(value = {"merchant:createCustomerService", "*:*"},logical = Logical.OR)
+    @RequiresPermissions(value = {"merchant:createCustomerService"},logical = Logical.OR)
     public ResultObj createCustomer(@RequestBody User user) {
         User theUser = (User) WebUtils.getSession().getAttribute("user");
         if (theUser.getType() == 2) {
@@ -184,21 +184,32 @@ public class UserController {
     public DataGridView getAllUser(@RequestBody UserVo userVo) {
         IPage<User> page = new Page<>(userVo.getPage(), userVo.getLimit());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-
+        queryWrapper.ne("account", "dereliction");
+        queryWrapper.ne("type", "4");
         queryWrapper.like(StringUtils.isNotBlank(userVo.getAccount()), "account", userVo.getAccount());
-        queryWrapper.like("available", userVo.getAvailable());
+        queryWrapper.eq(userVo.getAvailable()!= 5, "available", userVo.getAvailable());
         userService.page(page, queryWrapper);
         return new DataGridView(page.getTotal(), page.getRecords());
     }
     @RequestMapping("userManagement")
     @RequiresPermissions({"*:*"})
     public ResultObj userManagement(@RequestBody UserVo userVo) {
+        if(userVo.getDelete()) {
+            if(userService.removeById(userVo)) {
+                return ResultObj.DELETE_SUCCESS;
+            }else {
+                return ResultObj.DELETE_ERROR;
+            }
+        }
         if(userService.updateById(userVo)) {
             return ResultObj.UPDATE_SUCCESS;
         }else {
             return ResultObj.UPDATE_ERROR;
         }
     }
+
+
+
 
 }
 

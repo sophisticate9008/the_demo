@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagination Example</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <style>
+    /* Add your custom li styles here */
+    body {
+      height: 100%;
+      background-color: #47474742;
+    }
+
+    .list-item {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      padding: 8px;
+      margin: 4px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      align-items: center;
+      width: 48%;
+    }
+
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    .list-item img {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    #button-container {
+      display: block;
+      position: absolute;
+      right: 1%;
+    }
+
+    #button-container button {
+      padding: 12px 12px;
+      width: 35px;
+      height: 35px;
+
+      position: relative;
+    }
+
+    i {
+      display: block;
+      position: relative;
+      left: -25%;
+    }
+
+    #items-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .el-radio-group {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <div id="args">
+        <label for="limit">每页数量</label>
+        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-option value=10>10</el-option>
+          <el-option value=20>20</el-option>
+        </el-select>
+        <label for="account">账户</label>
+        <el-input class="arg" type="text" id="account" v-model="account"></el-input>
+        <label for="nickname">昵称</label>
+        <el-input class="arg" type="text" id="nickname" v-model="nickname"></el-input>
+        <el-radio-group v-model="available">
+          <el-radio :label=5>全部</el-radio>
+          <el-radio :label=0>禁止</el-radio>
+          <el-radio :label=1>可用</el-radio>
+        </el-radio-group>
+      </div>
+    </div>
+    <div id="items-container">
+      <div v-for="item in dataList" :key="item.account" class="list-item">
+        <img :src="'/file/showImageByPath?path=' + item.avatarpath">
+        <span> &nbsp; &nbsp; &nbsp;账户:{{ item.account}} &nbsp; &nbsp; &nbsp; 昵称: {{ item.nickname}} &nbsp; &nbsp; &nbsp;
+          类型: {{getTypeName(item.type)}}
+        </span>
+        <div id="button-container">
+          <el-button :type="item.available === 1 ? 'success' : 'warning'" @click="banUser($event,item)"
+           :icon="item.available === 1 ? 'el-icon-open' : 'el-icon-turn-off'">
+          </el-button>
+          <el-button type="danger" icon="el-icon-delete" @click="deleteUser(item)"></el-button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+     :total="total">
+    </el-pagination>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        available: 5,
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 10,
+        account: '', // 新增账户筛选条件
+        nickname: '' // 新增昵称筛选条件
+      },
+      mounted() {
+        this.getData();
+      },
+      watch: {
+        available() {
+          this.getData();
+        },
+        // 监听分页或筛选条件的变化，重新获取数据
+        currentPage() {
+          this.getData();
+        },
+        account() {
+          this.currentPage = 1; // Reset to first page when account filter changes
+          this.getData();
+        },
+        nickname() {
+          this.currentPage = 1; // Reset to first page when nickname filter changes
+          this.getData();
+        }
+      },
+      methods: {
+        getTypeName(val) {
+          switch (val) {
+            case 1:
+              return "用户";
+            case 2:
+              return "商家";
+            case 3:
+              return "客服";
+          }
+        },
+        banUser(event, item) {
+          let button = event.target;
+          if (item.available == 1) {
+            item.available = 0;
+            axios.post("/user/userManagement", {
+              available: 0,
+              account: item.account
+            })
+          } else {
+            item.available = 1
+            axios.post("/user/userManagement", {
+              available: 1,
+              account: item.account
+            })
+          }
+        },
+        deleteUser(item) {
+          this.$alert('删除后操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/user/userManagement", {
+                delete: true,
+                account: item.account
+              })
+                .then(response => {
+                  let index = this.dataList.indexOf(item);
+                  if (index != -1) {
+                    this.dataList.splice(index, 1);
+                  }
+                  this.$message(response.data.msg);
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        },
+        getData() {
+          const url = "/user/getAllUser";
+          axios.post(url, {
+            available: this.available,
+            page: this.currentPage,
+            limit: parseInt(this.limit),
+            account: this.account,
+            nickname: this.nickname
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

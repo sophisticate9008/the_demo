@@ -56,7 +56,7 @@ public class GoodsController {
         queryWrapper.like(goodsVo.getGoodName() != null, "good_name", goodsVo.getGoodName());
         queryWrapper.eq(goodsVo.getId() != null, "id", goodsVo.getId());
         queryWrapper.eq(StringUtils.isNotBlank(goodsVo.getMerchant()), "merchant", goodsVo.getMerchant());
-        queryWrapper.ne("merchant", "dereliction");
+        queryWrapper.ne(!goodsVo.getIgnoreDereliction(), "merchant", "dereliction");
         queryWrapper.like(StringUtils.isNotBlank(goodsVo.getLabel()), "label", goodsVo.getLabel());
         queryWrapper.like(StringUtils.isNotBlank(goodsVo.getIntroduction()), "introduction", goodsVo.getIntroduction());
 

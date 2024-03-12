@@ -83,4 +83,12 @@ public class SystemController {
     public String carousel() {
         return "system/carousel";
     }
+    @RequestMapping("userCheck")
+    public String userCheck() {
+        return "system/userCheck";
+    }
+    @RequestMapping("goodCheck")
+    public String goodCheck() {
+        return "system/goodCheck";
+    }
 }
