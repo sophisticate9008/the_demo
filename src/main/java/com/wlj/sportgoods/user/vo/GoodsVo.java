@@ -15,4 +15,5 @@ public class GoodsVo extends Goods{
     private Boolean delete = false;
     private Boolean showInShop = false;
     private Boolean ignoreDereliction = false;
+    private Boolean isManage = false;
 }

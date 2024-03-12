@@ -53,6 +53,7 @@ public class GoodsController {
         }
 
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+        
         queryWrapper.like(goodsVo.getGoodName() != null, "good_name", goodsVo.getGoodName());
         queryWrapper.eq(goodsVo.getId() != null, "id", goodsVo.getId());
         queryWrapper.eq(StringUtils.isNotBlank(goodsVo.getMerchant()), "merchant", goodsVo.getMerchant());
@@ -61,6 +62,7 @@ public class GoodsController {
         queryWrapper.like(StringUtils.isNotBlank(goodsVo.getIntroduction()), "introduction", goodsVo.getIntroduction());
 
         if (!goodsVo.getShowInShop()) {
+            queryWrapper.eq(goodsVo.getIsManage() && goodsVo.getAvailable() != 5, "available", goodsVo.getAvailable());
             queryWrapper.orderByDesc("id");
             allGoods = goodsService.list(queryWrapper); // 获取满足条件的所有数据
         } else {

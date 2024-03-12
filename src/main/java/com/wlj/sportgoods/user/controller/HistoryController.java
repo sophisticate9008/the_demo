@@ -38,7 +38,9 @@ public class HistoryController {
     @RequestMapping("updateHistory") 
     public ResultObj addHistory(@RequestBody History history) {
         User user = (User) WebUtils.getSession().getAttribute("user");
-
+        if(user.getType() == 4) {
+            return ResultObj.UPDATE_SUCCESS;
+        }
         history.setViewTime(new Date());
         history.setAccount(user.getAccount());
         history.setAvailable(1);

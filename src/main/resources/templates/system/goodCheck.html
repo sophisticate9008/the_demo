@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagination Example</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <script src="/resources/js/lodash.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <style>
+    /* Add your custom li styles here */
+    body{
+      height: 100%;
+      background-color: #47474742;
+      position: relative;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    .list-item {
+      position: relative;
+      display: flex;
+      flex-direction: row-reverse;
+      padding: 8px;
+      margin: 4px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      align-items: center;
+      width: 48%;
+    }
+
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #args label {
+      display: flex;
+      align-items: center;
+      /* 垂直居中 */
+      padding-left: 1%;
+    }
+
+    .arg.el-input {
+      width: 16.4%;
+    }
+
+    .list-item img {
+      display: block;
+      width: 235px;
+      height: 235px;
+      object-fit: fill;
+      cursor: pointer;
+    }
+
+    #button-container {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      justify-content: space-between;
+      right: 2.5%;
+      height: 90%;
+    }
+
+    #button-container button {
+      padding: 12px 12px;
+      width: 35px;
+      height: 35px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    i {
+      display: block;
+      position: relative;
+      left: -25%;
+    }
+
+    #items-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .el-pagination__jump {
+      color: white;
+    }
+
+    #picture-cropper {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      z-index: 10;
+    }
+    .el-radio-group {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
+    <div>
+      <div id="args">
+        <label for="limit">每页数量</label>
+        <el-select class="arg" id="limit" v-model="limit" @change="handleLimitChange">
+          <el-option value=10>10</el-option>
+          <el-option value=20>20</el-option>
+        </el-select>
+        <label for="goodName">商品名称</label>
+        <el-input class="arg" type="text" id="goodName" v-model="goodName"></el-input>
+        <label for="label">标签</label>
+        <el-input class="arg" type="text" id="label" v-model="label"></el-input>
+        <el-radio-group v-model="available">
+          <el-radio :label=5>全部</el-radio>
+          <el-radio :label=0>禁止</el-radio>
+          <el-radio :label=1>可用</el-radio>
+        </el-radio-group>
+      </div>
+    </div>
+    <div id="items-container">
+      <div v-for="(item, index) in dataList" :key="item.id" class="list-item">
+
+        <el-table :data="item.tempTableData" :show-header="false" size="small" max-height="240px">
+          <el-table-column prop="property" width="80px">
+          </el-table-column>
+          <el-table-column prop="value" width="320px">
+            <!-- 使用作用域插槽来自定义每一列的内容 -->
+            <template slot-scope="scope">
+              <span v-if="item.disabled">{{scope.row.value}}</span>
+              <el-input size="mini" v-if="!item.disabled && scope.row.property !== '商品销量'"
+               v-model="scope.row.value"></el-input>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <label :for="'goodImage' + item.id">
+          <img :src="getIntactImagePath(item)" alt="图片">
+        </label>
+        <div id="button-container">
+          <el-button :type="item.available === 1 ? 'success' : 'warning'" @click="banGoods($event,item)"
+           :icon="item.available === 1 ? 'el-icon-open' : 'el-icon-turn-off'">
+          </el-button>
+
+          <el-button type="danger" icon="el-icon-delete" @click="deletegood(item, index)"></el-button>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
+     :total="total">
+    </el-pagination>
+  </div>
+
+  <script>
+    function getCropPic(data) {
+      var uuid = generateUUID();
+      app.useCropper = false;
+      if (data == '') {
+        return;
+      }
+      app.focusItem["goodImageFile"] = new File([data], uuid + '.jpg', { type: 'image/*' });
+      app.focusItem.imagePath = URL.createObjectURL(app.focusItem["goodImageFile"]);
+    }
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
+      el: '#app',
+      data: {
+        available:5,
+        useCropper: false,
+        focusItem: null,
+        disabledEdit: false,
+        dataList: [],
+        total: 0,
+        currentPage: 1,
+        limit: 10,
+        goodName: '',
+        label: '',
+        reflexData: {
+          "goodName": "商品名称",
+          "label": "商品标签",
+          "introduction": "商品介绍",
+          "price": "商品价格",
+          "stock": "商品库存",
+          "merchant": "商家账户"
+        },
+        form: null
+
+      },
+      mounted() {
+        this.getData();
+      },
+      watch: {
+        available() {
+          this.getData();
+        },
+        // 监听分页或筛选条件的变化，重新获取数据
+        currentPage() {
+          this.getData();
+        },
+        goodName() {
+          this.currentPage = 1; // Reset to first page when goodName filter changes
+          this.getData();
+        },
+        label() {
+          this.currentPage = 1; // Reset to first page when label filter changes
+          this.getData();
+        }
+      },
+      methods: {
+        getIntactImagePath(item) {
+          if (item.imagePath.indexOf("blob") == -1) {
+            return '/file/showImageByPath?path=' + item.imagePath;
+          } else {
+            return item.imagePath;
+          }
+        },
+
+
+
+        transformedData(item) {
+
+          var tmpItem = item;
+          var theList = [];
+          for (var tmp in tmpItem) {
+            if (tmp in this.reflexData) {
+              theList.push({ "property": this.reflexData[tmp], "value": tmpItem[tmp.toString()] })
+            }
+          }
+          return theList;
+
+        },
+        banGoods(event, item) {
+          let button = event.target;
+          if (item.available == 1) {
+            item.available = 0;
+            axios.post("/goods/updateGoods", {
+              available: 0,
+              id: item.id
+            })
+          } else {
+            item.available = 1
+            axios.post("/goods/updateGoods", {
+              available: 1,
+              id: item.id
+            })
+          }
+        },
+        deletegood(item, index) {
+          this.$alert('删除后操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/goods/updateGoods", {
+                delete: true,
+                id: item.id
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                  this.dataList.splice(index, 1);
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        },
+        getData() {
+          const url = "/goods/loadAllGoods";
+          axios.post(url, {
+            isManage: true,
+            available: this.available,
+            page: this.currentPage,
+            limit: parseInt(this.limit),
+            goodName: this.goodName,
+            label: this.label
+          })
+            .then(response => {
+              this.dataList = response.data.data;
+              this.total = response.data.count;
+              this.dataList.forEach(item => {
+                this.$set(item, 'disabled', true);
+                this.$set(item, 'tempTableData', this.transformedData(item));
+              })
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        },
+        handleCurrentChange(page) {
+          this.currentPage = page;
+        },
+        handleLimitChange() {
+          this.currentPage = 1; // Reset to first page when limit changes
+          this.getData();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
