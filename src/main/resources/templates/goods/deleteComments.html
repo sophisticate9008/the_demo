@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    .comment-container {
+      height: min-content;
+      max-height: 95vh;
+
+      overflow: auto;
+    }
+
+    #comments {
+      background-color: white;
+      position: relative;
+      top: 5%;
+      width: 80%;
+
+      margin: auto auto;
+      border-radius: 0.5%;
+    }
+
+    .user-info {
+      position: relative;
+      display: flex;
+      align-items: center;
+      /* 上下居中 */
+      font-weight: bold;
+    }
+
+    .comment-content {
+      position: relative;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .comments-pics {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .comments-pics * {
+      margin: 5px;
+    }
+
+    .create-time {
+      position: absolute;
+      right: 1%;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .reply-button {
+      position: absolute;
+      right: 15%;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="comments">
+      <div class="comment-container" v-infinite-scroll="load" style="overflow:auto">
+        <el-card v-for="item in commentsShow">
+          <div class="user-info">
+            <el-avatar icon="el-icon-user-solid" :size="25"></el-avatar>
+            <span>&nbsp; {{item.nickname}}</span>
+            <el-rate v-model="item.star" disabled show-score text-color="#ff9900">
+            </el-rate>
+            <el-button class="reply-button" size="mini" @click="dialogFormVisible = true; deleteComment(item)"> 删除</el-button>
+            <span class="create-time">{{convertToBeijingTime(item.createTime)}}</span>
+          </div>
+
+          <div class="comment-content">
+            <span>{{item.content}} </span>
+            <div class="comments-pics">
+              <el-image preview-src-list shape="square" fit="contain" style=" height: 150px" v-for="pic in item.imgList"
+               v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic"></el-image>
+            </div>
+
+          </div>
+        </el-card>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        commentsShow: [],
+        comments: [],
+        count: 10,
+        form: {
+
+        },
+      },
+      mounted() {
+        this.getComments();
+
+      },
+      watch: {
+
+      },
+      methods: {
+        load() {
+          console.log("load")
+          setTimeout(() => {
+            this.count += 3
+            this.commentsShow = this.comments.slice(0, Math.min(this.comments.length, this.count));
+          }, 500)
+        },
+        getComments() {
+          axios.post("/comments/loadAllComment", {
+            showMyComments: true
+          }).then(response => {
+            this.comments = response.data.data;
+            this.comments.forEach(item => {
+              this.$set(item, "imgList", item.imagePath.split(";"));
+            });
+            this.load();
+          })
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+        deleteComment(item) {
+          this.$alert('操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/comments/deleteComment", {
+                id: item.id
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                  if (response.data.code == 200) {
+                    let index = this.comments.indexOf(item)
+                    this.comments.splice(index, 1);
+                    index = this.commentsShow.indexOf(item)
+                    this.commentsShow.splice(index, 1);
+                  }
+
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        }
+      },
+    })
+  </script>
+</body>
+</html>

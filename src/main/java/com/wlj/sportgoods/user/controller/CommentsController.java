@@ -109,7 +109,7 @@ public class CommentsController {
     public ResultObj deleteComment(@RequestBody CommentsVo commentsVo) {
         User user = (User) WebUtils.getSession().getAttribute("user");
         Comments thComments = commentsService.getById(commentsVo.getId());
-        if(thComments.getAccount() != user.getAccount() && user.getType() != 4) {
+        if(!thComments.getAccount().equals(user.getAccount()) && user.getType() != 4) {
             return ResultObj.EXCEED_PERMISSION;
         }else {
             commentsService.removeById(commentsVo.getId());

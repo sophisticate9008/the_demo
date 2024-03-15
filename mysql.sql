@@ -138,7 +138,8 @@ INSERT INTO Permission VALUES(21, "审核功能", "*:审核功能:审核功能:1
 INSERT INTO Permission VALUES(22, "审核功能", "*:审核功能:人员审核:2", "/sys/userCheck", "person-check", "menu");
 INSERT INTO Permission VALUES(23, "审核功能", "*:审核功能:商品审核:2", "/sys/goodCheck", "patch-check", "menu");
 INSERT INTO Permission VALUES(24, "删除评论权限", "user:deleteComment", "", "", "permission");
-
+INSERT INTO Permission VALUES(25, "评价管理", "user:评价管理:评价管理:1", "", "chat-left-text", "menu");
+INSERT INTO Permission VALUES(26, "评价管理", "user:评价管理:删除评价:2", "/sys/deleteComments", "x", "menu");
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -165,4 +166,5 @@ INSERT INTO role_permission VALUES(4, 22);
 INSERT INTO role_permission VALUES(4, 23);
 INSERT INTO role_permission VALUES(1, 24);
 INSERT INTO role_permission VALUES(3, 24);
-INSERT INTO role_permission VALUES(3, 25);
+INSERT INTO role_permission VALUES(1, 25);
+INSERT INTO role_permission VALUES(1, 26);

@@ -91,4 +91,8 @@ public class SystemController {
     public String goodCheck() {
         return "system/goodCheck";
     }
+    @RequestMapping("deleteComments")
+    public String deleteComments() {
+        return "goods/deleteComments";
+    }
 }
