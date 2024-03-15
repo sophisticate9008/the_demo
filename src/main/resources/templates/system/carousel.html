@@ -72,7 +72,7 @@
         <template slot="append">
           <el-button type="text" @click="dialogFormVisible = true">新增轮播图</el-button>
           <el-dialog title="新增轮播图" :visible.sync="dialogFormVisible">
-            <el-form :rules="rules" :model="form" ref="form">
+            <el-form :model="form" ref="form">
               <el-upload action="#" list-type="picture-card" :auto-upload="false" :limit="1" :on-change="saveFile">
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
@@ -108,10 +108,6 @@
           gid: null,
           imagePath: null
         },
-        rules: {
-          imagePath: [{ required: true, message: '请输入图片', trigger: 'blur' }],
-          gid: [{ required: true, message: '请输入公告内容', trigger: 'blur' }],
-        }
       },
 
       mounted() {

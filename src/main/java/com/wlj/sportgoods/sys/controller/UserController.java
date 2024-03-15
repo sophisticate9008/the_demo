@@ -117,8 +117,10 @@ public class UserController {
         user.setAccount(activerUser.getUser().getAccount());
         if(user.getAvatarpath().equals("")) {
             user.setAvatarpath(null);
+        }else {
+            user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));            
         }
-        user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
+
         if(userService.updateById(user)) {
 
             return ResultObj.UPDATE_SUCCESS;
@@ -207,7 +209,13 @@ public class UserController {
             return ResultObj.UPDATE_ERROR;
         }
     }
-
+    @RequestMapping("getUserBasicByAccount")
+    public DataGridView getUserBasicByAccount(@RequestBody UserVo uservo) {
+        User theUser = userService.getById(uservo.getAccount());
+        User returnUser = new User();
+        returnUser.setAvatarpath(theUser.getAvatarpath()).setNickname(theUser.getNickname()).setSex(theUser.getSex());
+        return new DataGridView(returnUser);
+    }
 
 
 

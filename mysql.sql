@@ -77,7 +77,6 @@ CREATE TABLE comments(
     star int,
     content TEXT,
     image_path VARCHAR(255) DEFAULT NULL,
-    is_anonym INT,
     FOREIGN KEY(account) REFERENCES User(account),
     FOREIGN KEY(gid) REFERENCES goods(id)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -138,6 +137,8 @@ INSERT INTO Permission VALUES(20, "首页管理菜单", "*:首页管理:公告�
 INSERT INTO Permission VALUES(21, "审核功能", "*:审核功能:审核功能:1", "" , "toggles", "menu");
 INSERT INTO Permission VALUES(22, "审核功能", "*:审核功能:人员审核:2", "/sys/userCheck", "person-check", "menu");
 INSERT INTO Permission VALUES(23, "审核功能", "*:审核功能:商品审核:2", "/sys/goodCheck", "patch-check", "menu");
+INSERT INTO Permission VALUES(24, "删除评论权限", "user:deleteComment", "", "", "permission");
+
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -162,3 +163,6 @@ INSERT INTO role_permission VALUES(4, 20);
 INSERT INTO role_permission VALUES(4, 21);
 INSERT INTO role_permission VALUES(4, 22);
 INSERT INTO role_permission VALUES(4, 23);
+INSERT INTO role_permission VALUES(1, 24);
+INSERT INTO role_permission VALUES(3, 24);
+INSERT INTO role_permission VALUES(3, 25);

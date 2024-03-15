@@ -47,6 +47,8 @@ shiro:
   - /resources/**
   - /carousel/getCarousel
   - /notice/getNotice
+  - /user/getUserBasicByAccount
+  - /comments/loadAllComment
   login-url: /sys/toLogin
   log-out-url: /login/logout*
   authc-urls:

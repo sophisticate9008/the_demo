@@ -41,10 +41,9 @@ public class Comments implements Serializable {
 
     private String imagePath;
 
-    private Integer isAnonym;
-
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private Integer replyId;
 
 }

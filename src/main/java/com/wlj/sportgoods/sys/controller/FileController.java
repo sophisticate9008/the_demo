@@ -27,7 +27,7 @@ public class FileController {
         //1.得到文件名
         String oldName = mf.getOriginalFilename();
         //2.根据旧的文件名生成新的文件名
-        String newName=AppFileUtils.createNewFileName(oldName);
+        String newName=AppFileUtils.createNewFileName(oldName) + "_temp";
         //3.得到当前日期的字符串
         String dirName= DateUtil.format(new Date(), "yyyy-MM-dd");
         //4.构造文件夹
@@ -46,7 +46,7 @@ public class FileController {
             e.printStackTrace();
         }
         Map<String,Object> map=new HashMap<String, Object>();
-        map.put("path",dirName+"/" + newName + "_temp");
+        map.put("path",dirName+"/" + newName);
         return map;
     }
 

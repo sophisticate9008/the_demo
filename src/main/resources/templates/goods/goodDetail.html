@@ -13,12 +13,16 @@
       background-color: #47474742;
     }
 
-    ::-webkit-scrollbar {
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .comment-container::-webkit-scrollbar {
       width: 8px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background-color: #eaecf1;
+      background-color: #77d393;
       border-radius: 3px;
     }
 
@@ -168,6 +172,97 @@
       background-color: #eaecf100;
       border-radius: 19px;
     }
+
+    .el-form-item__content,
+    .el-form-item__label {
+      margin-top: 5%;
+    }
+
+    .add-comment {
+      border: 1px solid transparent;
+      /* 需要添加一个透明的边框 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      border-radius: 19px;
+      width: 63%;
+      position: absolute;
+      top: 215%;
+      font-weight: bold;
+      right: 8%;
+    }
+
+    #comments {
+      position: relative;
+      top: 5%;
+      width: 80%;
+
+      margin: auto auto;
+      border-radius: 0.5%;
+    }
+
+    .user-info {
+      position: relative;
+      display: flex;
+      align-items: center;
+      /* 上下居中 */
+      font-weight: bold;
+    }
+
+    .comment-content {
+      position: relative;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .comments-pics {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .comments-pics * {
+      margin: 5px;
+    }
+
+    .create-time {
+      position: absolute;
+      right: 1%;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    #comment-args {
+      display: flex;
+      align-items: center;
+
+      width: 100%;
+      height: 60px;
+      background-color: white;
+    }
+
+    .comment-container {
+      height: min-content;
+      max-height: 640px;
+
+      overflow: auto;
+    }
+
+    #i-right {
+      position: absolute;
+      right: 1%;
+
+    }
+
+    .reply-button {
+      position: absolute;
+      right: 15%;
+    }
+
+    .reply-content {
+      font-size: 80%;
+      position: relative;
+      width: 100%;
+      background-color: rgba(128, 128, 128, 0.208);
+    }
   </style>
 </head>
 <body>
@@ -198,11 +293,74 @@
             立刻购买
           </el-button>
           <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
-
+          <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
 
         </div>
       </div>
 
+    </div>
+    <div id="comments">
+      <el-dialog title="新增评论" :visible.sync="dialogFormVisible">
+        <el-form :rules="rules" :model="form" ref="form">
+          <el-upload action="#" list-type="picture-card" v-show="form.theId == null" :auto-upload="false" :limit="5" :on-change="saveFile">
+            <i slot="default" class="el-icon-plus"></i>
+            <div slot="file" slot-scope="{file}">
+              <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+            </div>
+          </el-upload>
+          <el-rate v-model="form.star" v-show="form.theId == null"></el-rate>
+
+          </el-slider>
+          <el-form-item label="评价内容" :label-width="formLabelWidth" prop="content">
+            <el-input v-model="form.content" type="textarea" autosize></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisible = false; form.theId = null">取 消</el-button>
+          <el-button type="primary" @click="submit">确 定</el-button>
+
+        </div>
+      </el-dialog>
+
+      <div>
+        <div id="comment-args">
+          <span>评论 ({{comments.length}})</span>
+          <el-select v-model="starVo">
+            <el-option value=null>全部</el-option>
+            <el-option value=1>1</el-option>
+            <el-option value=2>2</el-option>
+            <el-option value=3>3</el-option>
+            <el-option value=4>4</el-option>
+            <el-option value=5>5</el-option>
+          </el-select>
+          <el-button id="i-right" :class="iClass" :title="iTitle" @click="toggleComments" circle></el-button>
+        </div>
+        <div class="comment-container" v-show="showComments" v-infinite-scroll="load" style="overflow:auto">
+          <el-card v-for="item in commentsShow">
+            <div class="user-info">
+              <el-avatar icon="el-icon-user-solid" :size="25"
+               :src="'/file/showImageByPath?path=' + item.avatarPath"></el-avatar>
+              <span>&nbsp; {{item.nickname}}</span>
+              <el-rate v-model="item.star" disabled show-score text-color="#ff9900">
+              </el-rate>
+              <el-button class="reply-button" size="mini" @click="dialogFormVisible = true; reply(item)"> 回复</el-button>
+              <span class="create-time">{{convertToBeijingTime(item.createTime)}}</span>
+            </div>
+
+            <div class="comment-content">
+              <span>{{item.content}} </span>
+              <div class="comments-pics">
+                <el-image preview-src-list shape="square" fit="contain" style=" height: 150px"
+                 v-for="pic in item.imgList" v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic"></el-image>
+              </div>
+              <div class="reply-content">
+                <span style="background-color: rgb(245, 116, 69); color:white" v-if="item.replyId != 0">客服:</span>
+                <span v-if="item.replyId != 0">{{item.reply.content}}</span>
+              </div>
+            </div>
+          </el-card>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -210,17 +368,143 @@
     var app = new Vue({
       el: "#app",
       data: {
+        starVo: null,
+        showComments: false,
+        iClass: "el-icon-arrow-down",
+        iTitle: "展开",
+        drawer: false,
+        direction: 'btt',
+        count: 4,
+        commentsShow: [],
+        comments: [],
+        fileList: [],
+        dialogFormVisible: false,
         dataList: null,
         id: null,
         starIcon: "el-icon-star-off",
-        num: 1
+        num: 1,
+        formLabelWidth: "100px",
+        form: {
+          isReply: false,
+          theId: null,
+          gid: 0,
+          content: null,
+          imagePath: "",
+          star: null,
+        },
+        rules: {
+          content: [{ required: true, message: '请输入评价内容', trigger: 'blur' }],
+        }
+
       },
       mounted() {
         this.getId();
         this.getData();
         this.addHistory();
+        this.getComments();
+      },
+      watch: {
+        "star()": function () {
+          this.count = 3;
+          this.commentsShow = [];
+          this.getComments();
+        }
       },
       methods: {
+        reply(item) {
+          this.picLimit = 0;
+          this.form.theId = item.id
+        },
+        toggleComments() {
+          if (this.iClass == "el-icon-arrow-down") {
+            this.showComments = true;
+            this.iTitle = "折叠";
+            this.iClass = "el-icon-arrow-up"
+          } else {
+            this.showComments = false;
+            this.iClass = "el-icon-arrow-down"
+            this.iTitle = "展开";
+          }
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+        load() {
+          setTimeout(() => {
+            this.count += 3
+            this.commentsShow = this.comments.slice(0, Math.min(this.comments.length, this.count));
+          }, 500)
+        },
+        getComments() {
+          axios.post("/comments/loadAllComment", {
+            gid: this.id,
+            star: this.form.star
+          }).then(response => {
+            this.comments = response.data.data;
+            this.comments.forEach(item => {
+              this.$set(item, "imgList", item.imagePath.split(";"));
+              if (item.replyId != 0) {
+                axios.post("/comments/loadAllComment", {
+                  isReply: true,
+                  id: item.replyId
+                }).then(response2=> {
+                  this.$set(item, "reply", response2.data.data[0])
+                })
+              }
+
+              axios.post("/user/getUserBasicByAccount", {
+                account: item.account
+              }).then(response1 => {
+                this.$set(item, "avatarPath", response1.data.data.avatarpath);
+                this.$set(item, "nickname", response1.data.data.nickname);
+                this.load();
+              })
+            })
+          })
+        },
+        submit() {
+          this.$refs.form.validate(valid => {
+            if (valid) {
+              const uploadPromises = this.fileList.map(item => {
+                let formData = new FormData();
+                formData.append('mf', item.raw);
+                // 返回一个 Promise，表示上传操作
+                return axios.post("/file/uploadFile", formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  }
+                });
+              });
+              Promise.all(uploadPromises)
+                .then(responses => {
+                  responses.forEach(item => {
+                    this.form.imagePath += ";" + item.data.path
+                  })
+                  console.log(this.form.imagePath);
+                  axios.post("/comments/addComment", this.form)
+                    .then(response => {
+                      this.$message(response.data.msg)
+                      setTimeout(() => {
+                        window.location.href = window.location.href;
+                      }, 1000)
+                    })
+                })
+            } else {
+              this.$message("请先补全");
+            }
+          })
+          setTimeout(() => {
+            this.form.theId = null;
+            this.picLimit = 5;
+          }, 500)
+
+        },
+        saveFile(file, fileList) {
+          this.fileList = fileList
+          console.log(this.fileList)
+        },
         getStar() {
           axios.post("/history/getHistory", {
             showStar: true,
@@ -296,12 +580,13 @@
           });
           var id = params['id'];
           this.id = parseInt(id);
+          this.form.gid = this.id
           console.log(id)
         },
         getSales(item) {
           axios.post("/userGoods/getSales", {
             gid: item.id
-          }).then(response=> {
+          }).then(response => {
             this.$set(item, 'sales', response.data.data ? response.data.data : 0);
           })
         },

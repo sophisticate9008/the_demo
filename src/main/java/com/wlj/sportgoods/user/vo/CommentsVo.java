@@ -10,4 +10,7 @@ import lombok.EqualsAndHashCode;
 public class CommentsVo extends Comments{
     private Integer page = 1;
     private Integer limit= 10;
+    private Boolean showMyComments = false;
+    private Boolean isReply = false;
+    private Integer theId;
 }
