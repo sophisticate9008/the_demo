@@ -65,12 +65,14 @@
 </head>
 <body>
   <div id="app">
-    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
+
     <div id="add-container">
-      <label for="goodImage" class="custom-file-upload">
-        <span v-if="!goodImageUrl">添加商品图片</span> <!-- 使用一个图标作为按钮 -->
-        <img v-else :src="goodImageUrl" alt="图片" style="width: 100%; height: 100%;">
-      </label>
+      <el-upload action="#" list-type="picture-card" :auto-upload="false" :limit="5" :on-change="saveFile">
+        <i slot="default" class="el-icon-plus"></i>
+        <div slot="file" slot-scope="{file}">
+          <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+        </div>
+      </el-upload>
       <input id="goodImage" @click="callCropper" style="display: none;" required>
       <el-form :model="form" ref="form" :rules="rules" label-width="100px" color="black">
         <el-form-item label="商品名称" prop="goodName">
@@ -89,41 +91,25 @@
           <el-input v-model="form.stock" placeholder="请输入商品库存"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm">提交</el-button>
+          <el-button type="primary" @click="submit">提交</el-button>
         </el-form-item>
       </el-form>
     </div>
+    
   </div>
   <script>
-    function getCropPic(data) {
-      var uuid = generateUUID();
-      app.useCropper = false;
-      if (data == '') {
-        return;
-      }
-      app.goodImageFile = new File([data], uuid + '.jpg', { type: 'image/*' });
-      app.goodImageUrl = URL.createObjectURL(app.goodImageFile);
-    }
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-          v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
+
     var app = new Vue({
       el: "#app",
       data: {
-        goodImageFile: null, // 保存上传的头像文件
-        goodImageUrl: '', // 保存头像预览图片的URL
-        useCropper: false,
+        fileList: null,
         form: {
           goodName: '',
           introduction: '',
           label: '',
           price: '',
           stock: '',
-          imagePath: null
+          imagePath: ''
         },
         rules: {
           goodName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
@@ -134,22 +120,39 @@
         }
       },
       methods: {
-        submitForm() {
-          this.form.price = parseFloat(this.form.price);
-          this.form.stock = parseInt(this.form.stock);
-          this.isregisterDisabled = true;
-          var formData = new FormData();
-          
-          formData.append('mf', this.goodImageFile);
-          axios.post("/file/uploadFile", formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
+        saveFile(file, fileList) {
+          this.fileList = fileList
+        },
+        submit() {
+          this.$refs.form.validate(valid => {
+            if (valid) {
+              const uploadPromises = this.fileList.map(item => {
+                let formData = new FormData();
+                formData.append('mf', item.raw);
+                // 返回一个 Promise，表示上传操作
+                return axios.post("/file/uploadFile", formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  }
+                });
+              });
+              Promise.all(uploadPromises)
+                .then(responses => {
+                  responses.forEach(item => {
+                    this.form.imagePath += ";" + item.data.path
+                  })
+                  console.log(this.form.imagePath);
+                  axios.post("/goods/addGoods", this.form)
+                    .then(response => {
+                      this.$message(response.data.msg)
+                      setTimeout(() => {
+                        window.location.href = window.location.href;
+                      }, 500)
+                    })
+                })
+            } else {
+              this.$message("请先补全");
             }
-          }).then(response => {
-            this.form.imagePath = response.data.path;
-            this.addGoods();
-          }).catch(error => {
-            this.$alert("请添加图片");
           })
         },
         addGoods() {

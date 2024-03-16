@@ -275,17 +275,14 @@
           <span class="info-sales">销量: {{dataList[0].sales}} <br>库存: {{dataList[0].stock}} </span>
           <span class="info-price">{{'￥' + dataList[0].price}}</span>
           <div id="label-container">
-
             <div class="label-div" v-for="label in dataList[0].labelList">
               <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
             </div>
           </div>
-
           <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
         </div>
         <div id="buttons">
           <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
-
           <el-button class="leftButton" @click="addToCart">
             加入购物车
           </el-button>
@@ -297,7 +294,6 @@
 
         </div>
       </div>
-
     </div>
     <div id="comments">
       <el-dialog title="新增评论" :visible.sync="dialogFormVisible">
@@ -309,7 +305,6 @@
             </div>
           </el-upload>
           <el-rate v-model="form.star" v-show="form.theId == null"></el-rate>
-
           </el-slider>
           <el-form-item label="评价内容" :label-width="formLabelWidth" prop="content">
             <el-input v-model="form.content" type="textarea" autosize></el-input>

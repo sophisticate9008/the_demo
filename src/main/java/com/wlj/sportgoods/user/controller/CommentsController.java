@@ -73,12 +73,20 @@ public class CommentsController {
         for (String item : imgPaths) {
             pathResult += ";" + AppFileUtils.renameFile(item);
         }
+        
         if(commentsVo.getTheId() != null) {
             if(user.getType() != 3) {
+                for (String item : imgPaths) {
+                    AppFileUtils.removeFileByPath(item.replace("_temp", ""));
+                }
                 return ResultObj.EXCEED_PERMISSION;
+                
             }
             Goods theGood = goodsService.getById(commentsVo.getGid());
             if(!theGood.getMerchant().equals(user.getMerchant())) {
+                for (String item : imgPaths) {
+                    AppFileUtils.removeFileByPath(item.replace("_temp", ""));
+                }
                 return ResultObj.EXCEED_PERMISSION;
             }
         }
@@ -86,7 +94,7 @@ public class CommentsController {
         if(hasBought || user.getType() == 3) {
             commentsVo.setAccount(user.getAccount());
             commentsVo.setCreateTime(new Date());
-            commentsVo.setImagePath(pathResult);
+            commentsVo.setImagePath(pathResult.replace(";;", ""));
             if(commentsVo.getTheId() != null) {
                 commentsVo.setReplyId(-1);
                 commentsService.save(commentsVo);

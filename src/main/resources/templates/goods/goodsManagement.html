@@ -10,7 +10,7 @@
   <script src="/resources/js/element-ui.index.js"></script>
   <style>
     /* Add your custom li styles here */
-    body{
+    body {
       height: 100%;
       background-color: #47474742;
       position: relative;
@@ -112,11 +112,13 @@
       position: fixed;
       z-index: 10;
     }
+    .el-dialog__wrapper {
+      z-index: 1000; /* 你可以根据需要调整层级 */
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
     <div>
       <div id="args">
         <label for="limit">每页数量</label>
@@ -132,7 +134,18 @@
     </div>
     <div id="items-container">
       <div v-for="(item, index) in dataList" :key="item.id" class="list-item">
-
+        <el-dialog title="图片" :visible.sync="item.dialogFormVisible">
+          <el-upload action="#" list-type="picture-card" :auto-upload="false" :on-change="saveFile">
+            <i slot="default" class="el-icon-plus"></i>
+            <div slot="file" slot-scope="{file}">
+              <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+            </div>
+          </el-upload>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="item.dialogFormVisible = false;">取 消</el-button>
+            <el-button type="primary" @click="preview(item);item.dialogFormVisible = false;">确 定</el-button>
+          </div>
+        </el-dialog>
         <el-table :data="item.tempTableData" :show-header="false" size="small" max-height="240px">
           <el-table-column prop="property" width="80px">
           </el-table-column>
@@ -149,7 +162,7 @@
         <label :for="'goodImage' + item.id">
           <img :src="getIntactImagePath(item)" alt="图片">
         </label>
-        <input v-if="!item.disabled" :id="'goodImage' + item.id" @click="callCropper(item)" style="display: none;">
+        <input v-if="!item.disabled" :id="'goodImage' + item.id" @click="item.dialogFormVisible = true; focusItem = item" style="display: none;">
         <div id="button-container">
           <el-button :type="item.available === 1 ? 'success' : 'warning'" @click="banGoods($event,item)"
            :icon="item.available === 1 ? 'el-icon-open' : 'el-icon-turn-off'">
@@ -164,33 +177,17 @@
       </div>
     </div>
 
-
     <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="parseInt(limit)"
      :total="total">
     </el-pagination>
   </div>
 
   <script>
-    function getCropPic(data) {
-      var uuid = generateUUID();
-      app.useCropper = false;
-      if (data == '') {
-        return;
-      }
-      app.focusItem["goodImageFile"] = new File([data], uuid + '.jpg', { type: 'image/*' });
-      app.focusItem.imagePath = URL.createObjectURL(app.focusItem["goodImageFile"]);
-    }
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-          v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
     var app = new Vue({
       el: '#app',
       data: {
-        useCropper: false,
+        focusItem: null,
+        fileList: [],
         focusItem: null,
         disabledEdit: false,
         dataList: [],
@@ -228,16 +225,23 @@
         }
       },
       methods: {
+        saveFile(file, fileList) {
+          console.log(this.focusItem.id)
+          this.focusItem.fileList = fileList;
+        },
+        preview(item) {
+          if (item.fileList != null) {
+            item.imagePath = item.fileList[0].url
+
+
+          }
+        },
         getIntactImagePath(item) {
           if (item.imagePath.indexOf("blob") == -1) {
             return '/file/showImageByPath?path=' + item.imagePath;
           } else {
             return item.imagePath;
           }
-        },
-        callCropper(item) {
-          this.focusItem = item;
-          this.useCropper = true;
         },
         editGood(item) {
           item.disabled = false;
@@ -246,25 +250,32 @@
           item.disabled = true;
           var changeForm = this.recoveryData(item);
           changeForm["id"] = item.id;
-
-          if ("goodImageFile" in item) {
-            var formData = new FormData();
-            formData.append('mf', item.goodImageFile);
-            axios.post("/file/uploadFile", formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
-              }
-            }).then(response => {
-              changeForm["imagePath"] = response.data.path;
-              this.updateGoods(changeForm);
-            }).catch(error => {
-              console.log(error);
-              this.updateGoods(changeForm);
-            })
-          }else {
+          try {
+            const uploadPromises = item.fileList.map(item1 => {
+              let formData = new FormData();
+              formData.append('mf', item1.raw);
+              // 返回一个 Promise，表示上传操作
+              return axios.post("/file/uploadFile", formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              });
+            });
+            Promise.all(uploadPromises)
+              .then(responses => {
+                changeForm["imageList"] = "";
+                responses.forEach(item1 => {
+                  changeForm["imageList"] += ";" + item1.data.path
+                })
+                this.updateGoods(changeForm);
+              });
+          }catch(error) {
             this.updateGoods(changeForm);
           }
+
           
+
+
         },
         updateGoods(form) {
           axios.post("/goods/updateGoods", form)
@@ -285,7 +296,6 @@
             }
 
           });
-          console.log(returnForm);
           return returnForm;
         },
         transformedData(item) {
@@ -341,7 +351,7 @@
         getSales(item) {
           axios.post("/userGoods/getSales", {
             gid: item.id
-          }).then(response=> {
+          }).then(response => {
             this.$set(item, 'sales', response.data.data ? response.data.data : 0);
             this.$set(item, 'tempTableData', this.transformedData(item));
           })
@@ -360,6 +370,8 @@
               this.total = response.data.count;
               this.dataList.forEach(item => {
                 this.$set(item, 'disabled', true);
+                this.$set(item, "dialogFormVisible", false)
+                this.$set(item, "fileList", []);
                 this.getSales(item);
               })
             })

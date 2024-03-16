@@ -22,6 +22,8 @@ import com.wlj.sportgoods.sys.common.ActiverUser;
 import com.wlj.sportgoods.sys.common.AppFileUtils;
 import com.wlj.sportgoods.sys.common.DataGridView;
 import com.wlj.sportgoods.sys.common.ResultObj;
+import com.wlj.sportgoods.sys.common.WebUtils;
+import com.wlj.sportgoods.sys.entity.User;
 import com.wlj.sportgoods.user.entity.Goods;
 import com.wlj.sportgoods.user.service.GoodsService;
 import com.wlj.sportgoods.user.vo.GoodsVo;
@@ -82,21 +84,27 @@ public class GoodsController {
     @RequestMapping("addGoods")
     @RequiresPermissions({ "merchant:addGoods" })
     public ResultObj addGoods(@RequestBody Goods goods) {
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        User user = (User) WebUtils.getSession().getAttribute("user");
+        String[] imgPaths = goods.getImagePath().split(";");
+        String pathResult = "";
         try {
-            if (goods.getImagePath() != null && goods.getImagePath().endsWith("_temp")) {
-                String newName = AppFileUtils.renameFile(goods.getImagePath());
-                goods.setImagePath(newName);
+            goods.setImagePath(imgPaths[1].replace("_temp", ""));
+            for (String item : imgPaths) {
+                pathResult += ";" + AppFileUtils.renameFile(item);
             }
-            goods.setMerchant(activerUser.getUser().getAccount());
+            goods.setImageList(pathResult.replace(";;", ""));
+            goods.setMerchant(user.getAccount());
             goods.setAvailable(1);
             if (!goodsService.save(goods)) {
-                AppFileUtils.removeFileByPath(goods.getImagePath());
+                for (String item : imgPaths) {
+                    AppFileUtils.removeFileByPath(item.replace("_temp", ""));
+                }
             }
             return ResultObj.ADD_SUCCESS;
         } catch (Exception e) {
-            AppFileUtils.removeFileByPath(goods.getImagePath());
+            for (String item : imgPaths) {
+                AppFileUtils.removeFileByPath(item.replace("_temp", ""));
+            }
             e.printStackTrace();
             return ResultObj.ADD_ERROR;
         }
@@ -105,12 +113,12 @@ public class GoodsController {
     @RequestMapping("updateGoods")
     @RequiresPermissions(value = { "merchant:updateGoods", "*:*" }, logical = Logical.OR)
     public ResultObj updateGoods(@RequestBody GoodsVo goodsVo) {
-        String oldPath = goodsService.getById(goodsVo.getId()).getImagePath();
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        String oldPath = goodsService.getById(goodsVo.getId()).getImageList();
+        String[] oldPaths = oldPath.split(";");
+        User user = (User) WebUtils.getSession().getAttribute("user");
         Goods targetGood = goodsService.getById(goodsVo.getId());
-        if (targetGood.getMerchant().equals(activerUser.getUser().getAccount())
-                || activerUser.getUser().getType() == 4) {
+        if (targetGood.getMerchant().equals(user.getAccount())
+                || user.getType() == 4) {
             try {
                 if (goodsVo.getDelete()) {
                     targetGood.setMerchant("dereliction");
@@ -118,13 +126,19 @@ public class GoodsController {
                     goodsService.updateById(targetGood);
                     return ResultObj.DELETE_SUCCESS;
                 }
-                if (!(goodsVo.getImagePath() != null && goodsVo.getImagePath().equals("/images/noDefaultImage.jpg"))) {
-                    if (goodsVo.getImagePath() != null && goodsVo.getImagePath().endsWith("_temp")) {
-                        String newName = AppFileUtils.renameFile(goodsVo.getImagePath());
-                        goodsVo.setImagePath(newName);
-                        // 删除原先的图片
-                        AppFileUtils.removeFileByPath(oldPath);
+                if(goodsVo.getImageList() != null) {
+                    String newPath = goodsVo.getImageList();
+                    String pathResult = "";
+                    String[] newPaths = newPath.split(";");
+                    goodsVo.setImagePath(newPaths[1].replace("_temp", ""));
+                    for(String item : newPaths) {
+                        pathResult += ";" + AppFileUtils.renameFile(item);
                     }
+                    goodsVo.setImageList(pathResult.replace(";;", ""));
+                    for (String item : oldPaths) {
+                        AppFileUtils.removeFileByPath(item.replace("_temp", ""));
+                    }
+                    
                 }
                 goodsService.updateById(goodsVo);
                 return ResultObj.UPDATE_SUCCESS;

@@ -42,5 +42,6 @@ public class Goods implements Serializable {
 
     private Integer stock;
     
+    private String imageList;
 
 }
