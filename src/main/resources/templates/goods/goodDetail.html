@@ -263,42 +263,60 @@
       width: 100%;
       background-color: rgba(128, 128, 128, 0.208);
     }
+
+    .imgs {
+      padding: 0 0 0 15px;
+      width: 400px;
+    }
+
+    .bigPic {
+      background-color: rgba(189, 189, 189, 0.519);
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <div id="card">
       <div id="card-info">
-        <img :src="'/file/showImageByPath?path=' + dataList[0].imagePath">
-        <div id="text-info">
-          <span class="info-name">{{dataList[0].goodName}} </span>
-          <span class="info-sales">销量: {{dataList[0].sales}} <br>库存: {{dataList[0].stock}} </span>
-          <span class="info-price">{{'￥' + dataList[0].price}}</span>
-          <div id="label-container">
-            <div class="label-div" v-for="label in dataList[0].labelList">
-              <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
+        <el-image style="background-color: rgba(189, 189, 189, 0.519);" :preview-src-list='[bigPicUrl]' fit="contain" :src="bigPicUrl"></el-image>
+          <div id="text-info">
+            <span class="info-name">{{dataList[0].goodName}} </span>
+            <span class="info-sales">销量: {{dataList[0].sales}} <br>库存: {{dataList[0].stock}} </span>
+            <span class="info-price">{{'￥' + dataList[0].price}}</span>
+            <div id="label-container">
+              <div class="label-div" v-for="label in dataList[0].labelList">
+                <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
+              </div>
             </div>
+            <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
           </div>
-          <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
-        </div>
-        <div id="buttons">
-          <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
-          <el-button class="leftButton" @click="addToCart">
-            加入购物车
-          </el-button>
-          <el-button class="rightButton" @click="buy">
-            立刻购买
-          </el-button>
-          <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
-          <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
+          <div id="buttons">
+            <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
+            <el-button class="leftButton" @click="addToCart">
+              加入购物车
+            </el-button>
+            <el-button class="rightButton" @click="buy">
+              立刻购买
+            </el-button>
+            <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
+            <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
 
-        </div>
+          </div>
       </div>
+      <div class="imgs">
+
+        <el-image v-for="pic in dataList[0].imageList.split(';')"
+         style="width: 50px; height: 50px; padding:1.5px; cursor: pointer" :src="'/file/showImageByPath?path=' + pic"
+         fit="cover" @click="bigPicUrl = '/file/showImageByPath?path=' + pic"></el-image>
+      </div>
+
     </div>
     <div id="comments">
       <el-dialog title="新增评论" :visible.sync="dialogFormVisible">
         <el-form :rules="rules" :model="form" ref="form">
-          <el-upload action="#" list-type="picture-card" v-show="form.theId == null" :auto-upload="false" :limit="5" :on-change="saveFile">
+          <el-upload action="#" list-type="picture-card" v-show="form.theId == null" :auto-upload="false" :limit="5"
+           :on-change="saveFile">
             <i slot="default" class="el-icon-plus"></i>
             <div slot="file" slot-scope="{file}">
               <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
@@ -345,8 +363,8 @@
             <div class="comment-content">
               <span>{{item.content}} </span>
               <div class="comments-pics">
-                <el-image preview-src-list shape="square" fit="contain" style=" height: 150px"
-                 v-for="pic in item.imgList" v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic"></el-image>
+                <el-image  shape="square" fit="contain" style=" height: 150px"
+                 v-for="pic in item.imgList" v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic" :preview-src-list="['/file/showImageByPath?path=' + pic]"></el-image>
               </div>
               <div class="reply-content">
                 <span style="background-color: rgb(245, 116, 69); color:white" v-if="item.replyId != 0">客服:</span>
@@ -363,6 +381,7 @@
     var app = new Vue({
       el: "#app",
       data: {
+        bigPicUrl: null,
         starVo: null,
         showComments: false,
         iClass: "el-icon-arrow-down",
@@ -406,6 +425,9 @@
         }
       },
       methods: {
+        initBigPic() {
+          this.bigPicUrl = '/file/showImageByPath?path=' + this.dataList[0].imageList.split(';')[0];
+        },
         reply(item) {
           this.picLimit = 0;
           this.form.theId = item.id
@@ -444,7 +466,7 @@
                 axios.post("/comments/loadAllComment", {
                   isReply: true,
                   id: item.replyId
-                }).then(response2=> {
+                }).then(response2 => {
                   this.$set(item, "reply", response2.data.data[0])
                 })
               }
@@ -598,6 +620,7 @@
                 this.$set(item, 'disabled', true);
                 this.$set(item, 'labelList', item.label.trim().split(/\s+/));
                 this.getSales(item);
+                this.initBigPic();
               })
             })
             .catch(error => {
