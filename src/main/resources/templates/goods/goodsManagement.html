@@ -149,7 +149,7 @@
         <el-table :data="item.tempTableData" :show-header="false" size="small" max-height="240px">
           <el-table-column prop="property" width="80px">
           </el-table-column>
-          <el-table-column prop="value" width="320px">
+          <el-table-column prop="value" max-width="320px">
             <!-- 使用作用域插槽来自定义每一列的内容 -->
             <template slot-scope="scope">
               <span v-if="item.disabled">{{scope.row.value}}</span>

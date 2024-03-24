@@ -126,7 +126,7 @@ public class GoodsController {
                     goodsService.updateById(targetGood);
                     return ResultObj.DELETE_SUCCESS;
                 }
-                if(goodsVo.getImageList() != null) {
+                if(goodsVo.getImageList() != null && !goodsVo.getImageList().equals("")) {
                     String newPath = goodsVo.getImageList();
                     String pathResult = "";
                     String[] newPaths = newPath.split(";");
