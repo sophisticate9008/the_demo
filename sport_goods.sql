@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+﻿-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sport_goods
 -- ------------------------------------------------------
@@ -7,13 +7,21 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES gbk */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Current Database: `sport_goods`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `sport_goods` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+
+USE `sport_goods`;
 
 --
 -- Table structure for table `carousel`
@@ -24,7 +32,7 @@ DROP TABLE IF EXISTS `carousel`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `carousel` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `gid` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -49,11 +57,11 @@ DROP TABLE IF EXISTS `comments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `account` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `gid` int DEFAULT NULL,
   `star` int DEFAULT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci,
+  `image_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `create_time` timestamp NULL DEFAULT NULL,
   `reply_id` int DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -84,14 +92,14 @@ DROP TABLE IF EXISTS `goods`;
 CREATE TABLE `goods` (
   `id` int NOT NULL AUTO_INCREMENT,
   `price` decimal(10,2) DEFAULT NULL,
-  `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `merchant` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `merchant` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `available` int DEFAULT NULL,
-  `label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `introduction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `good_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `label` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `introduction` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `good_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `stock` int DEFAULT NULL,
-  `image_list` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_list` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `merchant` (`merchant`),
   CONSTRAINT `goods_ibfk_1` FOREIGN KEY (`merchant`) REFERENCES `user` (`account`)
@@ -104,9 +112,8 @@ CREATE TABLE `goods` (
 
 LOCK TABLES `goods` WRITE;
 /*!40000 ALTER TABLE `goods` DISABLE KEYS */;
--- INSERT INTO `goods` VALUES (50,6.60,'2024-03-09/638505BB6E89423F99CB0E7F0A5777C4.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 鍝戦搩','钃濊壊 2kg','灏忓搼閾',498,'2024-03-09/638505BB6E89423F99CB0E7F0A5777C4.jpg'),(51,6.60,'2024-03-09/4C1932C8236543FDA9A8A428DDFC5925.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 璺崇?','榛戣壊','璺崇怀',490,'2024-03-09/4C1932C8236543FDA9A8A428DDFC5925.jpg'),(52,100.00,'2024-03-09/09CB8CB33C8042D2BE7D1095FE41390C.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 璺戞?鏈','杩愬姩鍋ヨ韩','璺戞?鏈',500,'2024-03-09/09CB8CB33C8042D2BE7D1095FE41390C.jpg'),(53,6.60,'2024-03-09/896F97F3DA894B1A81CAC0B5000C5A13.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗','2kg','纾呯牐',500,'2024-03-09/896F97F3DA894B1A81CAC0B5000C5A13.jpg'),(54,100.00,'2024-03-09/1BB6EB7C52C6424AA0AD572825041E16.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 鍝戦搩','鎷変几','鍝戦搩',499,'2024-03-09/1BB6EB7C52C6424AA0AD572825041E16.jpg'),(55,100.00,'2024-03-09/36DEEA2FE4EF45E393849A973D87625C.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 澶у搼閾','鍙屽眰','澶у搼閾',500,'2024-03-09/36DEEA2FE4EF45E393849A973D87625C.jpg'),(56,100.00,'2024-03-09/E88031AABEC6458A86E1C60A0031B79A.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 澶у搼閾','鍙屽眰','澶у搼閾',500,'2024-03-09/E88031AABEC6458A86E1C60A0031B79A.jpg'),(57,100.00,'2024-03-09/3BB793B380BA442FB5B37A5FADDD5103.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 澶у搼閾','鍙屽眰','澶у搼閾',499,'2024-03-09/3BB793B380BA442FB5B37A5FADDD5103.jpg'),(58,100.00,'2024-03-09/35F80A1B948D4ACBB4C37C4E67586313.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 澶у搼閾','鍙屽眰','澶у搼閾',499,'2024-03-09/35F80A1B948D4ACBB4C37C4E67586313.jpg'),(59,100.00,'2024-03-09/D6A42134AED8447C89B8317C4F9A09C1.jpg','merchant',1,'鍋ヨ韩鍣ㄦ潗 澶у搼閾','鍙屽眰','澶у搼閾',500,'2024-03-09/D6A42134AED8447C89B8317C4F9A09C1.jpg'),(60,6.60,'2024-03-13/9A9E4514E38441C8A5C035BFDF4EC577.jpg','merchant',1,'鎷変几 鍋ヨ韩','鎷変几','鎷変几妫',100,'2024-03-13/9A9E4514E38441C8A5C035BFDF4EC577.jpg'),(64,1.00,'2024-03-16/85F091128F504EF991CA29CF77B6CAED.jpg','merchant',1,'娴嬭瘯','娴嬭瘯','娴嬭瘯鍟',1,'2024-03-16/85F091128F504EF991CA29CF77B6CAED.jpg'),(65,3.00,'2024-03-16/22303D4C17294309A6B4BCDCA30C59D3.jpg','merchant',1,'娴嬭瘯','娴嬭瘯','娴嬭瘯',3,'2024-03-16/22303D4C17294309A6B4BCDCA30C59D3.jpg'),(66,4.00,'2024-03-16/B5CE2863FCEC4339B92ADD0FFEC0DB85.jpg','merchant',1,'娴嬭瘯','娴嬭瘯','娴嬭瘯',4,'2024-03-16/B5CE2863FCEC4339B92ADD0FFEC0DB85.jpg'),(67,5.00,'2024-03-16/124929F771DE420BA3CD895F8B0EFD95.jpeg','merchant',1,'娴嬭瘯','娴嬭瘯','娴嬭瘯',5,'2024-03-16/124929F771DE420BA3CD895F8B0EFD95.jpeg;2024-03-16/1A0361DFDA6443F0AAD40F172C90D6A0.jpg');
-/*!40000 ALTER TABLE `goods` ENABLE KEYS */;
 INSERT INTO `goods` VALUES (50,6.60,'2024-03-09/638505BB6E89423F99CB0E7F0A5777C4.jpg','merchant',1,'健身器材 哑铃','蓝色 2kg','小哑铃',498,'2024-03-09/638505BB6E89423F99CB0E7F0A5777C4.jpg'),(51,6.60,'2024-03-09/4C1932C8236543FDA9A8A428DDFC5925.jpg','merchant',1,'健身器材 跳神','黑色','跳绳',490,'2024-03-09/4C1932C8236543FDA9A8A428DDFC5925.jpg'),(52,100.00,'2024-03-09/09CB8CB33C8042D2BE7D1095FE41390C.jpg','merchant',1,'健身器材 跑步机','运动健身','跑步机',500,'2024-03-09/09CB8CB33C8042D2BE7D1095FE41390C.jpg'),(53,6.60,'2024-03-09/896F97F3DA894B1A81CAC0B5000C5A13.jpg','merchant',1,'健身器材','2kg','磅砣',500,'2024-03-09/896F97F3DA894B1A81CAC0B5000C5A13.jpg'),(54,100.00,'2024-03-09/1BB6EB7C52C6424AA0AD572825041E16.jpg','merchant',1,'健身器材 哑铃','拉伸','哑铃',499,'2024-03-09/1BB6EB7C52C6424AA0AD572825041E16.jpg'),(55,100.00,'2024-03-09/36DEEA2FE4EF45E393849A973D87625C.jpg','merchant',1,'健身器材 大哑铃','双层','大哑铃',500,'2024-03-09/36DEEA2FE4EF45E393849A973D87625C.jpg'),(56,100.00,'2024-03-09/E88031AABEC6458A86E1C60A0031B79A.jpg','merchant',1,'健身器材 大哑铃','双层','大哑铃',500,'2024-03-09/E88031AABEC6458A86E1C60A0031B79A.jpg'),(57,100.00,'2024-03-09/3BB793B380BA442FB5B37A5FADDD5103.jpg','merchant',1,'健身器材 大哑铃','双层','大哑铃',499,'2024-03-09/3BB793B380BA442FB5B37A5FADDD5103.jpg'),(58,100.00,'2024-03-09/35F80A1B948D4ACBB4C37C4E67586313.jpg','merchant',1,'健身器材 大哑铃','双层','大哑铃',499,'2024-03-09/35F80A1B948D4ACBB4C37C4E67586313.jpg'),(59,100.00,'2024-03-09/D6A42134AED8447C89B8317C4F9A09C1.jpg','merchant',1,'健身器材 大哑铃','双层','大哑铃',500,'2024-03-09/D6A42134AED8447C89B8317C4F9A09C1.jpg'),(60,6.60,'2024-03-13/9A9E4514E38441C8A5C035BFDF4EC577.jpg','merchant',1,'拉伸 健身','拉伸','拉伸棒',100,'2024-03-13/9A9E4514E38441C8A5C035BFDF4EC577.jpg'),(64,1.00,'2024-03-16/85F091128F504EF991CA29CF77B6CAED.jpg','merchant',1,'测试','测试','测试啊',1,'2024-03-16/85F091128F504EF991CA29CF77B6CAED.jpg'),(65,3.00,'2024-03-16/22303D4C17294309A6B4BCDCA30C59D3.jpg','merchant',1,'测试','测试','测试',3,'2024-03-16/22303D4C17294309A6B4BCDCA30C59D3.jpg'),(66,4.00,'2024-03-16/B5CE2863FCEC4339B92ADD0FFEC0DB85.jpg','merchant',1,'测试','测试','测试',4,'2024-03-16/B5CE2863FCEC4339B92ADD0FFEC0DB85.jpg'),(67,5.00,'2024-03-16/124929F771DE420BA3CD895F8B0EFD95.jpeg','merchant',1,'测试','测试','测试',5,'2024-03-16/124929F771DE420BA3CD895F8B0EFD95.jpeg;2024-03-16/1A0361DFDA6443F0AAD40F172C90D6A0.jpg');
+/*!40000 ALTER TABLE `goods` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -117,7 +124,7 @@ DROP TABLE IF EXISTS `history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `history` (
-  `account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `account` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `gid` int NOT NULL,
   `view_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `star` int DEFAULT '0',
@@ -178,8 +185,8 @@ DROP TABLE IF EXISTS `notice`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notice` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `end_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -205,11 +212,11 @@ DROP TABLE IF EXISTS `permission`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permission` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `percode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `href` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `percode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `href` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -233,8 +240,8 @@ DROP TABLE IF EXISTS `role`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remark` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `available` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -285,15 +292,15 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sex` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `merchant` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `account` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nickname` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sex` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `merchant` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `type` int DEFAULT NULL,
-  `avatarpath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `salt` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatarpath` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `salt` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `available` int DEFAULT NULL,
   `gold` decimal(10,2) DEFAULT '999.00',
   PRIMARY KEY (`account`)
@@ -306,8 +313,41 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
 INSERT INTO `user` VALUES ('dereliction',NULL,'7e63e52450ef7a549e2f732c277c3060',NULL,NULL,NULL,2,NULL,'a4e2253194f8783911cf5f8fe740ad16',1,999.00),('liuying','流萤','e51e56a1c8fa2a25a2a42367871dfee5',NULL,NULL,'merchant',3,'2024-03-08/265C747B405F4D0285FCFE1E55E8F338.jpg','43c2be3cab3eddf207c5406e6658ce87',1,1051.80),('merchant','商家','c76d253ae84c39dc233b21bdd3976a4a','',NULL,NULL,2,'2024-03-09/EBFB984496404730A7EBCFF2CD10F6E6.jpg','4f42e857882255b26e94c985dc4b111e',1,999.00),('merchant1',NULL,'1cd262c1a3c3550c1e7a022f6113f673',NULL,NULL,NULL,2,NULL,'e69ee2c8ebe4768bafb8299e5c52419e',1,999.00),('normal','用户','3026532e73d1027ce79b7fd643916aec','无',NULL,NULL,1,'2024-03-05/5BBAFB1C185542948D675DA85DAC5733.jpg','28d3b02fe37d12f6a4396a4f33412d6c',1,422.10),('system','管理员','e51e56a1c8fa2a25a2a42367871dfee5','',NULL,NULL,4,'2024-03-09/7B2B835EFCA04A07B91C51DF0E4E5325.jpg','43c2be3cab3eddf207c5406e6658ce87',1,999.00);
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_goods`
+--
+
+DROP TABLE IF EXISTS `user_goods`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_goods` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gid` int DEFAULT NULL,
+  `num` int DEFAULT NULL,
+  `finishTime` timestamp NULL DEFAULT NULL,
+  `status` int DEFAULT NULL COMMENT '0鏈畬鎴?涔熷氨鏄湪璐墿杞﹂噷. 1瀹屾垚浜ゆ槗, -1閫€璐х敵璇? 2閫€璐ф垚鍔?-2閫€璐уけ璐?,
+  `cost` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `account` (`account`),
+  KEY `gid` (`gid`),
+  CONSTRAINT `user_goods_ibfk_1` FOREIGN KEY (`account`) REFERENCES `user` (`account`),
+  CONSTRAINT `user_goods_ibfk_2` FOREIGN KEY (`gid`) REFERENCES `goods` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+--
+-- Dumping data for table `user_goods`
+--
+
+LOCK TABLES `user_goods` WRITE;
+/*!40000 ALTER TABLE `user_goods` DISABLE KEYS */;
+INSERT INTO `user_goods` VALUES (55,'normal',55,2,'2024-03-12 00:50:34',0,NULL),(56,'normal',59,2,'2024-03-12 00:50:57',0,NULL),(57,'normal',57,2,'2024-03-12 00:50:58',0,NULL),(58,'normal',50,1,'2024-03-12 00:50:54',0,NULL),(59,'normal',58,1,'2024-03-12 00:50:55',0,NULL),(60,'normal',50,1,'2024-03-12 00:51:16',1,6.60),(61,'normal',51,1,'2024-03-13 00:11:53',2,6.60),(62,'normal',51,1,'2024-03-13 00:10:44',1,6.60),(63,'normal',57,1,'2024-03-14 16:19:17',-2,100.00);
+/*!40000 ALTER TABLE `user_goods` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -319,4 +359,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-24 17:09:44
+-- Dump completed on 2024-03-23 22:14:35
