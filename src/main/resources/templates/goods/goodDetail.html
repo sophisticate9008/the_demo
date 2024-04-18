@@ -189,7 +189,17 @@
       font-weight: bold;
       right: 8%;
     }
-
+    .contact {
+      border: 1px solid transparent;
+      /* 需要添加一个透明的边框 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      border-radius: 19px;
+      width: 63%;
+      position: absolute;
+      top: 315%;
+      font-weight: bold;
+      right: 8%;     
+    }
     #comments {
       position: relative;
       top: 5%;
@@ -301,7 +311,7 @@
             </el-button>
             <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
             <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
-
+            <el-button class="contact" @click="jumpChat(dataList[0].merchant)">联系客服</el-button>
           </div>
       </div>
       <div class="imgs">
@@ -425,6 +435,24 @@
         }
       },
       methods: {
+        jumpChat(merchant) {
+          if (window.parent.app.userBasic == null) {
+            this.$message.error("请先登录");
+            return;
+          }
+          if(window.parent.app.userBasic.type != 1) {
+            this.$message.error("非普通用户");
+            return;
+          }
+          var jsonData = {
+            name: "chat",
+            url: '/sys/chat'
+          };
+          window.parent.postMessage(jsonData, '*');
+          setTimeout(() => {
+            window.parent.app.chatApp.contact(merchant);
+          }, 500);
+        },
         initBigPic() {
           this.bigPicUrl = '/file/showImageByPath?path=' + this.dataList[0].imageList.split(';')[0];
         },

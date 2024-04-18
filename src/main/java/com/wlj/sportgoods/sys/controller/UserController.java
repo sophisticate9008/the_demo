@@ -99,11 +99,13 @@ public class UserController {
     }
     @RequestMapping("getUserBasic")
     public DataGridView getUserBasic() {
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
+        User user = (User) WebUtils.getSession().getAttribute("user");
         User userBasic = new User();
-        User userIntact = activerUser.getUser();
+        User userIntact = user;
         userBasic.setAccount(userIntact.getAccount())
+        .setGold(userIntact.getGold())
+        .setType(userIntact.getType())
+        .setMerchant(userIntact.getMerchant())
         .setNickname(userIntact.getNickname())
         .setAddress(userIntact.getAddress()) // 修正此处，使用 userIntact.getAddress()
         .setAvatarpath(userIntact.getAvatarpath())
@@ -112,9 +114,8 @@ public class UserController {
     }
     @RequestMapping("changeProfile")
     public ResultObj changeProfile(@RequestBody User user) {
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        user.setAccount(activerUser.getUser().getAccount());
+        User auser = (User) WebUtils.getSession().getAttribute("user");
+        user.setAccount(auser.getAccount());
         if(user.getAvatarpath().equals("")) {
             user.setAvatarpath(null);
         }else {
@@ -149,9 +150,8 @@ public class UserController {
     }
     @RequestMapping("loadCustomerServices")
     public DataGridView loadCustomerService(@RequestBody UserVo userVo) {
-        Subject subject = SecurityUtils.getSubject();
-        ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
-        String merchant = activerUser.getUser().getAccount();
+        User user = (User) WebUtils.getSession().getAttribute("user");
+        String merchant = user.getAccount();
         IPage<User> page = new Page<>(userVo.getPage(), userVo.getLimit());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("merchant", merchant);

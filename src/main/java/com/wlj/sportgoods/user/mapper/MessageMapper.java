@@ -1,6 +1,6 @@
-package com.wlj.sportgoods.sys.mapper;
+package com.wlj.sportgoods.user.mapper;
 
-import com.wlj.sportgoods.sys.entity.Message;
+import com.wlj.sportgoods.user.entity.Message;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author wlj
- * @since 2024-03-10
+ * @since 2024-04-13
  */
 public interface MessageMapper extends BaseMapper<Message> {
 

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Client</title>
+  <!-- 引入 Vue.js、Axios、SockJS 和 STOMP.js -->
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <script src="/resources/js/sockjs.min.js"></script>
+  <script src="/resources/js/stomp.min.js"></script>
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    #chat-skeleton {
+      margin-top: 2%;
+      margin-left: 1%;
+      margin-right: 1%;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      width: 98%;
+      height: 91.5vh;
+      background-color: rgba(255, 255, 255, 0.484);
+      border-radius: 0.5%;
+    }
+
+    #card-container {
+      background-color: rgba(255, 255, 255, 0.718);
+      position: relative;
+      width: 20%;
+      height: 100%;
+      border-radius: 0.5%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: scroll;
+    }
+
+    #card-list {
+
+      position: relative;
+      width: 100%;
+      max-height: 100%;
+      border-radius: 0.5%;
+      display: flex;
+      align-items: center;
+      flex-direction: column-reverse;
+      overflow-y: scroll;
+    }
+
+    .card,
+    .card-sel {
+      border-radius: 1%;
+      margin-top: 2px;
+      margin-left: 2px;
+      width: 95%;
+      height: 60px;
+      overflow: hidden;
+      background-color: rgba(107, 107, 107, 0.133);
+      flex-shrink: 0;
+      display: flex;
+      /* 使用 Flexbox 布局 */
+      align-items: center;
+      cursor: pointer;
+      /* 垂直居中 */
+    }
+
+    .card:hover {
+      background-color: rgba(107, 107, 107, 0.204);
+      /* 修改背景颜色 */
+    }
+
+    .card-sel {
+      background-color: rgba(107, 107, 107, 0.318);
+    }
+
+    .chat-title,
+    .chat-preview {
+      margin-left: 2%;
+      width: 85%;
+      line-height: 100%;
+      height: 50%;
+      font-size: 15px;
+    }
+
+    .chat-preview {
+      text-overflow: clip;
+      font-size: 12px;
+      color: gray;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    #chat-container {
+      width: 80%;
+      position: relative;
+      background-color: rgb(255, 255, 255);
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    #chat-content {
+      position: relative;
+      height: 80%;
+    }
+
+    #chat-input {
+      position: relative;
+      height: 25%;
+      width: 100%;
+    }
+
+    .el-textarea__inner {
+      height: 100%;
+    }
+
+    #chat-button {
+      position: absolute;
+      height: 6%;
+      width: 100%;
+      display: flex;
+      flex-direction: row-reverse;
+      bottom: 1%;
+      z-index: 10;
+    }
+
+    #chat-button>* {
+      margin-right: 10px;
+    }
+
+    #chat-content {
+      overflow-x: scroll;
+      display: flex;
+      flex-direction: column;
+    }
+    .message{
+      display: flex;
+      flex-direction: row;
+      width: 98%;
+      padding: 1%;
+    }
+    .message-right{
+      flex-direction: row-reverse;
+    }
+    .bubble {
+      display: flex;
+      flex-direction: column;
+      color:gray;
+      height: 90%;
+      font-size: 15px;
+      max-width: 70%;
+      margin-left: 1%;
+      margin-right: 1%;
+      word-wrap: break-word;
+    }
+    .content-data{
+      border-radius: 5px;
+      background-color: #afafaf56;
+    }
+    .content-data-right {
+      color: white;
+      border-radius: 5px;
+      background-color: #12B7F5;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="chat-skeleton">
+      <div id="card-container">
+        <div id="card-list">
+          <div v-for="(title, key) in Object.keys(messagesData)" :key="key"
+           :class="{'card-sel': title === currentSel, 'card': title !== currentSel}" @click="changeSel(title)">
+            <el-avatar size="large"></el-avatar>
+            <div class="chat-title">{{ title }} <br>
+              <div class="chat-preview">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div id="chat-container">
+        <div id="chat-button">
+          <el-button type="primary" title="enter发送" @click="packAndSend" v-if="currentSel">发送</el-button>
+        </div>
+        <div id="chat-input">
+          <el-input v-if="currentSel" type="textarea" placeholder="请输入内容" v-model="contents[currentSel].contentSaved"
+           style="height: 100% !important;" resize="none" @keydown.enter.native="keyDown">
+          </el-input>
+        </div>
+        <div id="chat-content">
+          <div :class="{'message': true, 'message-right': judgeMsg(message)}"
+           v-for="message in messagesData[currentSel]">
+           <el-avatar size="medium"></el-avatar>
+           <div class="bubble">
+            <div class="account">{{getAccount(message)}}</div>
+            <div :class="{'content-data': !judgeMsg(message), 'content-data-right': judgeMsg(message)}">
+              {{getContentData(message)}}
+            </div>
+           </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+
+    function generateUUID() {
+      return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
+      el: "#app",
+      data: {
+        theCustomerServices: {},
+        imagePath: null,
+        role: null,
+        contents: {},
+        currentSel: null,
+        messagesData: {},
+        uuid: null,
+        websock: null,
+        stompClient: null,
+        userInfo: {}, // 你的用户信息
+        messageToSend: '', // 输入框中要发送的消息
+
+      },
+      mounted() {
+        this.getBasicInfo(); // 获取用户基本信息
+        this.initWebSocket(); // 初始化 WebSocket 连接
+        this.loadMsg();
+        window.parent.app.chatApp = this;
+      },
+      methods: {
+        getAccount(message) {
+          var contentJson = JSON.parse(message.content);
+          return message[contentJson.sender];
+        },
+        getContentData(message) {
+          var contentJson = JSON.parse(message.content);
+          return contentJson.data;
+        },
+        judgeMsg(message) {
+          var contentJson = JSON.parse(message.content);
+          if (contentJson.sender == this.role) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        loadMsg() {
+          axios.get('/message/loadMsg').then(res => {
+            this.messagesData = res.data.data;
+            console.log(res.data.data);
+          })
+        },
+        keyDown(e) {
+          if (e.ctrlKey && e.keyCode == 13) {   //用户点击了ctrl+enter触发
+            this.contents[this.currentSel].contentSaved += '\n';
+          } else { //用户点击了enter触发
+            this.packAndSend();
+          }
+        },
+        packAndSend() {
+          if (this.theCustomerServices[this.currentSel] == '无在线客服,请稍后刷新重试') {
+            this.$alert('当前无在线客服,请稍后刷新重试');
+            return;
+          }
+          if (this.contents[this.currentSel].contentSaved == '') {
+            return;
+          }
+          var contentJson = {
+            sender: this.role,
+            data: this.contents[this.currentSel].contentSaved
+          }
+          var contentStr = JSON.stringify(contentJson);
+          if (this.userInfo.type == 1) {
+            var jsonData = {
+              customerService: this.theCustomerServices[this.currentSel],
+              user: this.userInfo.account,
+              merchant: this.currentSel,
+              content: contentStr,
+              imagePath: this.imagePath,
+              type: this.role
+            }
+          } else {
+            var jsonData = {
+              customerService: this.userInfo.account,
+              user: this.currentSel,
+              merchant: this.userInfo.merchant,
+              content: contentStr,
+              imagePath: this.imagePath,
+              type: this.role
+            }
+          }
+          this.receiveMsg(jsonData);
+          this.sendMessage(JSON.stringify(jsonData));
+          setTimeout(() => {
+            this.contents[this.currentSel].contentSaved = '';
+          }, 100);
+        },
+        contact(merchant) {
+          this.changeSel(merchant);
+        },
+        receiveMsg(jsonMsg) {
+          if (typeof jsonMsg === 'string') {
+            jsonMsg = JSON.parse(jsonMsg);
+          }
+          if (this.userInfo.type == 1) {
+            if (this.messagesData.hasOwnProperty(jsonMsg.merchant)) {
+              const updatedArray = this.messagesData[jsonMsg.merchant].concat(jsonMsg);
+              this.$set(this.messagesData, jsonMsg.merchant, updatedArray);
+            } else {
+              this.$set(this.messagesData, jsonMsg.merchant, [jsonMsg]);
+            }
+          } else {
+            if (this.messagesData.hasOwnProperty(jsonMsg.user)) {
+              const updatedArray = this.messagesData[jsonMsg.user].concat(jsonMsg);
+              this.$set(this.messagesData,jsonMsg.user, updatedArray);
+            } else {
+              this.$set(this.messagesData, jsonMsg.user, [jsonMsg]);
+            }
+          }
+        },
+        changeSel(sel) {
+          this.currentSel = sel;
+          var isReturn = false;
+          if(this.role == 'user' && !this.theCustomerServices.hasOwnProperty(sel)) {
+            axios.get('/message/getRandomCustomerService?merchant=' + sel).then(
+              res => {
+                if (res.data.data == '无在线客服,请稍后刷新重试') {
+                  this.$alert('当前无在线客服,请稍后刷新重试');
+                  isReturn = true;
+                  return;
+                } else {
+                  this.theCustomerServices[sel] = res.data.data;
+                }
+              }
+            )
+            if (isReturn) {
+              return;
+            }
+          }else if(this.role != 'user'){
+            this.theCustomerServices[sel] = this.userInfo.account;
+          }
+
+
+          if (!this.contents.hasOwnProperty(sel)) {
+            this.$set(this.contents, sel, { 'contentSaved': '' });
+          }
+          if (!this.messagesData.hasOwnProperty(sel)) {
+            this.$set(this.messagesData, sel, []);
+          }
+
+        },
+        getMessageData() {
+          axios.post("/message/loadMsg").then(response => {
+            this.messagesData = response.data.data;
+            this.currentSel = "blank"
+          })
+        },
+        getBasicInfo() {
+          this.userInfo = window.parent.app.userBasic;
+          if (this.userInfo.type == 1) {
+            this.role = 'user';
+          } else {
+            this.role = 'customerService';
+          }
+        },
+        initWebSocket() {
+          var socket = new SockJS('http://localhost:8888/websocket'); // 连接到后端的 WebSocket 端点
+          this.stompClient = Stomp.over(socket); // 创建 STOMP 客户端
+          var uuid = generateUUID();
+          this.uuid = uuid;
+          var userId = this.userInfo.account;
+          this.stompClient.connect({}, (frame) => {
+            console.log('WebSocket 连接成功');
+            // 订阅消息主题
+            this.stompClient.subscribe('/topic/messages/' + this.uuid, (message) => {
+              // 处理接收到的消息
+              console.log('收到消息:', message.body);
+              this.receiveMsg(message.body);
+            });
+
+            // 发送初始化消息，例如用户信息等
+            this.stompClient.send('/app/init/' + this.uuid, {}, userId);
+
+          }, (error) => {
+            console.error('WebSocket 连接失败:', error);
+          });
+        },
+        sendMessage(message) {
+          message = message.trim(); // 获取输入框中的消息内容（去除首尾空白）
+          if (message) { // 确保消息内容不为空
+            if (this.stompClient && this.stompClient.connected) {
+              this.stompClient.send('/app/send/' + this.uuid, {}, message);
+              console.log('发送消息:', message);
+              this.messageToSend = ''; // 清空输入框内容
+            } else {
+              console.error("WebSocket 连接未打开或已关闭");
+            }
+          } else {
+            console.warn("消息内容不能为空");
+          }
+        },
+      },
+    });
+    
+  </script>
+</body>
+</html>

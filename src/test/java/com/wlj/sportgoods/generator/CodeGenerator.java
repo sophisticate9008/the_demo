@@ -37,7 +37,7 @@ public class CodeGenerator {
         generator.setGlobalConfig(globalConfig);
         // 包配置
         PackageConfig packageConfig = new PackageConfig();
-        packageConfig.setParent("com.wlj.sportgoods.sys");
+        packageConfig.setParent("com.wlj.sportgoods.user");
         generator.setPackageInfo(packageConfig);
         // 策略配置
         StrategyConfig strategyConfig = new StrategyConfig();
