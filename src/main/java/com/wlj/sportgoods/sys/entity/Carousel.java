@@ -24,7 +24,7 @@ public class Carousel implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
+    
     private String imagePath;
 
     private Integer gid;

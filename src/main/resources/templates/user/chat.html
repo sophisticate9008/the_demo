@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Client</title>
+  <!-- 引入 Vue.js、Axios、SockJS 和 STOMP.js -->
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <script src="/resources/js/sockjs.min.js"></script>
+  <script src="/resources/js/stomp.min.js"></script>
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    #chat-skeleton {
+      margin-top: 2%;
+      margin-left: 1%;
+      margin-right: 1%;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      width: 98%;
+      height: 91.5vh;
+      background-color: rgba(255, 255, 255, 0.484);
+      border-radius: 0.5%;
+    }
+
+    #card-container {
+      background-color: rgba(255, 255, 255, 0.718);
+      position: relative;
+      width: 20%;
+      height: 100%;
+      border-radius: 0.5%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: scroll;
+    }
+
+    #card-list {
+
+      position: relative;
+      width: 100%;
+      max-height: 100%;
+      border-radius: 0.5%;
+      display: flex;
+      align-items: center;
+      flex-direction: column-reverse;
+      overflow-y: scroll;
+    }
+
+    .card,
+    .card-sel {
+      border-radius: 1%;
+      margin-top: 2px;
+      margin-left: 2px;
+      width: 95%;
+      height: 60px;
+      overflow: hidden;
+      background-color: rgba(107, 107, 107, 0.133);
+      flex-shrink: 0;
+      display: flex;
+      /* 使用 Flexbox 布局 */
+      align-items: center;
+      cursor: pointer;
+      /* 垂直居中 */
+    }
+
+    .card:hover {
+      background-color: rgba(107, 107, 107, 0.204);
+      /* 修改背景颜色 */
+    }
+
+    .card-sel {
+      background-color: rgba(107, 107, 107, 0.318);
+    }
+
+    .chat-title,
+    .chat-preview {
+      margin-left: 2%;
+      width: 75%;
+      line-height: 100%;
+      height: 50%;
+      font-size: 15px;
+    }
+
+    .chat-preview {
+      text-overflow: clip;
+      font-size: 12px;
+      color: gray;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    #chat-container {
+      width: 80%;
+      position: relative;
+      background-color: rgb(255, 255, 255);
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    #chat-content {
+      position: relative;
+      height: 80%;
+    }
+
+    #chat-input {
+      position: relative;
+      height: 25%;
+      width: 100%;
+    }
+
+    .el-textarea__inner {
+      height: 100%;
+    }
+
+    #chat-button {
+      position: absolute;
+      height: 6%;
+
+      display: flex;
+      flex-direction: row-reverse;
+      bottom: 1%;
+      right: 1%;
+      z-index: 10;
+    }
+
+    #chat-button>* {
+      margin-right: 10px;
+    }
+
+    #chat-content {
+      position: relative;
+      overflow-x: scroll;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: row;
+      width: 98%;
+      padding: 1%;
+    }
+
+    .message-right {
+      flex-direction: row-reverse;
+    }
+
+    .bubble {
+      display: flex;
+      flex-direction: column;
+      color: gray;
+      height: 90%;
+      font-size: 15px;
+      max-width: 70%;
+      margin-left: 1%;
+      margin-right: 1%;
+      word-wrap: break-word;
+    }
+
+    .content-data {
+      color: black;
+      border-radius: 5px;
+      background-color: #afafaf56;
+    }
+
+    .content-data-right {
+      color: white;
+      border-radius: 5px;
+      background-color: #12B7F5;
+    }
+
+    #pics {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .per-pic {
+      padding: 1%;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .pic-button {
+      position: absolute;
+      z-index: 2;
+    }
+
+    #message-pic {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .first-unread {
+      padding-left: 10px;
+      position: fixed;
+      top: 5%;
+      width: 100px;
+      right: 1.5%;
+      height: 26px;
+      background-color: #12b8f570;
+      border-radius: 13px 0 0 13px;
+      opacity: 0;
+      /* 初始透明度为 0 */
+      animation: fadeIn 1s ease-in forwards;
+      /* 设置透明度过渡时间为 2 秒 */
+    }
+    .time {
+      font-size: 10px;
+    }
+    .account {
+      font-size: 12px;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        /* 起始状态为完全透明 */
+      }
+      to {
+        opacity: 1;
+        /* 结束状态为完全不透明 */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="chat-skeleton">
+      <div id="card-container">
+        <div id="card-list">
+          <div v-for="title in sortKeys" :key="title"
+           :class="{'card-sel': title === currentSel, 'card': title !== currentSel}" @click="changeSel(title)">
+            <el-avatar size="large" v-if="chatSessions[title]" :src="getIntactUrl(chatSessions[title].avatarpath)"
+             fit="fill"></el-avatar>
+            <div class="chat-title">{{ title }} <br>
+              <div class="chat-preview">
+              </div>
+            </div>
+            <el-badge v-if="getLastUnreadNum(title) > 0 && title != currentSel" :value="getLastUnreadNum(title)">
+            </el-badge>
+          </div>
+        </div>
+      </div>
+      <div id="chat-container">
+        <div id="chat-button">
+          <el-button type="primary" title="enter发送" @click="packAndSend" v-if="currentSel">发送</el-button>
+          <input type="file" accept="image/*" ref="fileInput" style="display: none;" @change="handleFileUpload" />
+          <el-button type="primary" title="点击选择图片" v-if="currentSel" @click="openFileInput">
+            上传
+          </el-button>
+        </div>
+        <div id="pics">
+          <div v-for="url in imagePreviews[currentSel]" class="per-pic">
+            <el-button type="danger" icon="el-icon-delete" size="mini" circle class="pic-button"
+             @click="deletePic(url)"></el-button>
+            <el-image style=" height: 100px; border-radius: 10px; box-shadow: 0 0 2px 2px rgba(90, 136, 166, 0.7);"
+             :src="url" :preview-src-list="imagePreviews[currentSel]">
+            </el-image>
+          </div>
+        </div>
+        <div id="chat-input">
+          <el-input v-if="currentSel" type="textarea" placeholder="请输入内容,支持粘贴图片,最多五张"
+           v-model="contents[currentSel].contentSaved" style="height: 100% !important;" resize="none"
+           @keydown.enter.native="keyDown" @paste.native.capture.prevent="pasting">
+          </el-input>
+        </div>
+        <div id="chat-content" ref="chatContent" @scroll="handleScroll">
+          <div v-if="staticLastIds[currentSel] != lastIds[currentSel]" class="first-unread" @click="hideJump"> <el-link
+             :href="'#message' + staticLastIds[currentSel]" type="info" underline="false">首条未读消息</el-link></div>
+          <div :class="{'message': true, 'message-right': judgeMsg(message)}" :id="'message' + message.id"
+           v-for="message in messagesData[currentSel]">
+            <el-avatar size="medium"
+             :src="judgeMsg(message)?getIntactUrl(userInfo.avatarpath):getIntactUrl(chatSessions[currentSel].avatarpath)"></el-avatar>
+            <div class="bubble">
+              <div class="time">{{window.parent.app.convertToBeijingTime(message.sendTime)}}</div>
+              <div class="account">{{judgeMsg(message)?userInfo.nickname:getAccount(message)}}</div>
+              <div :class="{'content-data': !judgeMsg(message), 'content-data-right': judgeMsg(message)}">
+                {{getContentData(message)}}
+                <div v-if="message.imagePath != ';' && message.imagePath != ''"
+                 v-for="url in message.imagePath.split(';')" class="per-pic">
+                  <el-image style=" height: 100px;  box-shadow: 0 0 1px 1px rgba(90, 136, 166, 0.7);"
+                   :src="getIntactUrl(url)" :preview-src-list="[getIntactUrl(url)]">
+                  </el-image>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('beforeunload', function (e) {
+      var account = app.userInfo.account;
+      console.log('beforeunload');
+      app.stompClient.send('/app/disconnect/' + app.uuid, {}, account);
+    });
+    function generateUUID() {
+      return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var app = new Vue({
+      el: "#app",
+      data: {
+        sortKeys: [],
+        isAtBottom: true,
+        staticLastIds: {},
+        lastIds: {},
+        chatSessions: {},
+        theCustomerServices: {},
+        imagePreviews: {},
+        fileLists: {},
+        imagePaths: {},
+        role: null,
+        contents: {},
+        currentSel: null,
+        messagesData: {},
+        uuid: null,
+        websock: null,
+        stompClient: null,
+        userInfo: {}, // 你的用户信息
+        messageToSend: '', // 输入框中要发送的消息
+
+      },
+      mounted() {
+        this.getBasicInfo(); // 获取用户基本信息
+        this.initWebSocket(); // 初始化 WebSocket 连接
+        this.loadMsg();
+        window.parent.app.chatApp = this;
+      },
+      methods: {
+        hideJump() {
+          console.log("hideJump");
+          this.staticLastIds[this.currentSel] = this.lastIds[this.currentSel];
+        },
+        readMsg(sel) {
+          var temp = this.messagesData[sel][this.messagesData[sel].length - 1];
+          if (this.role == 'user') {
+            temp.haveReadUser = 1;
+          } else {
+            temp.haveReadCustomerservice = 1;
+          }
+          temp.type = 'update';
+          this.stompClient.send('/app/send/' + this.uuid, {}, JSON.stringify(temp));
+        },
+        checkScrollPosition() {
+          const chatContent = this.$refs.chatContent;
+          // 检查是否在底部
+          const { scrollHeight, scrollTop, clientHeight } = chatContent;
+          this.isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+          if (this.isAtBottom) {
+            console.log("到底部");
+          }
+        },
+        // 处理滚动事件
+        handleScroll() {
+          this.checkScrollPosition();
+        },
+        // 滚动到底部
+        scrollToBottom() {
+          const chatContent = this.$refs.chatContent;
+          chatContent.scrollTop = chatContent.scrollHeight;
+          this.isAtBottom = true; // 滚动到底部后更新状态
+        },
+        getchatSessionsData(key) {
+          axios.post('/user/getUserBasicByAccount', {
+            account: key
+          }).then(res => {
+            this.$set(this.chatSessions, key, res.data.data);
+          })
+        },
+        getIntactUrl(url) {
+          return "/file/showImageByPath?path=" + url;
+        },
+        openFileInput() {
+          // 点击按钮时触发打开文件选择对话框
+          this.$refs.fileInput.click();
+        },
+        handleFileUpload(event) {
+          const file = event.target.files[0]; // 获取选择的文件
+          if (!file) {
+            return; // 如果没有选择文件，直接返回
+          }
+          // 检查文件类型是否为图片
+          if (!file.type.startsWith('image/')) {
+            this.$message.error('请选择图片文件'); // 提示用户只能选择图片文件
+            return;
+          }
+          this.handleFile(file);
+        },
+        deletePic(url) {
+          var index = this.imagePreviews[this.currentSel].indexOf(url);
+          if (index !== -1) {
+            // 使用 splice() 方法删除数组中的元素
+            this.imagePreviews[this.currentSel].splice(index, 1);
+            this.fileLists[this.currentSel].splice(index, 1);
+          }
+        },
+        pasting(event) {
+          let txt = event.clipboardData.getData('Text')
+          if (typeof (txt) == 'string') {
+            this.contents[this.currentSel].contentSaved += txt;
+          }
+          let file = null;
+          const items = (event.clipboardData || window.clipboardData).items
+          if (items.length) {
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].type.indexOf('image') !== -1) {
+                file = items[i].getAsFile();
+                console.log(file);
+                this.handleFile(file);
+                break
+              }
+            }
+          }
+        },
+        handleFile(file) {
+          var currentSel = this.currentSel;
+          this.fileLists[currentSel].push(file);
+          var tempUrl = URL.createObjectURL(file.raw || file);
+          console.log(tempUrl);
+          this.imagePreviews[currentSel].push(tempUrl);
+        },
+        uploadFiles() {
+          var currentSel = this.currentSel;
+          try {
+            const uploadPromises = this.fileLists[currentSel].map(item1 => {
+              let formData = new FormData();
+              formData.append('mf', item1.raw || item1);
+              // 返回一个 Promise，表示上传操作
+              return axios.post("/file/uploadFile", formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              });
+            });
+            Promise.all(uploadPromises)
+              .then(responses => {
+                responses.forEach(item1 => {
+                  this.imagePaths[currentSel] += ";" + item1.data.path
+                })
+              });
+            console.log(this.imagePaths[currentSel]);
+          } catch (error) {
+            console.error(error);
+          }
+        },
+        getAccount(message) {
+          var contentJson = JSON.parse(message.content);
+          return message[contentJson.sender];
+        },
+        getContentData(message) {
+          var contentJson = JSON.parse(message.content);
+          return contentJson.data;
+        },
+        judgeMsg(message) {
+          var contentJson = JSON.parse(message.content);
+          if (contentJson.sender == this.role) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        loadMsg() {
+          axios.get('/message/loadMsg').then(res => {
+            this.messagesData = res.data.data;
+            Object.keys(this.messagesData).forEach(key => {
+              this.getchatSessionsData(key);
+            });
+            this.sortKeys = Object.keys(this.messagesData);
+          })
+        },
+        getLastUnreadNum(key) {
+          var lastIdx = -1;
+          for (var i = this.messagesData[key].length - 1; i >= 0; i--) {
+            if (this.role == 'user' && this.messagesData[key][i].haveReadUser == 1
+              || this.role == 'customerService' && this.messagesData[key][i].haveReadCustomerservice == 1) {
+              lastIdx = i;
+              this.$set(this.lastIds, key, this.messagesData[key][i].id);
+              break;
+            }
+          }
+          return this.messagesData[key].length - 1 - lastIdx;
+        },
+        keyDown(e) {
+          if (e.ctrlKey && e.keyCode == 13) {   //用户点击了ctrl+enter触发
+            this.contents[this.currentSel].contentSaved += '\n';
+          } else { //用户点击了enter触发
+            this.packAndSend();
+          }
+        },
+        packAndSend() {
+          if (typeof this.theCustomerServices[this.currentSel] === 'undefined') {
+            this.$alert('当前无在线客服,请稍后刷新重试');
+            return;
+          }
+          if (this.contents[this.currentSel].contentSaved == '' && this.imagePreviews[this.currentSel].length == 0) {
+            return;
+          }
+          this.uploadFiles();
+          setTimeout(() => {
+            var contentJson = {
+              sender: this.role,
+              data: this.contents[this.currentSel].contentSaved
+            }
+            var contentStr = JSON.stringify(contentJson);
+            if (this.userInfo.type == 1) {
+              var jsonData = {
+                customerService: this.theCustomerServices[this.currentSel],
+                user: this.userInfo.account,
+                merchant: this.currentSel,
+                content: contentStr,
+                imagePath: this.imagePaths[this.currentSel],
+                type: this.role,
+                haveReadUser: 1
+              }
+            } else {
+              var jsonData = {
+                customerService: this.userInfo.account,
+                user: this.currentSel,
+                merchant: this.userInfo.merchant,
+                content: contentStr,
+                imagePath: this.imagePaths[this.currentSel],
+                type: this.role,
+                haveReadCustomerservice: 1
+              }
+            }
+
+            this.sendMessage(JSON.stringify(jsonData));
+            setTimeout(() => {
+              this.$nextTick(() => {
+                this.scrollToBottom();
+              });
+              this.destoryData(this.currentSel);
+              this.staticLastIds[this.currentSel] = this.lastIds[this.currentSel];
+            }, 100);
+          }, 100);
+
+        },
+        contact(merchant) {
+          this.changeSel(merchant);
+        },
+        receiveMsg(jsonMsg) {
+          if (typeof jsonMsg === 'string') {
+            jsonMsg = JSON.parse(jsonMsg);
+          }
+          if (this.userInfo.type == 1) {
+            if (this.messagesData.hasOwnProperty(jsonMsg.merchant)) {
+              let idx = this.sortKeys.indexOf(jsonMsg.merchant);
+              if(idx != -1) {
+                this.sortKeys.splice(idx, 1);
+              }
+              this.sortKeys.push(jsonMsg.merchant);
+              this.messagesData[jsonMsg.merchant].push(jsonMsg);
+            } else {
+              this.getchatSessionsData(jsonMsg.merchant);
+              this.$set(this.messagesData, jsonMsg.merchant, [jsonMsg]);
+              this.sortKeys.push(jsonMsg.merchant);
+            }
+          } else {
+            if (this.messagesData.hasOwnProperty(jsonMsg.user)) {
+              this.messagesData[jsonMsg.user].push(jsonMsg);
+              let idx = this.sortKeys.indexOf(jsonMsg.user);
+              if(idx != -1) {
+                this.sortKeys.splice(idx, 1);
+              }
+              this.sortKeys.push(jsonMsg.user);
+            } else {
+              this.getchatSessionsData(jsonMsg.user);
+              this.$set(this.messagesData, jsonMsg.user, [jsonMsg]);
+              this.sortKeys.push(jsonMsg.user);
+            }
+          }
+          console.log(this.sortKeys);
+          if (this.isAtBottom) {
+            this.$nextTick(() => {
+              this.scrollToBottom();
+            });
+          }
+        },
+        initData(sel) {
+          if (!this.fileLists.hasOwnProperty(sel)) {
+            this.$set(this.fileLists, sel, []);
+          }
+          if (!this.imagePaths.hasOwnProperty(sel)) {
+            this.$set(this.imagePaths, sel, '');
+          }
+          if (!this.contents.hasOwnProperty(sel)) {
+            this.$set(this.contents, sel, { 'contentSaved': '' });
+          }
+          if (!this.messagesData.hasOwnProperty(sel)) {
+            this.$set(this.messagesData, sel, []);
+          }
+          if (!this.imagePreviews.hasOwnProperty(sel)) {
+            this.$set(this.imagePreviews, sel, []);
+          }
+        },
+        destoryData(sel) {
+          this.$set(this.fileLists, sel, []);
+          this.$set(this.imagePaths, sel, '');
+          this.$set(this.imagePreviews, sel, []);
+          this.contents[this.currentSel].contentSaved = '';
+        },
+        changeSel(sel) {
+          this.currentSel = sel;
+          this.initData(sel);
+          if (this.messagesData[sel].length > 0) {
+            this.$set(this.staticLastIds, sel, this.lastIds[sel]);
+            this.readMsg(sel);
+          }
+          setTimeout(() => {
+            this.$nextTick(() => {
+              this.scrollToBottom();
+            });
+          }, 10);
+          axios.get('/message/changeSel?sel=' + sel);
+          this.getchatSessionsData(sel);
+
+          var isReturn = false;
+          if (this.role == 'user' && !this.theCustomerServices.hasOwnProperty(sel)) {
+            axios.get('/message/getRandomCustomerService?merchant=' + sel).then(
+              res => {
+                if (res.data.data == '无在线客服,请稍后刷新重试') {
+                  this.$alert('当前无在线客服,请稍后刷新重试');
+                  isReturn = true;
+                  return;
+                } else {
+                  this.theCustomerServices[sel] = res.data.data;
+                }
+              }
+            )
+            if (isReturn) {
+              return;
+            }
+          } else if (this.role != 'user') {
+            this.theCustomerServices[sel] = this.userInfo.account;
+          }
+
+        },
+        getMessageData() {
+          axios.post("/message/loadMsg").then(response => {
+            this.messagesData = response.data.data;
+            this.currentSel = "blank"
+          })
+        },
+        getBasicInfo() {
+          this.userInfo = window.parent.app.userBasic;
+          if (this.userInfo.type == 1) {
+            this.role = 'user';
+          } else {
+            this.role = 'customerService';
+          }
+        },
+        initWebSocket() {
+          var socket = new SockJS('http://localhost:8888/websocket'); // 连接到后端的 WebSocket 端点
+          this.stompClient = Stomp.over(socket); // 创建 STOMP 客户端
+          var uuid = generateUUID();
+          this.uuid = uuid;
+          var userId = this.userInfo.account;
+          this.stompClient.connect({}, (frame) => {
+            console.log('WebSocket 连接成功');
+            // 订阅消息主题
+            this.stompClient.subscribe('/topic/messages/' + this.uuid, (message) => {
+              // 处理接收到的消息
+              this.receiveMsg(message.body);
+            });
+
+            // 发送初始化消息，例如用户信息等
+            this.stompClient.send('/app/init/' + this.uuid, {}, userId);
+
+          }, (error) => {
+            console.error('WebSocket 连接失败:', error);
+          });
+        },
+        sendMessage(message) {
+          message = message.trim(); // 获取输入框中的消息内容（去除首尾空白）
+          if (message) { // 确保消息内容不为空
+            if (this.stompClient && this.stompClient.connected) {
+              this.stompClient.send('/app/send/' + this.uuid, {}, message);
+              console.log('发送消息:', message);
+              this.messageToSend = ''; // 清空输入框内容
+            } else {
+              console.error("WebSocket 连接未打开或已关闭");
+            }
+          } else {
+            console.warn("消息内容不能为空");
+          }
+        },
+      },
+    });
+
+  </script>
+</body>
+</html>

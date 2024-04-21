@@ -2,6 +2,9 @@ package com.wlj.sportgoods.sys.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("sys")
@@ -95,4 +98,9 @@ public class SystemController {
     public String deleteComments() {
         return "goods/deleteComments";
     }
+    @RequestMapping("chat")
+    public String chat() {
+        return "user/chat";
+    }
+    
 }

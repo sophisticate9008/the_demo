@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -67,6 +68,7 @@ public class UserRealm extends AuthorizingRealm{
         queryWrapper.eq("account",authenticationToken.getPrincipal().toString());
         //通过用户名从数据库中查询出该用户
         User user = userService.getOne(queryWrapper);
+        SecurityUtils.getSubject().getSession().setAttribute("user", user);
         if (null!=user){
             ActiverUser activerUser = new ActiverUser();
             activerUser.setUser(user);
@@ -108,7 +110,7 @@ public class UserRealm extends AuthorizingRealm{
             activerUser.setMenuUrls(menuUrls);
             if(user.getType() == 1) {
                 activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("star", "cart", "chat", "clock-history")));
-            }else if (user.getType() == 2) {
+            }else if (user.getType() == 3) {
                 activerUser.setHeadIcons(new ArrayList<>(Arrays.asList("chat")));
             }else {
 

@@ -8,9 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 @SpringBootApplication
 @Configuration
+@EnableWebSocket
 @MapperScan(basePackages = {"com.wlj.sportgoods.*.mapper"})
 public class SportgoodsApplication {
 

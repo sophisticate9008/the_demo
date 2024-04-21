@@ -138,7 +138,7 @@ public class GoodsController {
                     for (String item : oldPaths) {
                         AppFileUtils.removeFileByPath(item.replace("_temp", ""));
                     }
-                    
+
                 }
                 goodsService.updateById(goodsVo);
                 return ResultObj.UPDATE_SUCCESS;

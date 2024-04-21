@@ -348,6 +348,7 @@
   var app = new Vue({
     el: '#app',
     data: {
+      chatApp : null,
       items: {},
       itemUrls: {
         'chat': "/sys/chat",
@@ -379,8 +380,14 @@
 
     },
     methods: {
+      convertToBeijingTime(utcTime) {
+        var utcDate = new Date(utcTime);
+        var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+        return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      },
       saveData() {
         localStorage.setItem('loadVueData', "true");
+        this.chatApp = null;
         // 将Vue实例的数据转换成JSON字符串并保存到localStorage
         localStorage.setItem('vueData', JSON.stringify(this.$data));
       },
@@ -408,6 +415,7 @@
       refreshIframe() {
         let $theIframe = $('#' + this.focusIframe + 'Iframe');
         $theIframe.attr('src', $theIframe.attr('src'));
+
       },
       getInfoAll() {
         this.loadData();
