@@ -155,7 +155,7 @@
 
     #chat-content {
       position: relative;
-      overflow-x: scroll;
+      overflow-y: scroll;
       display: flex;
       flex-direction: column;
     }
@@ -326,9 +326,7 @@
 
   <script>
     window.addEventListener('beforeunload', function (e) {
-      var account = app.userInfo.account;
-      console.log('beforeunload');
-      app.stompClient.send('/app/disconnect/' + app.uuid, {}, account);
+      app.beforeunload();
     });
     function generateUUID() {
       return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -369,6 +367,10 @@
         window.parent.app.chatApp = this;
       },
       methods: {
+        beforeunload() {
+          var account = this.userInfo.account;
+          this.stompClient.send('/app/disconnect/' + this.uuid, {}, account);
+        },
         getSender(message) {
           return message[this.getSenderRole(message)];
         },

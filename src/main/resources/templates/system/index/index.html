@@ -463,6 +463,7 @@
           let newArray = app.openIframes.slice(1);
           newArray.forEach((item) => {
             app.removeLabel(item);
+
           });
         })
       },
@@ -472,9 +473,17 @@
           this.openIframes.splice(index, 1);
           let $theLabel = $('#' + name + 'Label');
           let $theIframe = $('#' + name + 'Iframe');
+          if(name == 'chat') {
+            try{
+              this.chatApp.beforeunload();
+            }catch {
+              console.log("chatApp is null");
+            }
+          }
           $theLabel.remove();
           $theIframe.remove();
 
+          
           if (name == this.focusIframe) {
             this.focusIframe = this.openIframes[index - 1]; // 更新选择为前一个元素
             this.clickLabel(this.focusIframe);
