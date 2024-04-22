@@ -144,10 +144,11 @@ public class MessageController {
 
     }
     @RequestMapping("loadAllUserChat")
-    public DataGridView loadAllUserChat() {
+    public DataGridView loadAllUserChat(String userId) {
         User user = (User) WebUtils.getSession().getAttribute("user");
         QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("merchant", user.getMerchant());
+        queryWrapper.eq("user", userId);
         List<Message> msgList = messageService.list(queryWrapper);
         return new DataGridView(msgList);
     }

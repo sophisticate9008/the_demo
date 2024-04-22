@@ -172,8 +172,6 @@
     }
 
     .bubble {
-      display: flex;
-      flex-direction: column;
       color: gray;
       height: 90%;
       font-size: 15px;
@@ -184,12 +182,19 @@
     }
 
     .content-data {
+      padding-left: 3%;
+      padding-right: 3%;
+      display: inline-block;
       color: black;
       border-radius: 5px;
       background-color: #afafaf56;
     }
 
     .content-data-right {
+      position: relative;
+      padding-left: 3%;
+      padding-right: 3%;
+      float: right;
       color: white;
       border-radius: 5px;
       background-color: #12B7F5;
@@ -235,9 +240,6 @@
     .time {
       font-size: 10px;
     }
-    .account {
-      font-size: 12px;
-    }
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -275,6 +277,9 @@
           <el-button type="primary" title="点击选择图片" v-if="currentSel" @click="openFileInput">
             上传
           </el-button>
+          <el-button type="primary" title="加载该用户与所有客服的聊天记录" v-if="currentSel && role != 'user'" @click="loadHistory">
+            历史
+          </el-button>
         </div>
         <div id="pics">
           <div v-for="url in imagePreviews[currentSel]" class="per-pic">
@@ -296,11 +301,11 @@
              :href="'#message' + staticLastIds[currentSel]" type="info" underline="false">首条未读消息</el-link></div>
           <div :class="{'message': true, 'message-right': judgeMsg(message)}" :id="'message' + message.id"
            v-for="message in messagesData[currentSel]">
+            <div style="display: none;">{{getUserBasicByMessage(message)}}</div>
             <el-avatar size="medium"
-             :src="judgeMsg(message)?getIntactUrl(userInfo.avatarpath):getIntactUrl(chatSessions[currentSel].avatarpath)"></el-avatar>
+             :src="avatarUrls[getSender(message)]"></el-avatar>
             <div class="bubble">
-              <div class="time">{{window.parent.app.convertToBeijingTime(message.sendTime)}}</div>
-              <div class="account">{{judgeMsg(message)?userInfo.nickname:getAccount(message)}}</div>
+              <div class="time">{{window.parent.app.convertToBeijingTime(message.sendTime)}} &nbsp;{{userBasics.hasOwnProperty(getSender(message))? userBasics[getSender(message)].nickname : ""}} </div>
               <div :class="{'content-data': !judgeMsg(message), 'content-data-right': judgeMsg(message)}">
                 {{getContentData(message)}}
                 <div v-if="message.imagePath != ';' && message.imagePath != ''"
@@ -335,6 +340,8 @@
     var app = new Vue({
       el: "#app",
       data: {
+        avatarUrls:{},
+        userBasics: {},
         sortKeys: [],
         isAtBottom: true,
         staticLastIds: {},
@@ -362,6 +369,29 @@
         window.parent.app.chatApp = this;
       },
       methods: {
+        getSender(message) {
+          return message[this.getSenderRole(message)];
+        },
+        getUserBasicByMessage(message) {
+          var sender = this.getSender(message);
+          if(this.userBasics.hasOwnProperty(sender)) {
+            this.$set(this.avatarUrls, sender, this.getIntactUrl(this.userBasics[sender].avatarpath))
+          }else {
+            this.$set(this.avatarUrls, sender, "")
+            axios.post("/user/getUserBasicByAccount", { account: sender }).then(
+              response => {
+                const userBasic = response.data.data;
+                this.userBasics[sender] = userBasic;
+                this.$set(this.avatarUrls, sender, this.getIntactUrl(this.userBasics[sender].avatarpath))
+              }
+            );
+          }
+        },
+        loadHistory() {
+          axios.get('/message/loadAllUserChat?userId=' + this.currentSel).then(res => {
+            this.messagesData[this.currentSel] = res.data.data;
+          })
+        },
         hideJump() {
           console.log("hideJump");
           this.staticLastIds[this.currentSel] = this.lastIds[this.currentSel];
@@ -478,9 +508,9 @@
             console.error(error);
           }
         },
-        getAccount(message) {
+        getSenderRole(message) {
           var contentJson = JSON.parse(message.content);
-          return message[contentJson.sender];
+          return contentJson.sender;
         },
         getContentData(message) {
           var contentJson = JSON.parse(message.content);
