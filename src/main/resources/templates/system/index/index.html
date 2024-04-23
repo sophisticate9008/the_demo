@@ -348,6 +348,7 @@
   var app = new Vue({
     el: '#app',
     data: {
+      detailApps: {},
       chatApp : null,
       items: {},
       itemUrls: {
@@ -388,6 +389,7 @@
       saveData() {
         localStorage.setItem('loadVueData', "true");
         this.chatApp = null;
+        this.detailApps = {};
         // 将Vue实例的数据转换成JSON字符串并保存到localStorage
         localStorage.setItem('vueData', JSON.stringify(this.$data));
       },

@@ -283,6 +283,20 @@
       background-color: rgba(189, 189, 189, 0.519);
       object-fit: contain;
     }
+    .jumped {
+      background: #f0f9eb; /* 初始渐变色 */
+      animation: gradientAnimation 3s forwards; /* 添加动画效果 */
+    }
+  
+    @keyframes gradientAnimation {
+      0% {
+        background: #f0f9eb;  /* 初始渐变色 */
+      }
+
+      100% {
+        background: white /* 结束渐变色 */
+      }
+    }
   </style>
 </head>
 <body>
@@ -359,7 +373,7 @@
           <el-button id="i-right" :class="iClass" :title="iTitle" @click="toggleComments" circle></el-button>
         </div>
         <div class="comment-container" v-show="showComments" v-infinite-scroll="load" style="overflow:auto">
-          <el-card v-for="item in commentsShow">
+          <el-card v-for="item in commentsShow" :id= "'comment' + item.id">
             <div class="user-info">
               <el-avatar icon="el-icon-user-solid" :size="25"
                :src="'/file/showImageByPath?path=' + item.avatarPath"></el-avatar>
@@ -426,6 +440,7 @@
         this.getData();
         this.addHistory();
         this.getComments();
+        window.parent.app.$set(window.parent.app.detailApps, this.id, this);
       },
       watch: {
         "star()": function () {
@@ -435,6 +450,20 @@
         }
       },
       methods: {
+        jumpToComment(commentId) {
+          this.showComments = true;
+          setTimeout(() => {
+            var comment = document.getElementById("comment" + commentId);
+            comment.classList.add("jumped")
+            if (comment != null) {
+              comment.scrollIntoView();
+              setTimeout(() => {
+                comment.classList.remove("jumped")
+              }, 3000);
+            }
+          }, 300);
+
+        },
         jumpChat(merchant) {
           if (window.parent.app.userBasic == null) {
             this.$message.error("请先登录");

@@ -250,6 +250,20 @@
         /* 结束状态为完全不透明 */
       }
     }
+    .last-unread {
+      background: #f0f9eb; /* 初始渐变色 */
+      animation: gradientAnimation 3s forwards; /* 添加动画效果 */
+    }
+  
+    @keyframes gradientAnimation {
+      0% {
+        background: #f0f9eb;  /* 初始渐变色 */
+      }
+
+      100% {
+        background: white /* 结束渐变色 */
+      }
+    }
   </style>
 </head>
 <body>
@@ -297,8 +311,8 @@
           </el-input>
         </div>
         <div id="chat-content" ref="chatContent" @scroll="handleScroll">
-          <div v-if="staticLastIds[currentSel] != lastIds[currentSel]" class="first-unread" @click="hideJump"> <el-link
-             :href="'#message' + staticLastIds[currentSel]" type="info" underline="false">首条未读消息</el-link></div>
+          <div v-if="staticLastIds[currentSel] != lastIds[currentSel]" class="first-unread" @click="jumpToLastUnread();hideJump() "> <el-link id="last-unread-id"
+             type="info" underline="false">首条未读消息</el-link></div>
           <div :class="{'message': true, 'message-right': judgeMsg(message)}" :id="'message' + message.id"
            v-for="message in messagesData[currentSel]">
             <div style="display: none;">{{getUserBasicByMessage(message)}}</div>
@@ -367,6 +381,16 @@
         window.parent.app.chatApp = this;
       },
       methods: {
+        jumpToLastUnread() {
+          var element = document.getElementById('message' + this.staticLastIds[this.currentSel]);
+          if (element) {
+            element.classList.add('last-unread');
+            element.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+              element.classList.remove('last-unread');
+            },3000)
+          }
+        },
         beforeunload() {
           var account = this.userInfo.account;
           this.stompClient.send('/app/disconnect/' + this.uuid, {}, account);
@@ -481,6 +505,10 @@
         },
         handleFile(file) {
           var currentSel = this.currentSel;
+          if(this.fileLists[currentSel].length >= 5) {
+            this.$message.error("图片数量不能超过5");
+            return;
+          }
           this.fileLists[currentSel].push(file);
           var tempUrl = URL.createObjectURL(file.raw || file);
           console.log(tempUrl);

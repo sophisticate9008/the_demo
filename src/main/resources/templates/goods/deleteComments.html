@@ -75,6 +75,10 @@
       position: absolute;
       right: 15%;
     }
+    .jump-button {
+      position: absolute;
+      right: 20%;
+    }
   </style>
 </head>
 <body>
@@ -88,6 +92,7 @@
             <el-rate v-model="item.star" disabled show-score text-color="#ff9900">
             </el-rate>
             <el-button class="reply-button" size="mini" @click="dialogFormVisible = true; deleteComment(item)"> 删除</el-button>
+            <el-button class="jump-button" size="mini" @click="jumpToComment(item)"> 跳转</el-button>
             <span class="create-time">{{convertToBeijingTime(item.createTime)}}</span>
           </div>
 
@@ -124,6 +129,21 @@
 
       },
       methods: {
+        jumpToComment(item) {
+          axios.post("/goods/loadAllGoods", {id: item.gid}).then(
+            res=> {
+              var data = res.data.data[0];
+              var jsonData = {
+                name: data.goodName + data.id,
+                url: '/sys/goodDetail?id=' + item.gid
+              };
+              window.parent.postMessage(jsonData, '*');
+            }
+          )
+          setTimeout(() => {
+            window.parent.app.detailApps[item.gid].jumpToComment(item.id);
+          }, 500);
+        },
         load() {
           console.log("load")
           setTimeout(() => {
