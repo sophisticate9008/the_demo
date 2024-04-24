@@ -6,12 +6,17 @@
   <title>创建客服--体育器材商城系统</title>
   <!-- 引入 Bootstrap CSS 文件 -->
   <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
   <style>
     /* 居中对齐 */
     body {
       height: 100%;
       background-color: #47474742;
     }
+
     #app {
       display: flex;
       justify-content: center;
@@ -23,6 +28,8 @@
 
     /* 提交框样式 */
     .form-container {
+      display: flex;
+      flex-direction: row;
       background-color: #f0f0f0;
       /* 设置背景色 */
       padding: 20px;
@@ -31,7 +38,8 @@
       /* 设置圆角 */
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
       /* 添加阴影效果 */
-      width: 300px;
+      width: 90%;
+      height: 90%;
       /* 设置宽度 */
       margin-bottom: 20px;
       /* 添加底部外边距 */
@@ -47,24 +55,24 @@
 
     /* 美化文件上传按钮 */
     .custom-file-upload {
-      margin: 0 auto 0;
+
       /* 顶部留出20px的空白，左右自动居中 */
       display: block;
       /* 将按钮显示为块级元素，使其水平居中 */
       text-align: center;
       cursor: pointer;
-      background-color: #007bff;
+
       color: #fff;
       border-radius: 50%;
       /* 圆形按钮 */
       border: none;
       font-size: 24px;
       /* 图标大小 */
-      width: 100px;
+      width: 300px;
       /* 按钮宽度 */
-      height: 100px;
+      height: 300px;
       /* 按钮高度 */
-      line-height: 100px;
+      line-height: 300px;
       /* 按钮内部文本的行高与按钮高度相等，使其垂直居中 */
       overflow: hidden;
       /* 隐藏溢出内容 */
@@ -79,95 +87,220 @@
       position: relative;
       border-radius: 50%;
       /* 圆形 */
-      max-width: 100px;
+      max-width: 250px;
       /* 最大宽度 */
-      max-height: 100px;
+      max-height: 250px;
       /* 最大高度 */
       /* 与提交框之间的垂直间距 */
     }
-    #picture-cropper{
+
+    #picture-cropper {
       width: 100%;
       height: 100%;
       position: absolute;
       z-index: 10;
     }
+
+    .avatar-box {
+      align-items: center;
+      padding: 2%;
+      background-color: rgba(163, 163, 163, 0.152);
+      display: flex;
+      flex-direction: column;
+      width: 280px;
+    }
+
+    .input-des {
+      border: none;
+      color: black;
+      font-weight: bold;
+      font-size: 14px;
+      display: inline-block;
+      width: 90%;
+    }
+
+    .address-box {
+      display: flex;
+      flex-wrap: wrap;
+      /* Allow items to wrap to the next row */
+      justify-content: space-between;
+      /* Space items evenly along the main axis */
+      align-self: start;
+
+    }
+
+    .address-item {
+      position: relative;
+      width: 48%;
+      /* Set the width to fit two items per row */
+      padding: 1%;
+      box-shadow: 0px 0px 10px rgba(154, 176, 247, 0.607);
+      box-sizing: border-box;
+      margin-bottom: 2%;
+      /* Add bottom margin for spacing between rows */
+    }
+
+    .address-add {
+      width: 48%;
+      height: 80px;
+      box-shadow: 0px 0px 10px rgba(154, 176, 247, 0.607);
+      display: flex;
+      justify-content: center;
+      /* 水平居中 */
+      align-items: center;
+      /* 垂直居中 */
+      font-weight: bold;
+      color: rgb(98, 133, 238);
+      cursor: pointer;
+    }
+
+    .address-add:hover {
+      background-color: rgba(98, 133, 238, 0.182);
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'" ></iframe>    
+    <iframe id="picture-cropper" v-if="useCropper" :src="'/sys/cropper'"></iframe>
     <div class="form-container">
       <!-- 图片预览 -->
       <!-- 上传头像按钮 -->
-      <label for="avatar" class="custom-file-upload">
-        <span v-if="!avatarUrl">头像</span> <!-- 使用一个图标作为按钮 -->
-        <img class="avatar-preview" v-else :src="avatarUrl" alt="头像" style="width: 100%; height: 100%; border-radius: 50%;">
-      </label>
-      <input id="avatar" @click="callCropper" style="display: none;">
-      
-      <div class="mb-3">
+      <div class="avatar-box">
+        <label for="avatar" class="custom-file-upload">
+          <span v-if="!avatarUrl">头像</span> <!-- 使用一个图标作为按钮 -->
+          <img class="avatar-preview" :src="avatarUrl" alt="头像" style="width: 100%; height: 100%; border-radius: 50%;">
+        </label>
+        <input id="avatar" @click="callCropper" style="display: none;">
 
-        <input type="text" class="form-control" id="nickname" placeholder="请输入昵称" v-model="form.nickname">
+        <el-descriptions title="用户信息" :column="1">
+          <template slot="extra">
+            <el-button type="primary" size="small" @click="avatarUpload" :disabled="isupdateDisabled">提交</el-button>
+          </template>
+          <el-descriptions-item label="账户">{{userInfo.account}}</el-descriptions-item>
+          <el-descriptions-item label="金币">{{userInfo.gold}}</el-descriptions-item>
+          <el-descriptions-item label="类型">
+            <el-tag size="small">{{typeName}}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="昵称">
+            <template slot="label">
+              <i class="el-icon-edit"></i>
+              昵称
+            </template>
+            <input class="input-des" v-model="userInfo.nickname">
+          </el-descriptions-item>
+        </el-descriptions>
       </div>
-      <div class="mb-3">
-
-        <input type="text" class="form-control" id="address" placeholder="请输入地址" v-model="form.address">
-      </div>
-      <div class="mb-3">
-
-        <select class="form-select" id="sex" v-model="form.sex">
-          <option value="secret">保密</option>
-          <option value="male">男</option>
-          <option value="female">女</option>
-        </select>
-      </div>
-      <div class="mb-3">
-
-        <button class="btn btn-primary btn-block" @click="avatarUpload" :disabled="isupdateDisabled">提交</button>
+      <div class="address-box">
+        <div v-for="(item,index) in addressJsons" :key="index" class="address-item">
+          <el-button type="danger" icon="el-icon-delete" size="mini" circle style="position: absolute; right: -10px; top: -10px;" @click="deleteAddress(index)"></el-button>
+          <el-descriptions :column="2">
+            <el-descriptions-item>
+              <template slot="label">
+                <i class="el-icon-edit"></i>
+                收件人
+              </template>
+              <input class="input-des" v-model="item.receiver">
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <i class="el-icon-edit"></i>
+                手机号码
+              </template>
+              <input class="input-des" v-model="item.phone">
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <i class="el-icon-edit"></i>
+                地址
+              </template>
+              <input class="input-des" v-model="item.address">
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+        <div class="address-add" style="height: 90px; " @click="addAddress"> 新增地址</div>
       </div>
     </div>
   </div>
 
-  <!-- 引入 Vue.js -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-  <!-- 引入 Axios -->
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
   <script>
     function getCropPic(data) {
       var uuid = generateUUID();
-      app.useCropper =false;
-      if(data == '') {
-
+      app.useCropper = false;
+      if (data == '') {
         return;
       }
-      app.avatarFile = new File([data], uuid + '.jpg', { type: 'image/*'});
+      app.avatarFile = new File([data], uuid + '.jpg', { type: 'image/*' });
       app.avatarUrl = URL.createObjectURL(app.avatarFile);
     }
     function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0,
-            v = c == 'x' ? r : (r & 0x3 | 0x8);
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
       });
     }
     var app = new Vue({
       el: '#app',
       data: {
-        form: {
-          nickname: '',
-          address: '',
-          sex: 'secret',
-        },
-
+        addressJsons: [],
+        userInfo: null,
         avatarFile: null, // 保存上传的头像文件
         avatarUrl: '', // 保存头像预览图片的URL
         avatarPath: "",
         isupdateDisabled: false, // 提交按钮是否禁用
         useCropper: false,
       },
+      computed: {
+        typeName() {
+          switch (this.userInfo.type) {
+            case 1:
+              return '普通用户';
+            case 2:
+              return '商家';
+            case 3:
+              return '客服';
+            case 4:
+              return '管理员';
+          }
+        }
+      },
+      mounted() {
+        window.parent.app.changeProfileApp = this;
+        axios.get("/user/getUserBasic").then(res => {
+          this.userInfo = res.data.data;
+          this.getAddressJsons();
+          this.avatarUrl = '/file/showImageByPath?path=' + this.userInfo.avatarpath;
+        });
+
+      },
       methods: {
+        getAddressJsons() {
+          var temp = this.userInfo.address.split("!@#");
+          try {
+            temp.forEach(element => {
+              this.addressJsons.push(JSON.parse(element));
+            });
+          } catch (e) { }
+        },
+        addAddress() {
+          this.addressJsons.push({
+            receiver: "",
+            phone: '',
+            address: ""
+          })
+        },
+        deleteAddress(index) {
+          this.addressJsons.splice(index, 1);
+        },
+        getAddressStrs() {
+          var temp = ''
+          this.addressJsons.forEach(element => {
+            if(element.receiver != '' && element.phone != '' && element.address != '') {
+              temp += JSON.stringify(element) + '!@#';
+            }
+          });
+          this.userInfo.address = temp;
+        },
         callCropper() {
           this.useCropper = true;
         },
@@ -180,6 +313,7 @@
         avatarUpload() {
           var formData = new FormData();
           this.isupdateDisabled = true;
+          this.getAddressStrs();
           formData.append('mf', this.avatarFile);
           axios.post("/file/uploadFile", formData, {
             headers: {
@@ -194,12 +328,8 @@
           // 禁用提交按钮
         },
         update() {
-          axios.post("/user/changeProfile", {
-            account: this.form.account,
-            address: this.form.address,
-            nickname: this.form.nickname,
-            avatarpath: this.avatarPath
-          }).then(response => {
+          window.parent.app.changeProfile();
+          axios.post("/user/changeProfile", this.userInfo).then(response => {
             this.$alert(response.data.msg);
             if (response.data.code != 200) {
               this.isupdateDisabled = false;

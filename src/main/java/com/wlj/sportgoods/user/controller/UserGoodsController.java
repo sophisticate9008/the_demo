@@ -113,7 +113,9 @@ public class UserGoodsController {
         User user = (User) WebUtils.getSession().getAttribute("user");
         userGoods.setAccount(user.getAccount());
         if (userGoods.getId() != null) {
+            UserGoods temp = userGoods;
             userGoods = userGoodsService.getById(userGoods.getId());
+            userGoods.setAddress(temp.getAddress());
             if (!userGoods.getAccount().equals(user.getAccount())) {
                 return ResultObj.EXCEED_PERMISSION;
             }

@@ -50,4 +50,5 @@ public class UserGoods implements Serializable {
     private Integer status;
 
     private BigDecimal cost;
+    private String address;
 }

@@ -108,6 +108,13 @@
       align-items: center;
       font-size: 18px;
     }
+    .demo-drawer__content {
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+    .demo-drawer__footer {
+      padding-top: 5%;
+    }
   </style>
 </head>
 <body>
@@ -152,9 +159,22 @@
       <span>选择{{multipleSelection.length}}项</span>
       <span>合计: <span style="color: rgb(247, 94, 94);"> {{costAll}} <span> </span>
           <el-button type="danger" @click="deleteSelection">删除</el-button>
-          <el-button type="primary" @click="balance">结算</el-button>
+          <el-button type="primary" @click="beforeBalance">结算</el-button>
     </div>
+    <el-drawer title="收货地址及备注" :visible.sync="dialogAddress" direction="rtl" custom-class="demo-drawer" ref="drawer">
+      <div class="demo-drawer__content">
+        <el-select v-model="addressSel" placeholder="请选择">
+          <el-option v-for="(item,index) in addressJsons" :key="index" :value="addressToStr(item)">
+          </el-option>
+        </el-select>
+        <el-input type="text" :rows="2" placeholder="请输入备注" v-model="remark" style="padding-top: 10px;"></el-input>
 
+        <div class="demo-drawer__footer">
+          <el-button @click="$refs.drawer.closeDrawer()">取 消</el-button>
+          <el-button type="primary" @click="$refs.drawer.closeDrawer(); balance()">确定</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 
 
@@ -172,7 +192,12 @@
         multipleSelection: [],
         value2: '',
         drawer: false,
-        costAll: 0
+        costAll: 0,
+        remark: "",
+        addressSel: '',
+        dialogAddress: false,
+        addressJsons: [],
+        userInfo: null,
       },
       watch: {
         value2() {
@@ -191,10 +216,35 @@
       },
       mounted() {
         this.getData();
+        this.userInfo = window.parent.app.userBasic;
+        this.getAddressJsons();
       },
 
       methods: {
+        beforeBalance() {
+          if (this.addressJsons.length == 0) {
+            this.$message.error("请先添加收货地址");
+            return;
+          } else {
+            this.dialogAddress = true;
+          }
+        },
+        addressToStr(item) {
+          return item.receiver + " " + item.phone + " " + item.address;
+        },
+        getAddressJsons() {
+          var temp = this.userInfo.address.split("!@#");
+          try {
+            temp.forEach(element => {
+              this.addressJsons.push(JSON.parse(element));
+            });
+          } catch (e) { }
+        },
         balance() {
+          if(this.addressSel == '' || this.remark == '') {
+            this.$message.error("请选择收货地址和填写备注");
+            return;
+          }
           this.$alert('实际扣费以实时商品价格为准,是否结算？', {
             dangerouslyUseHTMLString: true,
             showClose: false,
@@ -206,7 +256,8 @@
               this.multipleSelection.forEach(item => {
                 axios.post("/userGoods/buy", {
                   id: item.id,
-                  gid: item.goodInfo.id
+                  gid: item.goodInfo.id,
+                  address: this.addressSel + " " + this.remark
                 }).then(response => {
                   this.$message(item.goodInfo.goodName + response.data.msg);
                   if (response.data.code == 200) {

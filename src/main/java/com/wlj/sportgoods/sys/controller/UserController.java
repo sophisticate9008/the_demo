@@ -1,6 +1,5 @@
 package com.wlj.sportgoods.sys.controller;
 
-
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +30,7 @@ import com.wlj.sportgoods.user.entity.Goods;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author wlj
@@ -49,28 +48,30 @@ public class UserController {
 
     @RequestMapping("register")
     public ResultObj register(@RequestBody User user) {
-        if(roleService.getAllRolesAsMap().containsValue(user.getType())) {
+        if (roleService.getAllRolesAsMap().containsValue(user.getType())) {
             return userService.register(user);
-        }else {
+        } else {
             return ResultObj.REGISTER_ERROR;
         }
     }
+
     @RequestMapping("createCustomerService")
-    @RequiresPermissions(value = {"merchant:createCustomerService"},logical = Logical.OR)
+    @RequiresPermissions(value = { "merchant:createCustomerService" }, logical = Logical.OR)
     public ResultObj createCustomer(@RequestBody User user) {
         User theUser = (User) WebUtils.getSession().getAttribute("user");
         if (theUser.getType() == 2) {
             user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
             user.setMerchant(theUser.getAccount());
             user.setType(3);
-            if(!userService.register(user).equals(ResultObj.REGISTER_SUCCESS)) {
+            if (!userService.register(user).equals(ResultObj.REGISTER_SUCCESS)) {
                 AppFileUtils.removeFileByPath(user.getAvatarpath());
-            };
+            }
+            ;
             return ResultObj.DISPATCH_SUCCESS;
-        }else {
+        } else {
             return ResultObj.DISPATCH_ERROR;
         }
-        
+
     }
 
     @RequestMapping("getMenu")
@@ -79,57 +80,57 @@ public class UserController {
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         return new DataGridView(activerUser.getMenus());
     }
+
     @RequestMapping("getMenuUrls")
     public DataGridView getMenuUrls() {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         return new DataGridView(activerUser.getMenuUrls());
     }
+
     @RequestMapping("getMenuIcons")
     public DataGridView getMenuIcons() {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         return new DataGridView(activerUser.getMenuIcons());
     }
+
     @RequestMapping("getHeadIcons")
     public DataGridView getHeadIcons() {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         return new DataGridView(activerUser.getHeadIcons());
     }
+
     @RequestMapping("getUserBasic")
     public DataGridView getUserBasic() {
         User user = (User) WebUtils.getSession().getAttribute("user");
-        User userBasic = new User();
-        User userIntact = user;
-        userBasic.setAccount(userIntact.getAccount())
-        .setGold(userIntact.getGold())
-        .setType(userIntact.getType())
-        .setMerchant(userIntact.getMerchant())
-        .setNickname(userIntact.getNickname())
-        .setAddress(userIntact.getAddress()) // 修正此处，使用 userIntact.getAddress()
-        .setAvatarpath(userIntact.getAvatarpath())
-        .setSex(userIntact.getSex());
-        return new DataGridView(userBasic);
+        User theUser = userService.getById(user.getAccount());
+        theUser.setPassword(null).setSalt(null);
+        return new DataGridView(theUser);
     }
+
     @RequestMapping("changeProfile")
     public ResultObj changeProfile(@RequestBody User user) {
         User auser = (User) WebUtils.getSession().getAttribute("user");
+        User theUser = userService.getById(auser.getAccount());
+        user.setGold(theUser.getGold()).setGold(theUser.getGold()).setSalt(theUser.getSalt()).setPassword(theUser.getPassword());
         user.setAccount(auser.getAccount());
-        if(user.getAvatarpath().equals("")) {
+        if (user.getAvatarpath().equals("")) {
             user.setAvatarpath(null);
-        }else {
-            user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));            
+        } else {
+            user.setAvatarpath(AppFileUtils.renameFile(user.getAvatarpath()));
         }
 
-        if(userService.updateById(user)) {
+        if (userService.updateById(user)) {
 
             return ResultObj.UPDATE_SUCCESS;
-        }else {
+        } else {
             AppFileUtils.removeFileByPath(user.getAvatarpath());
             return ResultObj.UPDATE_ERROR;
         }
     }
+
     @RequestMapping("changePassword")
     public ResultObj changePassword(@RequestBody JsonNode requestBody) {
         String oldPassword = requestBody.get("oldPassword").asText();
@@ -139,15 +140,16 @@ public class UserController {
         User user = activerUser.getUser();
         String oldHashPassword = PasswordUtils.hashPassword(oldPassword, user.getSalt());
         String newHashPassword = PasswordUtils.hashPassword(newPassword, user.getSalt());
-        if(oldHashPassword.equals(user.getPassword())) {
+        if (oldHashPassword.equals(user.getPassword())) {
             user.setPassword(newHashPassword);
             userService.updateById(user);
             subject.logout();
             return ResultObj.UPDATE_SUCCESS;
-        }else {
+        } else {
             return ResultObj.UPDATE_ERROR;
         }
     }
+
     @RequestMapping("loadCustomerServices")
     public DataGridView loadCustomerService(@RequestBody UserVo userVo) {
         User user = (User) WebUtils.getSession().getAttribute("user");
@@ -161,63 +163,65 @@ public class UserController {
         userService.page(page, queryWrapper);
         return new DataGridView(page.getTotal(), page.getRecords());
     }
+
     @RequestMapping("controlCustomerService")
-    @RequiresPermissions({"merchant:controlCustomerService"})
+    @RequiresPermissions({ "merchant:controlCustomerService" })
     public ResultObj controlUser(@RequestBody UserVo userVo) {
         Subject subject = SecurityUtils.getSubject();
         ActiverUser activerUser = (ActiverUser) subject.getPrincipal();
         User targetUser = userService.getById(userVo.getAccount());
-        if(targetUser.getMerchant().equals(activerUser.getUser().getAccount())) {
-            if(userVo.getDelete()) {
+        if (targetUser.getMerchant().equals(activerUser.getUser().getAccount())) {
+            if (userVo.getDelete()) {
                 userService.removeById(userVo.getAccount());
                 AppFileUtils.removeFileByPath(targetUser.getAvatarpath());
                 return ResultObj.DELETE_SUCCESS;
-            }else {
+            } else {
                 userService.updateById(userVo);
                 return ResultObj.UPDATE_SUCCESS;
             }
-        }else {
+        } else {
             return ResultObj.UPDATE_ERROR;
-        }        
+        }
 
     }
-    @RequestMapping("getAllUser") 
-    @RequiresPermissions({"*:*"})
+
+    @RequestMapping("getAllUser")
+    @RequiresPermissions({ "*:*" })
     public DataGridView getAllUser(@RequestBody UserVo userVo) {
         IPage<User> page = new Page<>(userVo.getPage(), userVo.getLimit());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.ne("account", "dereliction");
         queryWrapper.ne("type", "4");
         queryWrapper.like(StringUtils.isNotBlank(userVo.getAccount()), "account", userVo.getAccount());
-        queryWrapper.eq(userVo.getAvailable()!= 5, "available", userVo.getAvailable());
+        queryWrapper.eq(userVo.getAvailable() != 5, "available", userVo.getAvailable());
         userService.page(page, queryWrapper);
         return new DataGridView(page.getTotal(), page.getRecords());
     }
+
     @RequestMapping("userManagement")
-    @RequiresPermissions({"*:*"})
+    @RequiresPermissions({ "*:*" })
     public ResultObj userManagement(@RequestBody UserVo userVo) {
-        if(userVo.getDelete()) {
-            if(userService.removeById(userVo)) {
+        if (userVo.getDelete()) {
+            if (userService.removeById(userVo)) {
                 return ResultObj.DELETE_SUCCESS;
-            }else {
+            } else {
                 return ResultObj.DELETE_ERROR;
             }
         }
-        if(userService.updateById(userVo)) {
+        if (userService.updateById(userVo)) {
             return ResultObj.UPDATE_SUCCESS;
-        }else {
+        } else {
             return ResultObj.UPDATE_ERROR;
         }
     }
+
     @RequestMapping("getUserBasicByAccount")
     public DataGridView getUserBasicByAccount(@RequestBody UserVo uservo) {
         User theUser = userService.getById(uservo.getAccount());
         User returnUser = new User();
-        returnUser.setAvatarpath(theUser.getAvatarpath()).setNickname(theUser.getNickname()).setSex(theUser.getSex());
+        returnUser.setAvatarpath(theUser.getAvatarpath()).setNickname(theUser.getNickname()).setSex(theUser.getSex())
+                .setMerchant(theUser.getMerchant());
         return new DataGridView(returnUser);
     }
 
-
-
 }
-

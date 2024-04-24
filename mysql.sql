@@ -175,9 +175,11 @@ INSERT INTO role_permission VALUES(3, 27);
 INSERT INTO role_permission VALUES(3, 28);
 INSERT INTO role_permission VALUES(3, 29);
 
-
+ALTER TABLE `goods` MODIFY COLUMN `image_list` varchar(2000)  DEFAULT NULL;
 update Permission SET percode = "customerService:订单管理:订单管理:1" WHERE id = 15;
 update Permission SET percode = "customerService:订单管理:退订概览:2" WHERE id = 16;
+Alter TABLE user_goods ADD COLUMN address VARCHAR(255) DEFAULT null;
+Alter TABLE user modify COLUMN address VARCHAR(2000) DEFAULT null;
 
 
 

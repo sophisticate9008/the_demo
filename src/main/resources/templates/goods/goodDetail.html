@@ -164,7 +164,7 @@
       color: rgb(63, 63, 63);
     }
 
-    .el-input__inner {
+    .selNum .el-input__inner {
       border: 1px solid transparent;
       /* 需要添加一个透明的边框 */
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -189,6 +189,7 @@
       font-weight: bold;
       right: 8%;
     }
+
     .contact {
       border: 1px solid transparent;
       /* 需要添加一个透明的边框 */
@@ -198,8 +199,9 @@
       position: absolute;
       top: 315%;
       font-weight: bold;
-      right: 8%;     
+      right: 8%;
     }
+
     #comments {
       position: relative;
       top: 5%;
@@ -283,19 +285,32 @@
       background-color: rgba(189, 189, 189, 0.519);
       object-fit: contain;
     }
+
     .jumped {
-      background: #f0f9eb; /* 初始渐变色 */
-      animation: gradientAnimation 3s forwards; /* 添加动画效果 */
+      background: #f0f9eb;
+      /* 初始渐变色 */
+      animation: gradientAnimation 3s forwards;
+      /* 添加动画效果 */
     }
-  
+
     @keyframes gradientAnimation {
       0% {
-        background: #f0f9eb;  /* 初始渐变色 */
+        background: #f0f9eb;
+        /* 初始渐变色 */
       }
 
       100% {
-        background: white /* 结束渐变色 */
+        background: white
+          /* 结束渐变色 */
       }
+    }
+
+    .demo-drawer__content {
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+    .demo-drawer__footer {
+      padding-top: 5%;
     }
   </style>
 </head>
@@ -303,30 +318,31 @@
   <div id="app">
     <div id="card">
       <div id="card-info">
-        <el-image style="background-color: rgba(189, 189, 189, 0.519);" :preview-src-list='[bigPicUrl]' fit="contain" :src="bigPicUrl"></el-image>
-          <div id="text-info">
-            <span class="info-name">{{dataList[0].goodName}} </span>
-            <span class="info-sales">销量: {{dataList[0].sales}} <br>库存: {{dataList[0].stock}} </span>
-            <span class="info-price">{{'￥' + dataList[0].price}}</span>
-            <div id="label-container">
-              <div class="label-div" v-for="label in dataList[0].labelList">
-                <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
-              </div>
+        <el-image style="background-color: rgba(189, 189, 189, 0.519);" :preview-src-list='[bigPicUrl]' fit="contain"
+         :src="bigPicUrl"></el-image>
+        <div id="text-info">
+          <span class="info-name">{{dataList[0].goodName}} </span>
+          <span class="info-sales">销量: {{dataList[0].sales}} <br>库存: {{dataList[0].stock}} </span>
+          <span class="info-price">{{'￥' + dataList[0].price}}</span>
+          <div id="label-container">
+            <div class="label-div" v-for="label in dataList[0].labelList">
+              <el-tag style="margin: 0 0 0 20px;">{{label}}</el-tag>
             </div>
-            <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
           </div>
-          <div id="buttons">
-            <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
-            <el-button class="leftButton" @click="addToCart">
-              加入购物车
-            </el-button>
-            <el-button class="rightButton" @click="buy">
-              立刻购买
-            </el-button>
-            <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
-            <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
-            <el-button class="contact" @click="jumpChat(dataList[0].merchant)">联系客服</el-button>
-          </div>
+          <span class="info-desc">商品介绍: {{dataList[0].introduction}}</span>
+        </div>
+        <div id="buttons">
+          <el-button class="star" :icon="starIcon" circle @click="star"></el-button>
+          <el-button class="leftButton" @click="addToCart">
+            加入购物车
+          </el-button>
+          <el-button class="rightButton" @click="beforeBuy">
+            立刻购买
+          </el-button>
+          <el-input-number class="selNum" v-model="num" :min="1" :max="100"></el-input-number>
+          <el-button class="add-comment" @click="dialogFormVisible = true">添加评论</el-button>
+          <el-button class="contact" @click="jumpChat(dataList[0].merchant)">联系客服</el-button>
+        </div>
       </div>
       <div class="imgs">
         <el-image v-for="pic in dataList[0].imageList.split(';')"
@@ -372,7 +388,7 @@
           <el-button id="i-right" :class="iClass" :title="iTitle" @click="toggleComments" circle></el-button>
         </div>
         <div class="comment-container" v-show="showComments" v-infinite-scroll="load" style="overflow:auto">
-          <el-card v-for="item in commentsShow" :id= "'comment' + item.id">
+          <el-card v-for="item in commentsShow" :id="'comment' + item.id">
             <div class="user-info">
               <el-avatar icon="el-icon-user-solid" :size="25"
                :src="'/file/showImageByPath?path=' + item.avatarPath"></el-avatar>
@@ -386,8 +402,9 @@
             <div class="comment-content">
               <span>{{item.content}} </span>
               <div class="comments-pics">
-                <el-image  shape="square" fit="contain" style=" height: 150px"
-                 v-for="pic in item.imgList" v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic" :preview-src-list="['/file/showImageByPath?path=' + pic]"></el-image>
+                <el-image shape="square" fit="contain" style=" height: 150px" v-for="pic in item.imgList"
+                 v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic"
+                 :preview-src-list="['/file/showImageByPath?path=' + pic]"></el-image>
               </div>
               <div class="reply-content">
                 <span style="background-color: rgb(245, 116, 69); color:white" v-if="item.replyId != 0">客服:</span>
@@ -398,12 +415,31 @@
         </div>
       </div>
     </div>
+    <el-drawer title="收货地址及备注" :visible.sync="dialogAddress" direction="rtl" custom-class="demo-drawer" ref="drawer">
+      <div class="demo-drawer__content">
+        <el-select v-model="addressSel" placeholder="请选择" >
+          <el-option v-for="(item,index) in addressJsons" :key="index" :value="addressToStr(item)">
+          </el-option>
+        </el-select>
+        <el-input type="text" :rows="2" placeholder="请输入备注" v-model="remark" style="padding-top: 10px;"></el-input>
+
+        <div class="demo-drawer__footer">
+          <el-button @click="$refs.drawer.closeDrawer()">取 消</el-button>
+          <el-button type="primary" @click="$refs.drawer.closeDrawer(); buy()">确定</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
   <script>
 
     var app = new Vue({
       el: "#app",
       data: {
+        remark: "",
+        addressSel: '',
+        dialogAddress: false,
+        addressJsons: [],
+        userInfo: null,
         bigPicUrl: null,
         starVo: null,
         showComments: false,
@@ -440,6 +476,8 @@
         this.addHistory();
         this.getComments();
         window.parent.app.$set(window.parent.app.detailApps, this.id, this);
+        this.userInfo = window.parent.app.userBasic;
+        this.getAddressJsons();
       },
       watch: {
         "star()": function () {
@@ -449,6 +487,17 @@
         }
       },
       methods: {
+        addressToStr(item) {
+          return item.receiver + " " + item.phone + " " +  item.address;
+        },
+        getAddressJsons() {
+          var temp = this.userInfo.address.split("!@#");
+          try {
+            temp.forEach(element => {
+              this.addressJsons.push(JSON.parse(element));
+            });
+          } catch (e) { }
+        },
         jumpToComment(commentId) {
           this.showComments = true;
           setTimeout(() => {
@@ -468,7 +517,7 @@
             this.$message.error("请先登录");
             return;
           }
-          if(window.parent.app.userBasic.type != 1) {
+          if (window.parent.app.userBasic.type != 1) {
             this.$message.error("非普通用户");
             return;
           }
@@ -606,6 +655,7 @@
             this.starIcon = "el-icon-star-off"
           }
         },
+
         addToCart() {
           axios.post("/userGoods/cartAdd", {
             gid: this.id,
@@ -614,7 +664,20 @@
             this.$message(response.data.msg);
           })
         },
+        beforeBuy() {
+          if (this.addressJsons.length == 0) {
+            this.$message.error("请先添加收货地址");
+            return;
+          } else {
+            this.dialogAddress = true;
+          }
+
+        },
         buy() {
+          if(this.addressSel == '' || this.remark == '') {
+            this.$message.error("请选择收货地址和填写备注");
+            return;
+          }
           this.$alert('实际扣费以实时商品价格为准,是否结算？', {
             dangerouslyUseHTMLString: true,
             showClose: false,
@@ -625,7 +688,8 @@
             if (action === 'confirm') {
               axios.post("/userGoods/buy", {
                 gid: this.id,
-                num: this.num
+                num: this.num,
+                address: this.addressSel + " " + this.remark
               }).then(response => {
                 this.$message(response.data.msg);
               }).catch(error => {
