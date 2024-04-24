@@ -8,5 +8,19 @@
         SELECT SUM(num) AS total_sales 
         FROM user_goods 
         WHERE gid = #{gid} AND status = 1;
-    </select>      
+    </select> 
+    <select id="getOrdersByAccount" resultType="com.wlj.sportgoods.user.entity.UserGoods">
+        SELECT *
+        FROM user_goods
+        WHERE status != 0 and gid IN (
+            SELECT id
+            FROM goods
+            WHERE merchant = (
+                SELECT merchant
+                FROM user
+                WHERE account = #{account}
+            )
+        )
+        ORDER BY finishTime DESC
+    </select>
 </mapper>

@@ -27,6 +27,9 @@ import com.wlj.sportgoods.sys.service.PermissionService;
 import com.wlj.sportgoods.sys.service.RoleService;
 import com.wlj.sportgoods.sys.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class UserRealm extends AuthorizingRealm{
     @Autowired
     private PermissionService permissionService;
@@ -133,6 +136,7 @@ public class UserRealm extends AuthorizingRealm{
     public Map<String,List<String>> getMenuMap(List<String> data) {
         Map<String, List<String>> menuMap = new HashMap<>();
         for (String line : data) {
+
             String[] parts = line.split(":");
             String key = parts[1];
             String value = parts[2];

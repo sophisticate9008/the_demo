@@ -158,7 +158,15 @@ public class UserGoodsController {
         User user = (User) WebUtils.getSession().getAttribute("user");
         return new DataGridView(userGoodsService.getRefoundApplymentByAccount(user.getAccount()));
     }
-
+    @RequestMapping("orderQuery")
+    public DataGridView orderQuery() {
+        User user = (User) WebUtils.getSession().getAttribute("user");
+        if(user.getType() != 3) {
+            return null;
+        }else {
+            return new DataGridView(userGoodsService.getOrdersByAccount(user.getAccount()));
+        }
+    }
     
 
     @Transactional

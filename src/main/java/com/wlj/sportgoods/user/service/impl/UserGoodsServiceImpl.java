@@ -43,5 +43,9 @@ public class UserGoodsServiceImpl extends ServiceImpl<UserGoodsMapper, UserGoods
     public Integer getSalesByGid(Integer gid) {
         return this.getBaseMapper().getSalesByGid(gid);
     }
+    @Override
+    public List<UserGoods> getOrdersByAccount(String account) {
+        return this.getBaseMapper().getOrdersByAccount(account);
+    }
 
 }

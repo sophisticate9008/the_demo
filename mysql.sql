@@ -140,6 +140,9 @@ INSERT INTO Permission VALUES(23, "审核功能", "*:审核功能:商品审核:2
 INSERT INTO Permission VALUES(24, "删除评论权限", "user:deleteComment", "", "", "permission");
 INSERT INTO Permission VALUES(25, "评价管理", "user:评价管理:评价管理:1", "", "chat-left-text", "menu");
 INSERT INTO Permission VALUES(26, "评价管理", "user:评价管理:删除评价:2", "/sys/deleteComments", "x", "menu");
+INSERT INTO Permission VALUES(27, "订单管理菜单", "customerService:订单管理:订单查询:2", "/sys/orderQuery", "search", "menu");
+INSERT INTO Permission VALUES(28, "评价管理菜单", "customerService:评价管理:评价管理:1", "", "chat-square", "menu");
+INSERT INTO Permission VALUES(29, "评价管理", "customerService:评价管理:评价管理:2", "/sys/commentsManagement", "chat-square-dots", "menu");
 
 INSERT INTO role_permission VALUES(2, 1);
 INSERT INTO role_permission VALUES(2, 2);
@@ -168,3 +171,13 @@ INSERT INTO role_permission VALUES(1, 24);
 INSERT INTO role_permission VALUES(3, 24);
 INSERT INTO role_permission VALUES(1, 25);
 INSERT INTO role_permission VALUES(1, 26);
+INSERT INTO role_permission VALUES(3, 27);
+INSERT INTO role_permission VALUES(3, 28);
+INSERT INTO role_permission VALUES(3, 29);
+
+
+update Permission SET percode = "customerService:订单管理:订单管理:1" WHERE id = 15;
+update Permission SET percode = "customerService:订单管理:退订概览:2" WHERE id = 16;
+
+
+

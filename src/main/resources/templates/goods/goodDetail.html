@@ -329,7 +329,6 @@
           </div>
       </div>
       <div class="imgs">
-
         <el-image v-for="pic in dataList[0].imageList.split(';')"
          style="width: 50px; height: 50px; padding:1.5px; cursor: pointer" :src="'/file/showImageByPath?path=' + pic"
          fit="cover" @click="bigPicUrl = '/file/showImageByPath?path=' + pic"></el-image>

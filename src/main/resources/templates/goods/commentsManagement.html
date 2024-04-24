@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    .comment-container {
+      height: min-content;
+      max-height: 95vh;
+
+      overflow: auto;
+    }
+
+    #comments {
+      background-color: white;
+      position: relative;
+      top: 5%;
+      width: 80%;
+
+      margin: auto auto;
+      border-radius: 0.5%;
+    }
+
+    .user-info {
+      position: relative;
+      display: flex;
+      align-items: center;
+      /* 上下居中 */
+      font-weight: bold;
+    }
+
+    .comment-content {
+      position: relative;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .comments-pics {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .comments-pics * {
+      margin: 5px;
+    }
+
+    .create-time {
+      position: absolute;
+      right: 1%;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .reply-button {
+      position: absolute;
+      right: 20%;
+    }
+
+    .jump-button {
+      position: absolute;
+      right: 15%;
+    }
+
+    .reply-content {
+      font-size: 80%;
+      position: relative;
+      width: 100%;
+      background-color: rgba(128, 128, 128, 0.208);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <el-dialog title="新增评论" :visible.sync="dialogFormVisible">
+      <el-form :rules="rules" :model="form" ref="form">
+        <el-form-item label="回复内容" :label-width="formLabelWidth" prop="content">
+          <el-input v-model="form.content" type="textarea" autosize></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false; form.theId = null">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+
+      </div>
+    </el-dialog>
+    <div id="comments">
+      <div class="comment-container" v-infinite-scroll="load" style="overflow:auto">
+        <el-card v-for="item in commentsShow">
+          <div class="user-info">
+            <el-avatar icon="el-icon-user-solid" :size="25"></el-avatar>
+            <span>&nbsp; {{item.nickname}}</span>
+            <el-rate v-model="item.star" disabled show-score text-color="#ff9900">
+            </el-rate>
+            <el-button class="jump-button" size="mini" @click="jumpToComment(item)"> 跳转</el-button>
+            <el-button class="reply-button" size="mini" @click="dialogFormVisible = true; reply(item)"> 回复</el-button>
+            <span class="create-time">{{convertToBeijingTime(item.createTime)}}</span>
+          </div>
+
+          <div class="comment-content">
+            <span>{{item.content}} </span>
+            <div class="comments-pics">
+              <el-image shape="square" :preview-src-list="['/file/showImageByPath?path=' + pic]" fit="contain" style=" height: 150px" v-for="pic in item.imgList"
+               v-if="pic != ''" :src="'/file/showImageByPath?path=' + pic"></el-image>
+            </div>
+            <div class="reply-content">
+              <span style="background-color: rgb(245, 116, 69); color:white" v-if="item.replyId != 0">客服:</span>
+              <span v-if="item.replyId != 0">{{item.reply.content}}</span>
+            </div>
+          </div>
+        </el-card>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        dialogFormVisible: false,
+        userInfo: null,
+        commentsShow: [],
+        comments: [],
+        count: 10,
+        goodsList: null,
+        formLabelWidth: "100px",
+        form: {
+          isReply: false,
+          theId: null,
+          gid: 0,
+          content: null,
+          imagePath: "",
+          star: null,
+        },
+        rules: {
+          content: [{ required: true, message: '请输入评价内容', trigger: 'blur' }],
+        }
+
+      },
+      mounted() {
+        this.userInfo = window.parent.app.userBasic;
+        this.getComments();
+
+      },
+      watch: {
+
+      },
+      methods: {
+        reply(item) {
+          this.form.theId = item.id
+          this.form.gid = item.gid
+        },
+        submit() {
+          this.$refs.form.validate(valid => {
+            if (valid) {
+              console.log(this.form.imagePath);
+              axios.post("/comments/addComment", this.form)
+                .then(response => {
+                  this.$message(response.data.msg)
+                  setTimeout(() => {
+                    window.location.href = window.location.href;
+                  }, 1000)
+                })
+            }
+            else {
+              this.$message("请先补全");
+            }
+          })
+          setTimeout(() => {
+            this.form.theId = null;
+            this.picLimit = 5;
+          }, 500)
+
+        },
+        jumpToComment(item) {
+          axios.post("/goods/loadAllGoods", { id: item.gid }).then(
+            res => {
+              var data = res.data.data[0];
+              var jsonData = {
+                name: data.goodName + data.id,
+                url: '/sys/goodDetail?id=' + item.gid
+              };
+              window.parent.postMessage(jsonData, '*');
+            }
+          )
+          setTimeout(() => {
+            window.parent.app.detailApps[item.gid].jumpToComment(item.id);
+          }, 500);
+        },
+        load() {
+          console.log("load")
+          setTimeout(() => {
+            this.count += 3
+            this.commentsShow = this.comments.slice(0, Math.min(this.comments.length, this.count));
+          }, 500)
+        },
+        getComments() {
+          axios.post("/goods/loadAllGoods", {
+            merchant: this.userInfo.merchant
+          }).then(res => {
+            this.goodsList = res.data.data;
+            this.goodsList.forEach(item1 => {
+              axios.post("/comments/loadAllComment", {
+                gid: item1.id
+              }).then(response => {
+                response.data.data.forEach(item => {
+                  this.$set(item, "imgList", item.imagePath.split(";"));
+                  if (item.replyId != 0) {
+                    axios.post("/comments/loadAllComment", {
+                      isReply: true,
+                      id: item.replyId
+                    }).then(response2 => {
+                      this.$set(item, "reply", response2.data.data[0])
+                    })
+                  }
+                });
+                this.comments = [...this.comments, ...response.data.data];
+              });
+            });
+          });
+          setTimeout(() => {
+            this.comments.sort((a, b) => {
+              // 将时间戳字符串转换为 Date 对象进行比较
+              const timeA = new Date(a.createTime).getTime();
+              const timeB = new Date(b.createTime).getTime();
+              return -timeA + timeB;
+            });
+            this.load();
+          }, 2000);
+
+
+        },
+        convertToBeijingTime(utcTime) {
+          var utcDate = new Date(utcTime);
+          var beijingTime = new Date(utcDate.getTime() + (8 * 60 * 60 * 1000)); // 加上8小时的毫秒数
+          return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        },
+        deleteComment(item) {
+          this.$alert('操作不可回退，是否删除？', {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: true, // 添加取消按钮
+            confirmButtonText: '确定',
+            cancelButtonText: '取消' // 指定取消按钮的文本
+          }).then(action => {
+            if (action === 'confirm') {
+              axios.post("/comments/deleteComment", {
+                id: item.id
+              })
+                .then(response => {
+                  this.$message(response.data.msg);
+                  if (response.data.code == 200) {
+                    let index = this.comments.indexOf(item)
+                    this.comments.splice(index, 1);
+                    index = this.commentsShow.indexOf(item)
+                    this.commentsShow.splice(index, 1);
+                  }
+
+                })
+            }
+          }, error => {
+            console.error('Promise 被拒绝:', error);
+          });
+        }
+      },
+    })
+  </script>
+</body>
+</html>

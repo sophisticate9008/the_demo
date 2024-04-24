@@ -120,6 +120,9 @@
          start-placeholder="开始日期" end-placeholder="结束日期" align="right">
         </el-date-picker>
       </div>
+      <div class="search">
+        <el-input placeholder="根据id查询" v-model="idSel"></el-input>
+      </div>
       <!-- <label>删除选中</label>
       <el-button @click="deleteSelection" icon="el-icon-delete" type="danger"> </el-button> -->
       <el-radio-group v-model="status">
@@ -130,7 +133,7 @@
       </el-radio-group>
     </div>
     <div id="table-container">
-      <el-table :data="tableData" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange"
+      <el-table :data="idSel == '' ? tableData : queryData" @row-dblclick="jumpGoodDetail" @selection-change="handleSelectionChange"
        :row-class-name="tableRowClassName">
         <el-table-column type="selection" width="55">
         </el-table-column>
@@ -168,11 +171,6 @@
              :style="'font-weight:bold; color:' + getStatusColor(scope.row.status)">{{getStatusName(scope.row.status)}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="退货" width="100">
-          <template slot-scope="scope">
-            <el-button @click="refound(scope.row, 2)" type="primary" icon="el-icon-check" circle size="mini"></el-button>
-            <el-button @click="refound(scope.row, -2)" type="danger" icon="el-icon-close" circle size="mini"></el-button>
-          </template>
         </el-table-column>
         <template slot="append">
           <div v-if="showAppend" style="text-align: center; margin: 20px 0;">
@@ -189,6 +187,8 @@
     var app = new Vue({
       el: "#app",
       data: {
+        idSel: '',
+        queryData: [],
         oldCount: 0,
         count: 8,
         tableData: null,
@@ -244,6 +244,11 @@
         }
       },
       watch: {
+        idSel() {
+          var targetId = parseInt(this.idSel);
+          // 使用数组的 filter() 方法筛选出匹配的数据
+          this.queryData = this.dataList.filter(item => item.id == targetId);
+        },
         status() {
           this.getData();
         },
@@ -296,6 +301,8 @@
             return "rgb(230,162,60)"
           }else if(val == -2) {
             return "#F04C3D"
+          }else {
+            return "#2A211F"
           }
         },
         getStatusColorReverse(val) {
@@ -305,6 +312,8 @@
             return "rgb(230,162,60)"
           }else if(val == 2) {
             return "rgb(22,160,133)"
+          }else {
+            return "#2A211F"
           }
         },
         getStatusName(val) {
@@ -373,7 +382,7 @@
           return beijingTime.toISOString().replace(/T/, ' ').replace(/\..+/, '');
         },
         getData() {
-          axios.get("/userGoods/getRefoundApply").then(response => {
+          axios.get("/userGoods/orderQuery").then(response => {
             this.total = response.data.count;
             this.dataList = response.data.data;
             this.tableData = this.dataList.slice(0, Math.min(this.dataList.length, this.count));

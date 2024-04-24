@@ -101,6 +101,8 @@ public class CommentsController {
                 theComments = commentsService.getById(commentsVo.getTheId());
                 theComments.setReplyId(commentsVo.getId());
                 commentsService.updateById(theComments);
+            }else {
+                commentsService.save(commentsVo);
             }
 
             return ResultObj.ADD_SUCCESS;

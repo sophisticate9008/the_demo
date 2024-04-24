@@ -631,6 +631,15 @@
 
         },
         contact(merchant) {
+          if(this.messagesData.hasOwnProperty(merchant)) {
+            let idx = this.sortKeys.indexOf(merchant);
+            if(idx != -1) {
+              this.sortKeys.splice(idx, 1);
+            }
+            this.sortKeys.push(merchant);
+          }else {
+            this.sortKeys.push(merchant);
+          }
           this.changeSel(merchant);
         },
         receiveMsg(jsonMsg) {

@@ -102,5 +102,12 @@ public class SystemController {
     public String chat() {
         return "user/chat";
     }
-    
+    @RequestMapping("orderQuery")
+    public String orderQuery() {
+        return "goods/orderQuery";
+    }
+    @RequestMapping("commentsManagement")
+    public String commentsManagement() {
+        return "goods/commentsManagement";
+    }
 }
