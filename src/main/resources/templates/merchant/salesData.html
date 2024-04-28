@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/resources/js/vue.min.js"></script>
+  <script src="/resources/js/axios.min.js"></script>
+  <link rel="stylesheet" href="/resources/css/element-ui.index.css">
+  <script src="/resources/js/element-ui.index.js"></script>
+  <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/resources/js/echarts.min.js"></script>
+  <style>
+    body {
+      background-color: #47474742;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #eaecf1;
+      border-radius: 3px;
+    }
+
+    /*表格*/
+    .el-table__body-wrapper::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .el-table__body-wrapper::-webkit-scrollbar-thumb {
+      background-color: #a1a3a9;
+      border-radius: 3px;
+    }
+
+    #goods {
+      display: flex;
+      flex-direction: column;
+      align-self: flex-start;
+      width: 300px;
+      height: 100%;
+      overflow-y: hidden;
+      background-color: white;
+
+    }
+
+    .table-img {
+      width: 50px;
+      height: 50px;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-items: center;
+      height: 100vh;
+    }
+
+    #args-charts {
+      flex-grow: 1;
+      background-color: #eaecf1d3;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #container {
+      margin-left: 1%;
+      margin-right: 1%;
+      width: 98%;
+      height: 650px;
+      display: flex;
+      flex-direction: row;
+      border-radius: 5px;
+    }
+
+    #args {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      height: 7.3%;
+      background-color: white;
+    }
+
+    .el-input__inner {
+      height: 47px;
+      border: none;
+    }
+
+    #submit-btn {
+      margin-top: 3px;
+      position: absolute;
+      right: 0;
+      margin-right: 3px;
+    }
+
+    #switch-btn {
+      margin-top: 3px;
+      position: absolute;
+      right: 5%;
+      margin-right: 3px;
+    }
+
+    #charts {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="container">
+      <div id="goods">
+        <el-table :data="goodsAll" @selection-change="handleSelectionChange" max-height="680">
+          <el-table-column type="selection" width="55">
+          </el-table-column>
+          <el-table-column prop="goodName" label="商品名称" width="130">
+          </el-table-column>
+          <el-table-column label="图片" width="100">
+            <template slot-scope="scope">
+              <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.imagePath">
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div id="args-charts">
+        <div id="args">
+          <div class="block">
+            <el-date-picker v-model="value2" type="datetimerange" :picker-options="pickerOptions" range-separator=""
+             start-placeholder="开始日期" end-placeholder="结束日期" align="right">
+            </el-date-picker>
+          </div>
+          <el-radio-group v-model="unit" style="display: flex; align-items: center;">
+            <el-radio label="hour">按小时</el-radio>
+            <el-radio label="day">按天</el-radio>
+            <el-radio label="month">按月</el-radio>
+            <el-radio label="year">按年</el-radio>
+          </el-radio-group>
+          <el-button id="submit-btn" type="success" icon="el-icon-check" @click="getSalesData" circle></el-button>
+          <el-button id="switch-btn" type="primary" icon="el-icon-refresh" @click="switchCharts" circle></el-button>
+        </div>
+        <div id="charts">
+          <div id="pie-chart" style="width: 100%; height: 100%"></div>
+          <div id="line-chart" style="width: 100%; height: 100%; display: none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var app = new Vue({
+      el: "#app",
+      data: {
+        startTime: null,
+        endTime: null,
+        goodsAll: [],
+        ids: [],
+        multipleSelection: [],
+        unit: '',
+        dataMap: {},
+        value2: '',
+        originData: null,
+        pickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+        pie: {
+          title: {
+            text: '销售数量',
+            left: 'center',
+            top: 'center'
+          },
+          series: [
+            {
+              label: {
+                show: true,
+                formatter: '{b}: {c} ({d}%)' // 标签内容格式，{b}表示名称，{c}表示值，{d}%表示占比
+              },
+              stillShowZeroSum: false,
+              type: 'pie',
+              radius: ['30%', '50%'],
+              data: [
+                {
+                  value: 335,
+                  name: '直接访问'
+                },
+                {
+                  value: 234,
+                  name: '联盟广告'
+                },
+                {
+                  value: 1548,
+                  name: '搜索引擎'
+                }
+              ]
+            }
+          ]
+        },
+        line: {
+          legend: {
+            data: ['Series 1', 'Series 2'] // 图例项的名称，与系列的name对应
+          },
+          xAxis: {
+            data: ['A', 'B', 'C', 'D', 'E']
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Series 1',
+              data: [10, 22, 28, 43, 49],
+              type: 'line',
+              label: { // 设置标签显示
+                show: true, // 显示标签
+                position: 'top', // 标签显示在数据点的上方
+                formatter: '{c}' // 标签内容格式，显示数据点的值
+              }
+            },
+            {
+              name: 'Series 2',
+              data: [5, 4, 3, 5, 10],
+              type: 'line',
+              label: { // 设置标签显示
+                show: true, // 显示标签
+                position: 'top', // 标签显示在数据点的上方
+                formatter: '{c}' // 标签内容格式，显示数据点的值
+              }
+            }
+          ]
+        }
+      },
+      mounted() {
+        this.loadAllGoods();
+      },
+      watch: {
+        value2() {
+          if (this.value2 == null) {
+            this.startTime = new Date(0);
+            this.endTime = new Date();
+          } else {
+            this.startTime = this.value2[0];
+            this.endTime = this.value2[1];
+          }
+        },
+        unit() {
+          if(this.originData != null) {
+            this.renderLine();
+          }
+        }
+      },
+      methods: {
+        formatDateToYearMonthDayHour(dateTimeString) {
+          const date = new Date(dateTimeString);
+
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 获取月份并补齐两位
+          const day = date.getDate().toString().padStart(2, '0'); // 获取日期并补齐两位
+          const hour = date.getHours().toString().padStart(2, '0'); // 获取小时并补齐两位
+
+          const formattedDateTime = `${year}-${month}-${day}:${hour}`;
+          return formattedDateTime;
+        },
+        queryDataByTimeRange(startTime, endTime, unit) {
+          let currentDate = new Date(startTime);
+          const endDate = new Date(endTime);
+          const result = [];
+          while (currentDate <= endDate) {
+            // 添加当前日期的字符串表示到结果数组
+            result.push(this.formatDateToYearMonthDayHour(currentDate.toISOString()));
+
+            // 根据单位调整当前日期，比如按天、小时等
+            switch (unit) {
+              case "day":
+                currentDate.setDate(currentDate.getDate() + 1);
+                break;
+              case "hour":
+                currentDate.setHours(currentDate.getHours() + 1);
+                break;
+              // 可根据需要添加其他时间单位的处理
+              case "month":
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                break;
+              case "year":
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+                break;
+            }
+          }
+          result.push(this.formatDateToYearMonthDayHour(currentDate.toISOString()));
+          return result;
+        },
+        switchCharts() {
+          var pie = document.getElementById('pie-chart');
+          var line = document.getElementById('line-chart');
+          if (pie.style.display === 'none') {
+            // 如果 pie-chart 宽度已经是 100%，则切换为 0%
+            pie.style.display = '';
+            line.style.display = 'none';
+          } else {
+            // 否则切换为 pie-chart 宽度为 100%
+            line.style.display = '';
+            pie.style.display = 'none';
+            this.renderLine();
+          }
+        },
+
+        handleLineData() {
+          this.line.xAxis.data = this.queryDataByTimeRange(this.startTime, this.endTime, this.unit);
+          this.line.series = [];
+          this.line.legend.data = [];
+          Object.keys(this.originData).forEach(id => {
+            // 获取当前键对应的值（即数组 item）
+            const item = this.originData[id];
+            // 计算数组 item 中所有元素的和
+            const sum = item.reduce((acc, val) => acc + val, 0);
+            // 获取 id 对应的 goodName
+            const goodName = this.dataMap[id].goodName + id;
+            // 将结果添加到 pie.series[0].data 数组中
+            if (sum != 0) {
+              this.line.legend.data.push(goodName);
+              var temp = {
+                name: goodName,
+                data: item,
+                type: 'line',
+                label: { // 设置标签显示
+                  show: true, // 显示标签
+                  position: 'top', // 标签显示在数据点的上方
+                  formatter: '{c}' // 标签内容格式，显示数据点的值
+                }
+              };
+              this.line.series.push(temp);
+            }
+
+          });
+        },
+        handlePieData() {
+          this.pie.series[0].data = [];
+          Object.keys(this.originData).forEach(id => {
+            // 获取当前键对应的值（即数组 item）
+            const item = this.originData[id];
+
+            // 计算数组 item 中所有元素的和
+            const sum = item.reduce((acc, val) => acc + val, 0);
+
+            // 获取 id 对应的 goodName
+            const goodName = this.dataMap[id].goodName + id;
+
+            // 将结果添加到 pie.series[0].data 数组中
+            if (sum != 0) {
+              this.pie.series[0].data.push({
+                value: sum,
+                name: goodName
+              });
+            }
+
+          });
+        },
+        renderLine() {
+          this.handleLineData();
+          var myChart = echarts.init(document.getElementById('line-chart'));
+          myChart.setOption(this.line);
+        },
+        renderPie() {
+          this.handlePieData();
+          var myChart = echarts.init(document.getElementById('pie-chart'));
+          myChart.setOption(this.pie);
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+        loadAllGoods() {
+          axios.post("/goods/loadAllGoods", {
+            showMygoods: true
+          }).then(res => {
+            this.goodsAll = res.data.data;
+            this.goodsAll.forEach(item => {
+              this.dataMap[item.id] = item;
+            })
+          })
+        },
+
+        getSalesData() {
+          this.ids = [];
+          this.multipleSelection.forEach(item => {
+            this.ids.push(item.id);
+          })
+          axios.post("/userGoods/getSalesDataByGid", {
+            startTime: this.startTime,
+            endTime: this.endTime,
+            ids: this.ids,
+            unit: this.unit
+          }).then(res => {
+            this.originData = res.data.data;
+            this.renderPie();
+          })
+        }
+      },
+    })
+  </script>
+</body>
+</html>

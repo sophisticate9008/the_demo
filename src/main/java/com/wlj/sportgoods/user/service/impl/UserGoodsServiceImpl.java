@@ -6,8 +6,9 @@ import com.wlj.sportgoods.user.service.UserGoodsService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
+import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,5 +48,14 @@ public class UserGoodsServiceImpl extends ServiceImpl<UserGoodsMapper, UserGoods
     public List<UserGoods> getOrdersByAccount(String account) {
         return this.getBaseMapper().getOrdersByAccount(account);
     }
+
+    @Override
+    public Integer getSalesDataByGid(Integer id, LocalDateTime currentDate, LocalDateTime nextDate) {
+        Timestamp theCurrentDate = Timestamp.valueOf(currentDate);
+        Timestamp theNextDate = Timestamp.valueOf(nextDate);
+        return this.getBaseMapper().getSalesDataByGid(id, theCurrentDate, theNextDate);
+    }
+
+
 
 }

@@ -2,6 +2,7 @@ package com.wlj.sportgoods.user.service;
 
 import com.wlj.sportgoods.user.entity.UserGoods;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -25,4 +26,7 @@ public interface UserGoodsService extends IService<UserGoods> {
     List<UserGoods> getRefoundApplymentByAccount(String account);
     List<UserGoods> getOrdersByAccount(String account);
     Integer getSalesByGid(Integer gid);
+    Integer getSalesDataByGid(Integer id, LocalDateTime currentDate, LocalDateTime nextDate);
+
+
 }

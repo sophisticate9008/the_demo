@@ -148,30 +148,30 @@
             <img class="table-img" :src="'/file/showImageByPath?path=' +  scope.row.goodInfo.imagePath">
           </template>
         </el-table-column>
-        <el-table-column prop="goodInfo.goodName" label="商品名字">
+        <el-table-column prop="goodInfo.goodName" label="商品名字" width="100">
         </el-table-column>
-        <el-table-column prop="goodInfo.introduction" label="简介">
+        <el-table-column prop="goodInfo.introduction" label="简介" width="100">
         </el-table-column>
         <el-table-column prop="num" label="数量" width="50">
         </el-table-column>
-        <el-table-column label="金额" width="100">
+        <el-table-column label="金额" width="50">
           <template slot-scope="scope">
-            <span
-             :style="'font-weight:bold; color:' + getStatusColorReverse(scope.row.status)">{{scope.row.cost}}</span>
+            <span :style="'font-weight:bold; color:' + getStatusColorReverse(scope.row.status)"  >{{scope.row.cost}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="更新时间">
+        <el-table-column label="更新时间" width="100">
           <template slot-scope="scope">
             {{convertToBeijingTime(scope.row.finishTime)}}
           </template>
         </el-table-column>
-        <el-table-column label="状态">
+        <el-table-column prop="address" label="地址备注" width="350">
+        </el-table-column>
+        <el-table-column label="状态" >
           <template slot-scope="scope">
-            <span
-             :style="'font-weight:bold; color:' + getStatusColor(scope.row.status)">{{getStatusName(scope.row.status)}}</span>
+            <span :style="'font-weight:bold; color:' + getStatusColor(scope.row.status)"  >{{getStatusName(scope.row.status)}}</span>
           </template>
         </el-table-column>
-        </el-table-column>
+        
         <template slot="append">
           <div v-if="showAppend" style="text-align: center; margin: 20px 0;">
             <el-button v-loading="loading" @click="loadMore">加载更多</el-button>
@@ -339,10 +339,11 @@
               this.ids = []
               this.multipleSelection.forEach(item => {
                 let index = this.tableData.indexOf(item);
+                this.ids.push(item.id)    
                 if (index !== -1) {
                   this.tableData.splice(index, 1);
                 }
-                this.ids.push(item.id)
+
               })
               axios.post("/userGoods/delete", {
                 ids: this.ids

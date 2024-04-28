@@ -2,6 +2,8 @@ package com.wlj.sportgoods.user.mapper;
 
 import com.wlj.sportgoods.user.entity.UserGoods;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -22,4 +24,6 @@ public interface UserGoodsMapper extends BaseMapper<UserGoods> {
     Integer getSalesByGid(@Param("gid") Integer gid);
 
     List<UserGoods> getOrdersByAccount(@Param("account") String account);
+    Integer getSalesDataByGid(@Param("gid") Integer gid, @Param("currentDate") Timestamp currentDate, @Param("nextDate") Timestamp nextDate);
+
 }

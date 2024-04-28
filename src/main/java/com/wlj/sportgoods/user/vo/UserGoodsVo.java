@@ -13,4 +13,5 @@ public class UserGoodsVo extends UserGoods {
     private Integer[] ids;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String unit;
 }

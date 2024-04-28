@@ -23,4 +23,9 @@
         )
         ORDER BY finishTime DESC
     </select>
+    <select id="getSalesDataByGid" resultType="Integer">
+        SELECT SUM(num)
+        FROM user_goods
+        WHERE gid = #{gid} AND status = 1 AND finishTime BETWEEN #{currentDate} AND #{nextDate}
+    </select>
 </mapper>

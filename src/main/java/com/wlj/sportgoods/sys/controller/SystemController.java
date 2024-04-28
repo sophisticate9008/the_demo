@@ -1,9 +1,6 @@
 package com.wlj.sportgoods.sys.controller;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
@@ -109,5 +106,9 @@ public class SystemController {
     @RequestMapping("commentsManagement")
     public String commentsManagement() {
         return "goods/commentsManagement";
+    }
+    @RequestMapping("salesData")
+    public String getSalesData() {
+        return "merchant/salesData";
     }
 }

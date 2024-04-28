@@ -83,6 +83,7 @@
 
     /* 上传图片预览样式 */
     .avatar-preview {
+      color: rgb(67, 105, 161);
       bottom: 2.0%;
       position: relative;
       border-radius: 50%;
@@ -268,6 +269,9 @@
         window.parent.app.changeProfileApp = this;
         axios.get("/user/getUserBasic").then(res => {
           this.userInfo = res.data.data;
+          if(!this.userInfo.address) {
+            this.userInfo.address = '';
+          }
           this.getAddressJsons();
           this.avatarUrl = '/file/showImageByPath?path=' + this.userInfo.avatarpath;
         });
@@ -314,13 +318,18 @@
           var formData = new FormData();
           this.isupdateDisabled = true;
           this.getAddressStrs();
+          if (this.avatarFile == null) {
+            this.update();
+            return;
+          }          
           formData.append('mf', this.avatarFile);
+
           axios.post("/file/uploadFile", formData, {
             headers: {
               'Content-Type': 'multipart/form-data' // 设置请求头为 multipart/form-data
             }
           }).then(response => {
-            this.avatarPath = response.data.path;
+            this.userInfo.avatarpath = response.data.path;
             this.update();
           }).catch(error => {
             this.update();

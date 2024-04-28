@@ -2,7 +2,7 @@ package com.wlj.sportgoods.user.mapper;
 
 import com.wlj.sportgoods.user.entity.Comments;
 
-import java.util.List;
+
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 

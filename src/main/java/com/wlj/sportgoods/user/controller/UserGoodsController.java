@@ -1,8 +1,14 @@
 package com.wlj.sportgoods.user.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +51,6 @@ public class UserGoodsController {
 
     @Autowired
     private UserService userService;
-
 
     @RequestMapping("load")
     public DataGridView load(@RequestBody UserGoodsVo userGoodsVo) {
@@ -144,7 +149,7 @@ public class UserGoodsController {
     public ResultObj refound(@RequestBody UserGoods userGoods) {
         User user = (User) WebUtils.getSession().getAttribute("user");
         userGoods = userGoodsService.getById(userGoods.getId());
-        if(!userGoods.getAccount().equals(user.getAccount())) {
+        if (!userGoods.getAccount().equals(user.getAccount())) {
             return ResultObj.EXCEED_PERMISSION;
         }
         userGoods.setStatus(-1);
@@ -160,16 +165,16 @@ public class UserGoodsController {
         User user = (User) WebUtils.getSession().getAttribute("user");
         return new DataGridView(userGoodsService.getRefoundApplymentByAccount(user.getAccount()));
     }
+
     @RequestMapping("orderQuery")
     public DataGridView orderQuery() {
         User user = (User) WebUtils.getSession().getAttribute("user");
-        if(user.getType() != 3) {
+        if (user.getType() != 3) {
             return null;
-        }else {
+        } else {
             return new DataGridView(userGoodsService.getOrdersByAccount(user.getAccount()));
         }
     }
-    
 
     @Transactional
     @RequestMapping("agreeRefound")
@@ -205,10 +210,62 @@ public class UserGoodsController {
             }
         }
     }
+
     @RequestMapping("getSales")
     public DataGridView getSales(@RequestBody UserGoods userGoods) {
         return new DataGridView(userGoodsService.getSalesByGid(userGoods.getGid()));
     }
 
+    @RequestMapping("getSalesDataByGid")
+    @RequiresPermissions({ "merchant:getSalesData" })
+    public DataGridView getSalesDataByGid(@RequestBody UserGoodsVo userGoodsVo) {
 
+        Map<Integer, List<Integer>> map = new ConcurrentHashMap<>();
+        LocalDateTime startTime = userGoodsVo.getStartTime();
+        LocalDateTime endTime = userGoodsVo.getEndTime();
+        String unit = userGoodsVo.getUnit();
+        for (Integer id : userGoodsVo.getIds()) {
+            List<Integer> temp = new LinkedList<>();
+            map.put(id, temp);
+        }
+        for (Integer id : userGoodsVo.getIds()) {
+            LocalDateTime currentDate = startTime;
+            while (!currentDate.isAfter(endTime)) {
+                LocalDateTime nextDate;
+                // 根据单位调整当前日期，比如按天、小时等
+                switch (unit) {
+                    case "day":
+                        nextDate = currentDate.plusDays(1);
+                        break;
+                    case "hour":
+                        nextDate = currentDate.plusHours(1);
+                        break;
+                    case "month":
+                        nextDate = currentDate.plusMonths(1);
+                        break;
+                    case "year":
+                        nextDate = currentDate.plusYears(1);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid unit: " + unit);
+                }
+                Integer res = userGoodsService.getSalesDataByGid(id, currentDate, nextDate);
+                if(res!=null) {
+                    map.get(id).add(res);
+                }
+                else {
+                    map.get(id).add(0);
+                }
+                currentDate = nextDate;
+            }
+            Integer res = userGoodsService.getSalesDataByGid(id, currentDate,endTime);
+            if(res!=null) {
+                map.get(id).add(res);
+            }
+            else {
+                map.get(id).add(0);
+            }
+        }
+        return new DataGridView(map);
+    }
 }
